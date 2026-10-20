@@ -1,0 +1,5 @@
+# build outputs (make -C ports/brickfall-coco2/target all)
+brickfall.bin
+brickfall.map
+brickfall.lst
+build/

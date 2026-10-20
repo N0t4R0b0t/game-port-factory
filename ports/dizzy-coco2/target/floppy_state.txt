@@ -1,0 +1,92 @@
+# floppy_state.txt -- T0242: the QUICK-SAVE state set.  S = saved, T = deliberately not saved (reason).
+# Checked against EVERY store the assembler listing shows and every byte that changed across the bot's
+# 105 checkpoints by tools/floppy_state_check.py (floppy_pack.sh runs it; an unclassified store fails the build).
+# The save happens at the top of a main-loop pass, standing on the floor, no box / death / well / troll launch.
+#
+# ---- SAVED -------------------------------------------------------------------------------------------
+S actor_acc 1                 # T0237 actor-clock accumulator (4 actor ticks per 3 Dizzy updates)
+S pn_lfsr 2                   # breath/noise LFSR (cosmetic, 2 bytes, keeps the sequence exact)
+S upsidedown 2                # upsidedown (world flipped) + fb_flip (derived from it by draw_ui, kept consistent)
+S lives 4                     # lives, coins, cur_room, room_load_seq (hawk/dagger... compare it with their own copy to decide 'room just entered': restored, and load is made NOT to bump it)
+S flame_ctr 13                # flame/water animation counters+pointers (flame_ctr..fireout): fireout is the puzzle flag
+S dizzy_x 16                  # dizzy_x,y,dy,floor,dir, jump_on, jump_anim, seq, anim, anim_div, ff, h, probe_x/y, try_x, vstep
+S denzil_gave_rope 1          # Denzil gave the rope (flag inside the code block)
+S ai_n 380                    # actors.asm vars (pickup_timer, drop_slot, inv_cursor.. inv, inv_cap) + actor_ram (344 B): ONE run
+S croc_var_a 63               # croc vars, completedgame, ov_* temps, coin_ram (45 B), respawn_room/x/y (the checkpoint): ONE run
+S dg_y 26                     # gameplay.asm vars dg_y..spm_i: killed, death_msg, troll_bribed, rng_ctr, *_msg_pending, pib_*
+S cdt_n 4                     # drop-trigger counter + key-machine vars (cdk_*)
+S shop_count 3                # shopkeeper countdown, junk counter, stalk_grown
+S full_bucket 2               # bucket filled: pointer to the full-bucket actor record
+S us1_n 5                     # lift/switch tracker (us1_n, us1_lift, us1_sw)
+S uh_n 3                      # hawk: uh_n, uh_dc, uh_seq
+S ud40_n 17                   # dragon 40 / log 48 vars: ud40_n, dr_owner, dr_slots(4), egg slot, waterheight, tide_list(6), ul48_*
+S dz_talks 1                  # Dozy talk counter
+S udd_rec 2                   # Daisy record pointer
+S hd_dir 4                    # heart demo direction patch + RNG seed (outlive a demo)
+S ul_orig 6                   # lift original-y + lift draw temps (logic_low)
+S well_mode 2                 # well_mode, well_last
+S tt_dylan 2                  # Dylan / Doug talked flags
+S drunk 1                     # whiskey timer
+S actor_init_tape 232         # the LIVE tape actor table (29 x 8)
+S coin_init_tape 45           # the LIVE tape coin table (15 x 3)
+S dgf_i 18                    # block D: dragon vars dgf_i .. dragon_headfrm, dragon_flame_x[6]
+S uc_n 3                      # block D: crocodile (uc_n, uc_slot word)
+S up_n 6                      # block D: portcullis
+S ur_n 15                     # block D: rat/troll/hazard vars (ur_n..uf_dy)
+S haz_msg 2                   # block D: which death line the hazard uses
+S ua_n 5                      # block D: armorog
+S ul_n 11                     # block D: lifts/dagger vars
+# ---- NOT SAVED (T) ------------------------------------------------------------------------------------
+T FD_NMIV 3  # disk driver NMI hook
+T ui_last_lives 3  # banner/UI draw state: draw_ui repaints from lives/coins/room
+T ui_coin_digits 2  # banner/UI draw state: draw_ui repaints from lives/coins/room
+T ui_lives_rep 1  # banner/UI draw state: draw_ui repaints from lives/coins/room
+T ui_q 2  # banner/UI draw state: draw_ui repaints from lives/coins/room
+T bd_pat_end 1  # banner/UI draw state: draw_ui repaints from lives/coins/room
+T ti_len 10  # title/unpack scratch
+T dd_rows 3  # per-pass / per-draw temporaries, rewritten before every use
+T ast_n 23  # per-pass / per-draw temporaries, rewritten before every use
+T blit_mirror 8  # per-pass / per-draw temporaries, rewritten before every use
+T gate_col_hdr+1 1  # per-pass / per-draw temporaries, rewritten before every use
+T rope_col_hdr+1 1  # per-pass / per-draw temporaries, rewritten before every use
+T pt_period 5  # per-pass / per-draw temporaries, rewritten before every use
+T cw_side 1  # per-pass / per-draw temporaries, rewritten before every use
+T dc_sprite 17  # per-pass / per-draw temporaries, rewritten before every use
+T dc_dcol 18  # per-pass / per-draw temporaries, rewritten before every use
+T rt_newroom 2  # room geometry pointers rebuilt by load_room / transition temps / keys
+T placeptr 17  # per-pass / per-draw temporaries, rewritten before every use
+T blit_ybot 2  # per-pass / per-draw temporaries, rewritten before every use
+T bd_str3 2  # banner/UI draw state: draw_ui repaints from lives/coins/room
+T blit_bpr 3  # per-pass / per-draw temporaries, rewritten before every use
+T blit_col 2  # per-pass / per-draw temporaries, rewritten before every use
+T draw_base 3  # draw machinery bound to the LIVE hardware page / per-buffer caches: force_redraw resets them, never restore
+T field_ctr 5  # draw machinery bound to the LIVE hardware page / per-buffer caches: force_redraw resets them, never restore
+T old_dizzy_x 2  # per-pass / per-draw temporaries, rewritten before every use
+T bd_skip 1  # banner/UI draw state: draw_ui repaints from lives/coins/room
+T pre_y 8  # per-pass / per-draw temporaries, rewritten before every use
+T keyflags 1  # room geometry pointers rebuilt by load_room / transition temps / keys
+T room_place_count 17  # room geometry pointers/counts rebuilt by load_room (room_placements_*, bands, flames, water)
+T cb_spr 7  # per-pass / per-draw temporaries, rewritten before every use
+T flame_var_a 4  # draw machinery bound to the LIVE hardware page / per-buffer caches: force_redraw resets them, never restore
+T cb_x 2  # per-pass / per-draw temporaries, rewritten before every use
+T clr_width 5  # per-pass / per-draw temporaries, rewritten before every use
+T rat_lastx_a 2  # draw machinery bound to the LIVE hardware page / per-buffer caches: force_redraw resets them, never restore
+T bd_toprow 8  # banner/UI draw state: draw_ui repaints from lives/coins/room
+T bd_rows 10  # banner/UI draw state: draw_ui repaints from lives/coins/room
+T msg_active 1  # always 0 at a save point (a box is up => the main loop is not running)
+T joy_f 3  # joystick device state (joy_f/joy_acc/joy_armed): re-armed by the stick itself
+T msg_x 13  # message VM temporaries (msg_x..box_gl)
+T tw_base 4  # completion-tune cutscene state (tw_base/tw_dp/tw_started): not in normal play
+T tape_room_staged_start 5  # disk driver state (fd_trk..)
+T fd_dir 1  # disk driver state
+T fd_n 1  # disk driver state
+T fd_sp 7  # disk driver state
+T ovl_try 1  # overlay loader retry counter
+T msg_dozy_end 315  # ROOM_UNPACK_BUF: the room's unpacked placements, rebuilt by load_room (+ tape_room_hook)
+T rat_sv_hdr_a 1  # per-pass / per-draw temporaries, rewritten before every use
+T rat_sv_hdr_b 1  # per-pass / per-draw temporaries, rewritten before every use
+
+T fd_yc 2  # disk driver: count for the halting read loop
+T sv_base 3  # quick-save resident vars (overlay address, last result)
+T fb_k1 1  # fb_stablekeys' last-read temp (differs between a box closing and a load: found by the round-trip test)
+T $3521 1  # a byte in an unloaded gap that only the playthrough bot's stray_fix pokes (harness/playthrough.lua), ABSOLUTE: not written by the game

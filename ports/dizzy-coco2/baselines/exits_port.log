@@ -1,0 +1,362 @@
+[LUA ERROR] error in machine reset callback: error loading module 'data/load_dat' from file '/usr/lib/mame/plugins/data/load_dat.lua':
+	/usr/lib/mame/plugins/data/load_dat.lua:163: attempt to assign to const variable 'info'
+EXIT id=23r0 start=23@224,120 strat=RIGHT stood=1 rooms=23>24 land=24@8,120 killed=0 final=24@8,120 floor=1 win=0
+EXIT id=23r1 start=23@216,120 strat=JUMPRIGHT stood=1 rooms=23>24 land=24@64,120 killed=0 final=24@68,120 floor=1 win=1 jumped=1
+EXIT id=23r2 start=23@216,176 strat=RIGHT stood=1 rooms=23>24 land=24@8,164 killed=0 final=24@8,133 floor=1 win=0
+EXIT id=23r3 start=23@208,176 strat=JUMPRIGHT stood=1 rooms=23>24 land=24@8,159 killed=0 final=24@52,176 floor=1 win=1 jumped=1
+EXIT id=24l0 start=24@16,120 strat=LEFT stood=1 rooms=24>23 land=23@224,120 killed=0 final=23@224,120 floor=1 win=0
+EXIT id=24l1 start=24@24,120 strat=JUMPLEFT stood=1 rooms=24>23 land=23@164,148(air) killed=0 final=23@164,148 floor=0 win=1 jumped=1
+EXIT id=24l2 start=24@16,132 strat=LEFT stood=1 rooms=24 land=24@16,142 killed=0 final=24@16,142 floor=1 win=1
+EXIT id=24l3 start=24@24,132 strat=JUMPLEFT stood=1 rooms=24 land=24@20,176 killed=0 final=24@20,176 floor=1 win=1 jumped=1
+EXIT id=24l4 start=24@24,176 strat=JUMPLEFT stood=1 rooms=24 land=24@24,176 killed=0 final=24@20,176 floor=1 win=1 jumped=1
+EXIT id=35u0 start=35@36,40 strat=NONE stood=0 rooms=35>51 land=51@36,154 killed=0 final=51@36,136 floor=1 win=0
+EXIT id=35u1 start=35@12,48 strat=NONE stood=0 rooms=35>51 land=51@12,162 killed=0 final=51@12,136 floor=1 win=0
+EXIT id=35u2 start=35@140,48 strat=NONE stood=0 rooms=35>51>35 land=35@140,68(air) killed=1 final=35@140,68 floor=0 win=0
+EXIT id=35r0 start=35@216,48 strat=RIGHT NEVER-ARRIVED room=52 x=216 y=168
+EXIT id=35r1 start=35@208,48 strat=JUMPRIGHT stood=0 rooms=35>51 land=51@208,162 killed=0 final=51@208,160 floor=1 win=0 jumped=0
+EXIT id=35u3 start=35@224,80 strat=JUMP stood=1 rooms=35 land=35@224,80 killed=0 final=35@224,80 floor=1 win=1 jumped=1
+EXIT id=35u4 start=35@224,80 strat=JUMPLEFT stood=1 rooms=35 land=35@224,80 killed=0 final=35@224,80 floor=1 win=1 jumped=0
+EXIT id=35u5 start=35@224,80 strat=JUMPRIGHT stood=1 rooms=35 land=35@224,80 killed=0 final=35@224,80 floor=1 win=1 jumped=0
+EXIT id=35u6 start=35@228,80 strat=JUMP stood=1 rooms=35 land=35@228,80 killed=0 final=35@228,80 floor=1 win=1 jumped=1
+EXIT id=35u7 start=35@228,80 strat=JUMPLEFT stood=1 rooms=35 land=35@228,80 killed=0 final=35@228,80 floor=1 win=1 jumped=0
+EXIT id=35u8 start=35@228,80 strat=JUMPRIGHT stood=1 rooms=35 land=35@228,80 killed=0 final=35@228,80 floor=1 win=1 jumped=0
+EXIT id=35u9 start=35@232,80 strat=JUMP stood=1 rooms=35 land=35@232,80 killed=0 final=35@232,80 floor=1 win=1 jumped=1
+EXIT id=35u10 start=35@232,80 strat=JUMPLEFT stood=1 rooms=35 land=35@232,80 killed=0 final=35@232,80 floor=1 win=1 jumped=0
+EXIT id=35u11 start=35@232,80 strat=JUMPRIGHT stood=1 rooms=35 land=35@232,80 killed=0 final=35@232,80 floor=1 win=1 jumped=0
+EXIT id=35r2 start=35@216,80 strat=RIGHT stood=1 rooms=35>36 land=36@8,80 killed=0 final=36@8,80 floor=1 win=0
+EXIT id=35r3 start=35@208,80 strat=JUMPRIGHT stood=1 rooms=35>36 land=36@8,80 killed=0 final=36@8,80 floor=1 win=1 jumped=1
+EXIT id=35r4 start=35@200,160 strat=JUMPRIGHT stood=1 rooms=35>36 land=36@20,168 killed=1 final=36@44,174 floor=0 win=1 jumped=1
+EXIT id=35r5 start=35@216,168 strat=RIGHT stood=1 rooms=35>36 land=36@12,168 killed=1 final=36@12,168 floor=1 win=1
+EXIT id=35r6 start=35@208,168 strat=JUMPRIGHT stood=1 rooms=35>36 land=36@8,163(air) killed=0 final=36@8,163 floor=0 win=1 jumped=0
+EXIT id=36u0 start=36@88,48 strat=NONE stood=0 rooms=36>52 land=52@88,166(air) killed=0 final=52@88,166 floor=0 win=1
+EXIT id=36l0 start=36@16,48 strat=LEFT stood=0 rooms=36>52 land=52@16,168 killed=0 final=52@16,168 floor=1 win=0
+EXIT id=36l1 start=36@24,48 strat=JUMPLEFT stood=0 rooms=36>52 land=52@24,168 killed=0 final=52@24,168 floor=1 win=0 jumped=0
+EXIT id=36u1 start=36@228,48 strat=NONE stood=0 rooms=36>52 land=52@228,168 killed=0 final=52@228,168 floor=1 win=0
+EXIT id=36u2 start=36@116,80 strat=JUMP stood=1 rooms=36 land=36@116,80 killed=1 final=36@116,73 floor=1 win=1 jumped=1
+EXIT id=36u3 start=36@116,80 strat=JUMPLEFT stood=1 rooms=36 land=36@116,76 killed=0 final=36@116,76 floor=1 win=1 jumped=0
+EXIT id=36u4 start=36@116,80 strat=JUMPRIGHT stood=1 rooms=36 land=36@116,76 killed=0 final=36@116,76 floor=1 win=1 jumped=0
+EXIT id=36u5 start=36@224,80 strat=JUMP stood=1 rooms=36 land=36@224,80 killed=0 final=36@224,80 floor=1 win=1 jumped=0
+EXIT id=36u6 start=36@224,80 strat=JUMPLEFT stood=1 rooms=36 land=36@224,80 killed=0 final=36@224,80 floor=1 win=1 jumped=0
+EXIT id=36u7 start=36@224,80 strat=JUMPRIGHT stood=1 rooms=36 land=36@224,80 killed=0 final=36@224,80 floor=1 win=1 jumped=0
+EXIT id=36l2 start=36@16,168 strat=LEFT stood=1 rooms=36 land=36@16,168 killed=1 final=36@16,168 floor=0 win=1
+EXIT id=36l3 start=36@24,168 strat=JUMPLEFT stood=1 rooms=36 land=36@24,168 killed=1 final=36@24,168 floor=1 win=1 jumped=0
+EXIT id=36l4 start=36@40,176 strat=JUMPLEFT stood=1 rooms=36 land=36@40,176 killed=0 final=36@40,176 floor=1 win=1 jumped=0
+EXIT id=39u0 start=39@28,48 strat=NONE stood=0 rooms=39>55 land=55@88,160 killed=0 final=55@88,160 floor=1 win=0
+EXIT id=39d0 start=39@32,48 strat=RIGHT stood=0 rooms=39>55 land=55@92,160 killed=0 final=55@92,160 floor=1 win=0
+EXIT id=39u1 start=39@88,48 strat=NONE stood=0 rooms=39>55 land=55@124,176 killed=0 final=55@124,176 floor=1 win=0
+EXIT id=39d1 start=39@88,48 strat=LEFT stood=0 rooms=39>55 land=55@124,176 killed=0 final=55@124,176 floor=1 win=0
+EXIT id=39u2 start=39@120,48 strat=NONE stood=0 rooms=39>55 land=55@152,176 killed=0 final=55@152,176 floor=1 win=0
+EXIT id=39u3 start=39@4,64 strat=NONE stood=0 rooms=39>55 land=55@52,160 killed=0 final=55@52,160 floor=1 win=0
+EXIT id=39u4 start=39@148,64 strat=NONE stood=0 rooms=39>55 land=55@176,176 killed=0 final=55@176,176 floor=1 win=0
+EXIT id=39d2 start=39@144,64 strat=RIGHT stood=0 rooms=39>55 land=55@164,176 killed=0 final=55@164,176 floor=1 win=0
+EXIT id=39u5 start=39@120,72 strat=JUMP stood=1 rooms=39>55 land=55@152,176 killed=0 final=55@180,176 floor=1 win=1 jumped=1
+EXIT id=39u6 start=39@120,72 strat=JUMPLEFT stood=1 rooms=39>55 land=55@148,176 killed=0 final=55@176,176 floor=1 win=1 jumped=1
+EXIT id=39u7 start=39@120,72 strat=JUMPRIGHT stood=1 rooms=39>55 land=55@156,176 killed=0 final=55@184,176 floor=1 win=1 jumped=1
+EXIT id=39u8 start=39@124,72 strat=JUMP stood=1 rooms=39 land=39@124,72 killed=0 final=39@124,72 floor=1 win=1 jumped=1
+EXIT id=39u9 start=39@124,72 strat=JUMPLEFT stood=1 rooms=39 land=39@124,72 killed=0 final=39@124,72 floor=1 win=1 jumped=0
+EXIT id=39u10 start=39@124,72 strat=JUMPRIGHT stood=1 rooms=39 land=39@124,72 killed=0 final=39@128,72 floor=1 win=1 jumped=0
+EXIT id=39u11 start=39@128,72 strat=JUMP stood=1 rooms=39 land=39@128,72 killed=0 final=39@128,72 floor=1 win=1 jumped=0
+EXIT id=39u12 start=39@128,72 strat=JUMPLEFT stood=1 rooms=39 land=39@128,72 killed=0 final=39@128,72 floor=1 win=1 jumped=0
+EXIT id=39u13 start=39@128,72 strat=JUMPRIGHT stood=1 rooms=39 land=39@128,72 killed=0 final=39@132,72 floor=1 win=1 jumped=0
+EXIT id=39u14 start=39@8,96 strat=JUMPLEFT stood=1 rooms=39 land=39@8,96 killed=0 final=39@8,96 floor=1 win=1 jumped=1
+EXIT id=39u15 start=39@8,96 strat=JUMPRIGHT stood=1 rooms=39 land=39@8,96 killed=0 final=39@8,96 floor=1 win=1 jumped=0
+EXIT id=39u16 start=39@104,96 strat=JUMPLEFT stood=1 rooms=39>55 land=55@148,176 killed=0 final=55@148,176 floor=1 win=1 jumped=1
+EXIT id=39u17 start=39@104,96 strat=JUMPRIGHT stood=1 rooms=39>55 land=55@148,176 killed=0 final=55@148,176 floor=1 win=1 jumped=1
+EXIT id=39u18 start=39@108,96 strat=JUMPLEFT stood=1 rooms=39 land=39@108,96 killed=0 final=39@108,96 floor=1 win=1 jumped=1
+EXIT id=39u19 start=39@108,96 strat=JUMPRIGHT stood=1 rooms=39 land=39@108,96 killed=0 final=39@108,96 floor=1 win=1 jumped=0
+EXIT id=39u20 start=39@112,96 strat=JUMPLEFT stood=1 rooms=39>55 land=55@148,176 killed=0 final=55@148,176 floor=1 win=1 jumped=1
+EXIT id=39u21 start=39@112,96 strat=JUMPRIGHT stood=1 rooms=39>55 land=55@148,176 killed=0 final=55@148,176 floor=1 win=1 jumped=1
+EXIT id=39u22 start=39@136,96 strat=JUMPLEFT stood=1 rooms=39>55 land=55@160,176 killed=0 final=55@160,176 floor=1 win=1 jumped=1
+EXIT id=39u23 start=39@136,96 strat=JUMPRIGHT stood=1 rooms=39>55 land=55@164,176 killed=0 final=55@168,176 floor=1 win=1 jumped=1
+EXIT id=39u24 start=39@140,96 strat=JUMPLEFT stood=1 rooms=39 land=39@140,96 killed=0 final=39@140,96 floor=1 win=1 jumped=1
+EXIT id=39u25 start=39@140,96 strat=JUMPRIGHT stood=1 rooms=39 land=39@140,96 killed=0 final=39@140,96 floor=1 win=1 jumped=0
+EXIT id=39u26 start=39@144,96 strat=JUMPLEFT stood=1 rooms=39 land=39@144,96 killed=0 final=39@144,96 floor=1 win=1 jumped=1
+EXIT id=39u27 start=39@144,96 strat=JUMPRIGHT stood=1 rooms=39 land=39@144,96 killed=0 final=39@148,96 floor=1 win=1 jumped=0
+EXIT id=39d3 start=39@144,160 strat=RIGHT stood=1 rooms=39>55 land=55@188,183(air) killed=0 final=55@188,183 floor=0 win=0
+EXIT id=39d4 start=39@128,168 strat=RIGHT stood=1 rooms=39>55 land=55@188,65(air) killed=0 final=55@188,65 floor=0 win=1
+EXIT id=50r0 start=50@216,136 strat=RIGHT stood=1 rooms=50>51 land=51@8,136 killed=0 final=51@8,136 floor=1 win=0
+EXIT id=50r1 start=50@208,136 strat=JUMPRIGHT stood=1 rooms=50>51 land=51@44,123(air) killed=0 final=51@44,123 floor=0 win=1 jumped=1
+EXIT id=50r2 start=50@208,176 strat=JUMPRIGHT stood=1 rooms=50 land=50@208,176 killed=0 final=50@208,176 floor=1 win=1 jumped=1
+EXIT id=51u0 start=51@76,48 strat=NONE stood=0 rooms=51>67 land=67@76,162 killed=0 final=67@76,74 floor=1 win=0
+EXIT id=51u1 start=51@96,56 strat=NONE NEVER-ARRIVED room=83 x=76 y=183
+EXIT id=51u2 start=51@112,72 strat=JUMP NEVER-ARRIVED room=67 x=76 y=182
+EXIT id=51u3 start=51@112,72 strat=JUMPLEFT stood=1 rooms=51>67 land=67@88,160 killed=0 final=67@88,160 floor=1 win=1 jumped=1
+EXIT id=51u4 start=51@112,72 strat=JUMPRIGHT stood=1 rooms=51>67>51 land=51@160,68(air) killed=0 final=51@160,68 floor=0 win=1 jumped=1
+EXIT id=51u5 start=51@116,72 strat=JUMP stood=1 rooms=51>67 land=67@116,176 killed=0 final=67@116,176 floor=1 win=1 jumped=1
+EXIT id=51u6 start=51@116,72 strat=JUMPLEFT stood=1 rooms=51 land=51@116,72 killed=0 final=51@116,72 floor=1 win=1 jumped=0
+EXIT id=51u7 start=51@116,72 strat=JUMPRIGHT stood=1 rooms=51 land=51@116,72 killed=0 final=51@120,72 floor=1 win=1 jumped=0
+EXIT id=51u8 start=51@120,72 strat=JUMP stood=1 rooms=51 land=51@120,72 killed=0 final=51@120,72 floor=1 win=1 jumped=0
+EXIT id=51u9 start=51@120,72 strat=JUMPLEFT stood=1 rooms=51 land=51@120,72 killed=0 final=51@120,72 floor=1 win=1 jumped=0
+EXIT id=51u10 start=51@120,72 strat=JUMPRIGHT stood=1 rooms=51 land=51@120,72 killed=0 final=51@124,72 floor=1 win=1 jumped=0
+EXIT id=51u11 start=51@136,88 strat=JUMP stood=1 rooms=51>67 land=67@136,176 killed=0 final=67@136,176 floor=1 win=1 jumped=1
+EXIT id=51u12 start=51@136,88 strat=JUMPLEFT stood=1 rooms=51 land=51@136,88 killed=0 final=51@136,88 floor=1 win=1 jumped=0
+EXIT id=51u13 start=51@136,88 strat=JUMPRIGHT stood=1 rooms=51 land=51@136,88 killed=0 final=51@140,88 floor=1 win=1 jumped=0
+EXIT id=51u14 start=51@156,88 strat=JUMP stood=1 rooms=51>67>51 land=51@156,68(air) killed=0 final=51@156,68 floor=0 win=1 jumped=1
+EXIT id=51u15 start=51@156,88 strat=JUMPLEFT stood=0 rooms=51>67 land=67@136,65(air) killed=0 final=67@136,65 floor=0 win=1 jumped=1
+EXIT id=51u16 start=51@156,88 strat=JUMPRIGHT stood=1 rooms=51>67 land=67@192,176 killed=0 final=67@192,176 floor=1 win=1 jumped=1
+EXIT id=51u17 start=51@176,88 strat=JUMP stood=1 rooms=51>67>51 land=51@176,68(air) killed=0 final=51@176,68 floor=0 win=1 jumped=1
+EXIT id=51u18 start=51@176,88 strat=JUMPLEFT stood=0 rooms=51>67 land=67@156,65(air) killed=0 final=67@156,65 floor=0 win=1 jumped=1
+EXIT id=51u19 start=51@176,88 strat=JUMPRIGHT stood=1 rooms=51>67 land=67@200,176 killed=0 final=67@200,176 floor=1 win=1 jumped=1
+EXIT id=51u20 start=51@200,104 strat=JUMP stood=1 rooms=51 land=51@200,104 killed=0 final=51@200,104 floor=1 win=1 jumped=0
+EXIT id=51u21 start=51@200,104 strat=JUMPLEFT stood=1 rooms=51 land=51@200,104 killed=0 final=51@200,104 floor=1 win=1 jumped=0
+EXIT id=51u22 start=51@200,104 strat=JUMPRIGHT stood=1 rooms=51 land=51@200,104 killed=0 final=51@204,104 floor=1 win=1 jumped=0
+EXIT id=51u23 start=51@216,104 strat=JUMP stood=1 rooms=51 land=51@216,104 killed=0 final=51@216,104 floor=1 win=1 jumped=1
+EXIT id=51u24 start=51@216,104 strat=JUMPLEFT stood=1 rooms=51 land=51@216,104 killed=0 final=51@212,104 floor=1 win=1 jumped=0
+EXIT id=51u25 start=51@216,104 strat=JUMPRIGHT stood=1 rooms=51>52 land=52@60,104(air) killed=0 final=52@60,104 floor=0 win=1 jumped=1
+EXIT id=51u26 start=51@232,104 strat=JUMP stood=1 rooms=51 land=51@232,104 killed=0 final=51@232,104 floor=1 win=1 jumped=1
+EXIT id=51u27 start=51@232,104 strat=JUMPLEFT stood=1 rooms=51 land=51@232,104 killed=0 final=51@228,104 floor=1 win=1 jumped=0
+EXIT id=51u28 start=51@232,104 strat=JUMPRIGHT stood=1 rooms=51>52 land=52@8,104 killed=0 final=52@8,104 floor=1 win=0 jumped=0
+EXIT id=51r0 start=51@224,104 strat=RIGHT stood=1 rooms=51>52 land=52@8,104 killed=0 final=52@8,104 floor=1 win=0
+EXIT id=51l0 start=51@8,136 strat=LEFT stood=1 rooms=51>50 land=50@224,136 killed=0 final=50@224,136 floor=1 win=1
+EXIT id=51l1 start=51@16,136 strat=JUMPLEFT stood=1 rooms=51>50 land=50@168,143(air) killed=0 final=50@168,143 floor=0 win=1 jumped=1
+EXIT id=51r1 start=51@216,168 strat=RIGHT stood=1 rooms=51>52 land=52@12,168 killed=0 final=52@12,168 floor=1 win=0
+EXIT id=51r2 start=51@208,168 strat=JUMPRIGHT stood=1 rooms=51>52 land=52@36,142(air) killed=1 final=52@36,142 floor=0 win=1 jumped=1
+EXIT id=52u0 start=52@8,104 strat=JUMP stood=1 rooms=52 land=52@8,104 killed=0 final=52@8,104 floor=1 win=1 jumped=0
+EXIT id=52u1 start=52@8,104 strat=JUMPLEFT stood=1 rooms=52 land=52@8,104 killed=0 final=52@8,104 floor=1 win=1 jumped=0
+EXIT id=52u2 start=52@8,104 strat=JUMPRIGHT stood=1 rooms=52 land=52@8,104 killed=0 final=52@8,104 floor=1 win=1 jumped=0
+EXIT id=52u3 start=52@28,104 strat=JUMP stood=1 rooms=52 land=52@28,104 killed=0 final=52@28,104 floor=1 win=1 jumped=1
+EXIT id=52u4 start=52@28,104 strat=JUMPLEFT stood=1 rooms=52 land=52@28,104 killed=0 final=52@28,104 floor=1 win=1 jumped=0
+EXIT id=52u5 start=52@28,104 strat=JUMPRIGHT stood=1 rooms=52 land=52@28,104 killed=0 final=52@28,104 floor=1 win=1 jumped=0
+EXIT id=52u6 start=52@48,104 strat=JUMP stood=1 rooms=52 land=52@48,104 killed=0 final=52@48,104 floor=1 win=1 jumped=1
+EXIT id=52u7 start=52@48,104 strat=JUMPLEFT stood=1 rooms=52 land=52@48,104 killed=0 final=52@48,104 floor=1 win=1 jumped=0
+EXIT id=52u8 start=52@48,104 strat=JUMPRIGHT stood=1 rooms=52 land=52@48,104 killed=0 final=52@48,104 floor=1 win=1 jumped=0
+EXIT id=52l0 start=52@16,104 strat=LEFT stood=1 rooms=52>51 land=51@224,104 killed=0 final=51@224,104 floor=1 win=0
+EXIT id=52l1 start=52@24,104 strat=JUMPLEFT stood=1 rooms=52>51 land=51@188,88 killed=0 final=51@184,88 floor=1 win=1 jumped=1
+EXIT id=52u9 start=52@184,104 strat=JUMP stood=1 rooms=52 land=52@184,104 killed=0 final=52@184,104 floor=1 win=1 jumped=1
+EXIT id=52u10 start=52@184,104 strat=JUMPLEFT stood=1 rooms=52 land=52@184,104 killed=0 final=52@184,104 floor=1 win=1 jumped=0
+EXIT id=52u11 start=52@184,104 strat=JUMPRIGHT stood=1 rooms=52 land=52@184,104 killed=0 final=52@184,104 floor=1 win=1 jumped=0
+EXIT id=52u12 start=52@204,104 strat=JUMP stood=1 rooms=52 land=52@204,104 killed=0 final=52@204,104 floor=1 win=1 jumped=1
+EXIT id=52u13 start=52@204,104 strat=JUMPLEFT stood=1 rooms=52 land=52@204,104 killed=0 final=52@204,104 floor=1 win=1 jumped=0
+EXIT id=52u14 start=52@204,104 strat=JUMPRIGHT stood=1 rooms=52 land=52@204,104 killed=0 final=52@204,104 floor=1 win=1 jumped=0
+EXIT id=52u15 start=52@224,104 strat=JUMP stood=1 rooms=52 land=52@224,104 killed=0 final=52@224,104 floor=1 win=1 jumped=1
+EXIT id=52u16 start=52@224,104 strat=JUMPLEFT stood=1 rooms=52 land=52@224,104 killed=0 final=52@224,104 floor=1 win=1 jumped=0
+EXIT id=52u17 start=52@224,104 strat=JUMPRIGHT stood=1 rooms=52 land=52@224,104 killed=0 final=52@224,104 floor=1 win=1 jumped=0
+EXIT id=52r0 start=52@216,104 strat=RIGHT stood=1 rooms=52>53 land=53@8,104 killed=0 final=53@8,104 floor=1 win=0
+EXIT id=52r1 start=52@208,104 strat=JUMPRIGHT stood=1 rooms=52>53 land=53@44,88 killed=0 final=53@52,88 floor=1 win=1 jumped=1
+EXIT id=52d0 start=52@152,136 strat=RIGHT stood=1 rooms=52>36 land=36@208,80 killed=0 final=36@208,79 floor=0 win=0
+EXIT id=52l2 start=52@16,168 strat=LEFT stood=1 rooms=52>51 land=51@224,168 killed=0 final=51@224,168 floor=1 win=0
+EXIT id=52l3 start=52@24,168 strat=JUMPLEFT stood=1 rooms=52>51 land=51@188,152 killed=1 final=51@188,152 floor=1 win=1 jumped=1
+EXIT id=52d1 start=52@152,168 strat=RIGHT stood=1 rooms=52>36 land=36@192,74(air) killed=0 final=36@192,74 floor=0 win=1
+EXIT id=52r2 start=52@216,168 strat=RIGHT stood=1 rooms=52>53 land=53@8,168 killed=0 final=53@8,168 floor=1 win=0
+EXIT id=52r3 start=52@208,168 strat=JUMPRIGHT stood=1 rooms=52>53 land=53@44,152 killed=1 final=53@44,152 floor=1 win=1 jumped=1
+EXIT id=52d2 start=52@224,168 strat=LEFT stood=1 rooms=52>36 land=36@188,74(air) killed=0 final=36@188,74 floor=0 win=1
+EXIT id=53u0 start=53@140,48 strat=NONE stood=0 rooms=53>69 land=69@140,176 killed=0 final=69@140,176 floor=1 win=0
+EXIT id=53u1 start=53@116,56 strat=NONE stood=0 rooms=53>69 land=69@116,176 killed=0 final=69@116,176 floor=1 win=0
+EXIT id=53u2 start=53@96,72 strat=JUMP stood=1 rooms=53>69 land=69@96,176 killed=0 final=69@96,176 floor=1 win=1 jumped=1
+EXIT id=53u3 start=53@96,72 strat=JUMPLEFT stood=1 rooms=53>52 land=52@8,104(air) killed=0 final=52@8,104 floor=1 win=1 jumped=0
+EXIT id=53u4 start=53@96,72 strat=JUMPRIGHT NEVER-ARRIVED room=52 x=224 y=104
+EXIT id=53u5 start=53@56,88 strat=JUMP stood=1 rooms=53>69>53 land=53@56,71(air) killed=0 final=53@56,71 floor=0 win=1 jumped=1
+EXIT id=53u6 start=53@56,88 strat=JUMPLEFT stood=1 rooms=53 land=53@56,88 killed=0 final=53@44,88 floor=1 win=1 jumped=0
+EXIT id=53u7 start=53@56,88 strat=JUMPRIGHT stood=1 rooms=53>69 land=69@96,177 killed=0 final=69@120,176 floor=1 win=1 jumped=1
+EXIT id=53u8 start=53@64,88 strat=JUMP stood=1 rooms=53>69>53 land=53@64,69(air) killed=0 final=53@64,69 floor=0 win=1 jumped=1
+EXIT id=53u9 start=53@64,88 strat=JUMPLEFT stood=1 rooms=53 land=53@64,88 killed=0 final=53@52,88 floor=1 win=1 jumped=0
+EXIT id=53u10 start=53@64,88 strat=JUMPRIGHT stood=1 rooms=53>69 land=69@96,176 killed=0 final=69@100,176 floor=1 win=1 jumped=1
+EXIT id=53u11 start=53@72,88 strat=JUMP stood=1 rooms=53>69>53 land=53@72,71(air) killed=0 final=53@72,71 floor=0 win=1 jumped=1
+EXIT id=53u12 start=53@72,88 strat=JUMPLEFT stood=1 rooms=53 land=53@72,88 killed=0 final=53@60,88 floor=1 win=1 jumped=0
+EXIT id=53u13 start=53@72,88 strat=JUMPRIGHT stood=1 rooms=53>69 land=69@100,176 killed=0 final=69@100,176 floor=1 win=1 jumped=1
+EXIT id=53u14 start=53@8,104 strat=JUMP stood=1 rooms=53 land=53@8,104 killed=0 final=53@8,104 floor=1 win=1 jumped=1
+EXIT id=53u15 start=53@8,104 strat=JUMPLEFT stood=1 rooms=53>52 land=52@8,104(air) killed=0 final=52@8,104 floor=1 win=1 jumped=0
+EXIT id=53u16 start=53@8,104 strat=JUMPRIGHT stood=1 rooms=53 land=53@60,88 killed=0 final=53@72,88 floor=1 win=1 jumped=1
+EXIT id=53u17 start=53@20,104 strat=JUMP stood=1 rooms=53 land=53@20,104 killed=0 final=53@20,104 floor=1 win=1 jumped=1
+EXIT id=53u18 start=53@20,104 strat=JUMPLEFT stood=1 rooms=53 land=53@20,104 killed=0 final=53@8,104 floor=1 win=1 jumped=0
+EXIT id=53u19 start=53@20,104 strat=JUMPRIGHT stood=1 rooms=53 land=53@72,88 killed=0 final=53@72,88 floor=1 win=1 jumped=1
+EXIT id=53u20 start=53@32,104 strat=JUMP stood=1 rooms=53 land=53@32,104 killed=0 final=53@32,104 floor=1 win=1 jumped=1
+EXIT id=53u21 start=53@32,104 strat=JUMPLEFT stood=1 rooms=53 land=53@32,104 killed=0 final=53@20,104 floor=1 win=1 jumped=0
+EXIT id=53u22 start=53@32,104 strat=JUMPRIGHT stood=1 rooms=53 land=53@72,88 killed=0 final=53@72,88 floor=1 win=1 jumped=1
+EXIT id=53l0 start=53@16,104 strat=LEFT stood=1 rooms=53>52 land=52@224,104 killed=0 final=52@224,104 floor=1 win=0
+EXIT id=53l1 start=53@24,104 strat=JUMPLEFT stood=1 rooms=53>52 land=52@176,104 killed=0 final=52@172,104 floor=1 win=1 jumped=1
+EXIT id=53r0 start=53@216,160 strat=RIGHT stood=1 rooms=53>54 land=54@20,162 killed=0 final=54@20,162 floor=1 win=1
+EXIT id=53r1 start=53@208,160 strat=JUMPRIGHT stood=1 rooms=53>54 land=54@64,176 killed=0 final=54@68,176 floor=1 win=1 jumped=1
+EXIT id=53l2 start=53@16,168 strat=LEFT stood=1 rooms=53>52 land=52@220,168 killed=0 final=52@220,168 floor=1 win=0
+EXIT id=53l3 start=53@24,168 strat=JUMPLEFT stood=1 rooms=53>52 land=52@196,142(air) killed=1 final=52@196,142 floor=0 win=1 jumped=1
+EXIT id=54l0 start=54@12,160 strat=LEFT stood=1 rooms=54>53 land=53@224,160 killed=0 final=53@224,157 floor=1 win=1
+EXIT id=54l1 start=54@20,160 strat=JUMPLEFT stood=1 rooms=54>53 land=53@144,156 killed=1 final=53@112,174 floor=0 win=1 jumped=1
+EXIT id=54l2 start=54@32,176 strat=JUMPLEFT stood=1 rooms=54 land=54@32,176 killed=0 final=54@32,176 floor=1 win=1 jumped=0
+EXIT id=54r0 start=54@216,176 strat=RIGHT stood=1 rooms=54>55 land=55@8,176 killed=0 final=55@8,176 floor=1 win=0
+EXIT id=54r1 start=54@208,176 strat=JUMPRIGHT stood=1 rooms=54>55 land=55@44,160 killed=0 final=55@52,160 floor=1 win=1 jumped=1
+EXIT id=55u0 start=55@232,96 strat=JUMP stood=1 rooms=55 land=55@232,96 killed=0 final=55@232,96 floor=1 win=1 jumped=1
+EXIT id=55u1 start=55@232,96 strat=JUMPLEFT stood=1 rooms=55 land=55@232,96 killed=0 final=55@228,96 floor=1 win=1 jumped=0
+EXIT id=55u2 start=55@232,96 strat=JUMPRIGHT stood=1 rooms=55>56 land=56@8,96 killed=0 final=56@8,96 floor=1 win=0 jumped=0
+EXIT id=55r0 start=55@224,96 strat=RIGHT stood=1 rooms=55>56 land=56@8,96 killed=0 final=56@8,96 floor=1 win=0
+EXIT id=55r1 start=55@216,96 strat=JUMPRIGHT stood=1 rooms=55>56 land=56@56,96 killed=0 final=56@60,96 floor=1 win=1 jumped=1
+EXIT id=55u3 start=55@184,104 strat=JUMP stood=1 rooms=55 land=55@184,104 killed=0 final=55@184,104 floor=1 win=1 jumped=1
+EXIT id=55u4 start=55@184,104 strat=JUMPLEFT stood=1 rooms=55 land=55@184,104 killed=0 final=55@180,104 floor=1 win=1 jumped=0
+EXIT id=55u5 start=55@184,104 strat=JUMPRIGHT stood=1 rooms=55>56 land=56@24,96 killed=0 final=56@28,96 floor=1 win=1 jumped=1
+EXIT id=55u6 start=55@200,104 strat=JUMP stood=1 rooms=55 land=55@200,104 killed=0 final=55@200,104 floor=1 win=1 jumped=1
+EXIT id=55u7 start=55@200,104 strat=JUMPLEFT stood=1 rooms=55 land=55@200,104 killed=0 final=55@196,104 floor=1 win=1 jumped=0
+EXIT id=55u8 start=55@200,104 strat=JUMPRIGHT stood=1 rooms=55>56 land=56@40,96 killed=0 final=56@44,96 floor=1 win=1 jumped=1
+EXIT id=55u9 start=55@216,104 strat=JUMP stood=1 rooms=55 land=55@216,104 killed=0 final=55@216,104 floor=1 win=1 jumped=1
+EXIT id=55u10 start=55@216,104 strat=JUMPLEFT stood=1 rooms=55 land=55@216,104 killed=0 final=55@212,104 floor=1 win=1 jumped=0
+EXIT id=55u11 start=55@216,104 strat=JUMPRIGHT stood=1 rooms=55>56 land=56@56,96 killed=0 final=56@60,96 floor=1 win=1 jumped=1
+EXIT id=55r2 start=55@200,144 strat=JUMPRIGHT stood=1 rooms=55>56 land=56@24,176 killed=0 final=56@24,172 floor=0 win=1 jumped=1
+EXIT id=55l0 start=55@40,160 strat=JUMPLEFT stood=1 rooms=55>54 land=54@184,170(air) killed=0 final=54@184,170 floor=0 win=1 jumped=1
+EXIT id=55d0 start=55@32,160 strat=RIGHT stood=1 rooms=55 land=55@32,160 killed=0 final=55@224,176 floor=1 win=1
+EXIT id=55d1 start=55@88,160 strat=LEFT stood=1 rooms=55>54 land=54@216,176 killed=0 final=54@216,176 floor=1 win=1
+EXIT id=55l1 start=55@16,176 strat=LEFT stood=1 rooms=55>54 land=54@224,176 killed=0 final=54@224,176 floor=1 win=1
+EXIT id=55l2 start=55@24,176 strat=JUMPLEFT stood=1 rooms=55>54 land=54@176,176 killed=0 final=54@160,176 floor=1 win=1 jumped=1
+EXIT id=55r3 start=55@216,176 strat=RIGHT stood=1 rooms=55>56 land=56@8,176 killed=0 final=56@8,176 floor=1 win=1
+EXIT id=55r4 start=55@208,176 strat=JUMPRIGHT stood=1 rooms=55>56 land=56@8,176 killed=0 final=56@20,176 floor=1 win=1 jumped=1
+EXIT id=56u0 start=56@8,96 strat=JUMP stood=1 rooms=56 land=56@8,96 killed=0 final=56@8,96 floor=1 win=1 jumped=1
+EXIT id=56u1 start=56@8,96 strat=JUMPLEFT stood=1 rooms=56>55 land=55@8,96(air) killed=0 final=55@8,96 floor=1 win=1 jumped=0
+EXIT id=56u2 start=56@8,96 strat=JUMPRIGHT stood=1 rooms=56 land=56@8,96 killed=0 final=56@148,96 floor=1 win=1 jumped=1
+EXIT id=56u3 start=56@120,96 strat=JUMP stood=1 rooms=56 land=56@120,96 killed=0 final=56@120,96 floor=1 win=1 jumped=1
+EXIT id=56u4 start=56@120,96 strat=JUMPLEFT stood=1 rooms=56 land=56@120,96 killed=0 final=56@116,96 floor=1 win=1 jumped=0
+EXIT id=56u5 start=56@120,96 strat=JUMPRIGHT stood=1 rooms=56>57 land=57@8,96(air) killed=0 final=57@8,96 floor=1 win=1 jumped=1
+EXIT id=56u6 start=56@232,96 strat=JUMP stood=1 rooms=56 land=56@232,96 killed=0 final=56@232,96 floor=1 win=1 jumped=1
+EXIT id=56u7 start=56@232,96 strat=JUMPLEFT stood=1 rooms=56 land=56@232,96 killed=0 final=56@228,96 floor=1 win=1 jumped=0
+EXIT id=56u8 start=56@232,96 strat=JUMPRIGHT stood=1 rooms=56>57 land=57@8,96 killed=0 final=57@8,96 floor=1 win=0 jumped=0
+EXIT id=56l0 start=56@16,96 strat=LEFT stood=1 rooms=56>55 land=55@224,96 killed=0 final=55@224,96 floor=1 win=0
+EXIT id=56l1 start=56@24,96 strat=JUMPLEFT stood=1 rooms=56>55 land=55@172,104 killed=0 final=55@164,105 floor=0 win=1 jumped=1
+EXIT id=56r0 start=56@224,96 strat=RIGHT stood=1 rooms=56>57 land=57@8,96 killed=0 final=57@8,96 floor=1 win=0
+EXIT id=56r1 start=56@216,96 strat=JUMPRIGHT stood=1 rooms=56>57 land=57@52,103(air) killed=0 final=57@52,103 floor=0 win=1 jumped=1
+EXIT id=56r2 start=56@224,144 strat=RIGHT stood=1 rooms=56>57 land=57@8,144 killed=0 final=57@8,144 floor=1 win=0
+EXIT id=56r3 start=56@216,144 strat=JUMPRIGHT stood=1 rooms=56>57 land=57@40,128 killed=0 final=57@60,120 floor=1 win=1 jumped=1
+EXIT id=56l2 start=56@16,176 strat=LEFT stood=1 rooms=56>55 land=55@224,176 killed=0 final=55@224,176 floor=1 win=0
+EXIT id=56l3 start=56@24,176 strat=JUMPLEFT stood=1 rooms=56>55 land=55@212,144 killed=0 final=55@184,144 floor=1 win=1 jumped=1
+EXIT id=56r4 start=56@216,176 strat=RIGHT stood=1 rooms=56>57 land=57@8,176 killed=0 final=57@8,176 floor=1 win=0
+EXIT id=56r5 start=56@208,176 strat=JUMPRIGHT stood=1 rooms=56>57 land=57@8,176 killed=0 final=57@20,176 floor=1 win=1 jumped=1
+EXIT id=57l0 start=57@16,96 strat=LEFT stood=1 rooms=57>56 land=56@224,96 killed=0 final=56@224,96 floor=1 win=0
+EXIT id=57l1 start=57@24,96 strat=JUMPLEFT stood=1 rooms=57>56 land=56@180,96(air) killed=0 final=56@180,96 floor=0 win=1 jumped=1
+EXIT id=57l2 start=57@40,136 strat=JUMPLEFT stood=1 rooms=57>56 land=56@220,144 killed=0 final=56@208,144 floor=1 win=1 jumped=1
+EXIT id=57l3 start=57@16,144 strat=LEFT stood=1 rooms=57>56 land=56@224,144 killed=0 final=56@224,144 floor=1 win=0
+EXIT id=57l4 start=57@24,144 strat=JUMPLEFT stood=1 rooms=57>56 land=56@208,144 killed=0 final=56@208,144 floor=1 win=1 jumped=1
+EXIT id=57l5 start=57@16,176 strat=LEFT stood=1 rooms=57>56 land=56@224,176 killed=0 final=56@224,176 floor=1 win=0
+EXIT id=57l6 start=57@24,176 strat=JUMPLEFT stood=1 rooms=57>56 land=56@224,176 killed=0 final=56@212,176 floor=1 win=1 jumped=1
+EXIT id=67u0 start=67@164,32 strat=NONE stood=0 rooms=67>83 land=83@164,160 killed=0 final=83@164,160 floor=1 win=0
+EXIT id=67u1 start=67@204,48 strat=NONE stood=0 rooms=67>83 land=83@204,176 killed=0 final=83@204,176 floor=1 win=0
+EXIT id=67r0 start=67@216,48 strat=RIGHT stood=0 rooms=67>83 land=83@220,176 killed=0 final=83@220,176 floor=1 win=0
+EXIT id=67r1 start=67@208,48 strat=JUMPRIGHT stood=0 rooms=67>83>84 land=84@20,176 killed=0 final=84@20,176 floor=1 win=1 jumped=1
+EXIT id=67u2 start=67@232,88 strat=JUMP stood=1 rooms=67 land=67@232,88 killed=0 final=67@232,88 floor=1 win=1 jumped=1
+EXIT id=67u3 start=67@232,88 strat=JUMPLEFT stood=1 rooms=67 land=67@232,88 killed=0 final=67@228,88 floor=1 win=1 jumped=0
+EXIT id=67u4 start=67@232,88 strat=JUMPRIGHT stood=1 rooms=67>68 land=68@8,88 killed=0 final=68@8,88 floor=1 win=0 jumped=0
+EXIT id=67r2 start=67@224,88 strat=RIGHT stood=1 rooms=67>68 land=68@8,88 killed=0 final=68@8,88 floor=1 win=0
+EXIT id=67r3 start=67@216,88 strat=JUMPRIGHT stood=1 rooms=67>68 land=68@48,148 killed=0 final=68@60,148 floor=1 win=1 jumped=1
+EXIT id=67r4 start=67@216,168 strat=JUMPRIGHT stood=1 rooms=67>68 land=68@48,148 killed=0 final=68@60,148 floor=1 win=1 jumped=1
+EXIT id=67d0 start=67@120,176 strat=RIGHT stood=1 rooms=67>51 land=51@176,88 killed=0 final=51@176,88 floor=1 win=1
+EXIT id=67r5 start=67@196,176 strat=JUMPRIGHT stood=1 rooms=67>68 land=68@8,168 killed=0 final=68@8,176 floor=1 win=1 jumped=1
+EXIT id=67d1 start=67@200,176 strat=LEFT stood=1 rooms=67>51 land=51@148,88 killed=0 final=51@144,88 floor=1 win=1
+EXIT id=67r6 start=67@216,176 strat=RIGHT stood=1 rooms=67>68 land=68@8,168 killed=0 final=68@8,176 floor=1 win=0
+EXIT id=67r7 start=67@208,176 strat=JUMPRIGHT stood=1 rooms=67>68 land=68@36,148 killed=0 final=68@52,148 floor=1 win=1 jumped=1
+EXIT id=68u0 start=68@220,40 strat=NONE stood=0 rooms=68>84 land=84@220,176 killed=0 final=84@220,176 floor=1 win=0
+EXIT id=68r0 start=68@216,40 strat=JUMPRIGHT stood=0 rooms=68>84>85>69 land=69@32,182(air) killed=0 final=69@32,182 floor=0 win=1 jumped=1
+EXIT id=68u1 start=68@8,48 strat=NONE stood=0 rooms=68>84 land=84@8,162 killed=0 final=84@8,128 floor=1 win=0
+EXIT id=68l0 start=68@16,48 strat=LEFT stood=0 rooms=68>84 land=84@16,176 killed=0 final=84@16,176 floor=1 win=0
+EXIT id=68l1 start=68@24,48 strat=JUMPLEFT stood=0 rooms=68>84 land=84@16,176 killed=0 final=84@16,176 floor=1 win=1 jumped=1
+EXIT id=68u2 start=68@76,48 strat=NONE stood=0 rooms=68>84 land=84@76,176 killed=0 final=84@76,176 floor=1 win=0
+EXIT id=68u3 start=68@8,88 strat=JUMP stood=1 rooms=68 land=68@8,88 killed=0 final=68@8,88 floor=1 win=1 jumped=1
+EXIT id=68u4 start=68@8,88 strat=JUMPLEFT stood=1 rooms=68>67 land=67@8,88(air) killed=0 final=67@8,88 floor=1 win=1 jumped=0
+EXIT id=68u5 start=68@8,88 strat=JUMPRIGHT NEVER-ARRIVED room=67 x=224 y=88
+EXIT id=68u6 start=68@32,88 strat=JUMP stood=1 rooms=68>84>68 land=68@32,68(air) killed=0 final=68@32,68 floor=0 win=1 jumped=1
+EXIT id=68u7 start=68@32,88 strat=JUMPLEFT stood=0 rooms=68>67 land=67@8,81(air) killed=0 final=67@8,81 floor=0 win=1 jumped=1
+EXIT id=68u8 start=68@32,88 strat=JUMPRIGHT NEVER-ARRIVED room=67 x=224 y=88
+EXIT id=68u9 start=68@56,88 strat=JUMP stood=1 rooms=68>84>68 land=68@56,68(air) killed=0 final=68@56,68 floor=0 win=1 jumped=1
+EXIT id=68u10 start=68@56,88 strat=JUMPLEFT stood=0 rooms=68>84 land=84@36,65(air) killed=0 final=84@36,65 floor=0 win=1 jumped=1
+EXIT id=68u11 start=68@56,88 strat=JUMPRIGHT stood=1 rooms=68>84 land=84@68,176 killed=0 final=84@68,176 floor=1 win=1 jumped=1
+EXIT id=68l2 start=68@16,88 strat=LEFT stood=1 rooms=68>67 land=67@224,88 killed=0 final=67@224,88 floor=1 win=1
+EXIT id=68l3 start=68@24,88 strat=JUMPLEFT stood=1 rooms=68>67 land=67@208,112 killed=0 final=67@208,112 floor=1 win=1 jumped=1
+EXIT id=68r1 start=68@200,128 strat=JUMPRIGHT stood=1 rooms=68 land=68@200,128 killed=0 final=68@200,128 floor=1 win=1 jumped=1
+EXIT id=68l4 start=68@16,176 strat=LEFT stood=1 rooms=68>67 land=67@224,176 killed=0 final=67@224,168 floor=1 win=1
+EXIT id=68l5 start=68@24,176 strat=JUMPLEFT stood=1 rooms=68>67 land=67@212,168 killed=0 final=67@208,168 floor=1 win=1 jumped=1
+EXIT id=68r2 start=68@192,176 strat=JUMPRIGHT stood=1 rooms=68 land=68@192,176 killed=1 final=68@224,168 floor=1 win=1 jumped=1
+EXIT id=69u0 start=69@68,40 strat=NONE stood=0 rooms=69>85 land=85@68,160 killed=0 final=85@68,160 floor=1 win=0
+EXIT id=69u1 start=69@52,48 strat=NONE stood=0 rooms=69>85 land=85@52,176 killed=0 final=85@52,176 floor=1 win=0
+EXIT id=69l0 start=69@16,128 strat=JUMPLEFT stood=1 rooms=69 land=69@16,128 killed=0 final=69@16,128 floor=1 win=1 jumped=1
+EXIT id=69d0 start=69@112,176 strat=LEFT stood=1 rooms=69>53 land=53@64,88 killed=0 final=53@64,88 floor=1 win=0
+EXIT id=71u0 start=71@112,96 strat=JUMP stood=1 rooms=71 land=71@112,96 killed=0 final=71@112,96 floor=1 win=1 jumped=1
+EXIT id=71u1 start=71@112,96 strat=JUMPLEFT stood=1 rooms=71 land=71@112,96 killed=0 final=71@108,96 floor=1 win=1 jumped=0
+EXIT id=71u2 start=71@112,96 strat=JUMPRIGHT stood=1 rooms=71>72 land=72@224,96(air) killed=0 final=72@224,96 floor=1 win=1 jumped=1
+EXIT id=71u3 start=71@172,96 strat=JUMP NEVER-ARRIVED room=72 x=8 y=88
+EXIT id=71u4 start=71@172,96 strat=JUMPLEFT stood=1 rooms=71 land=71@172,96 killed=0 final=71@36,124 floor=0 win=1 jumped=1
+EXIT id=71u5 start=71@172,96 strat=JUMPRIGHT stood=1 rooms=71>72 land=72@12,88 killed=0 final=72@12,88 floor=1 win=1 jumped=1
+EXIT id=71u6 start=71@232,96 strat=JUMP stood=1 rooms=71 land=71@232,96 killed=0 final=71@232,96 floor=1 win=1 jumped=1
+EXIT id=71u7 start=71@232,96 strat=JUMPLEFT stood=1 rooms=71 land=71@232,96 killed=0 final=71@228,96 floor=1 win=1 jumped=0
+EXIT id=71u8 start=71@232,96 strat=JUMPRIGHT stood=1 rooms=71>72 land=72@8,96 killed=0 final=72@8,88 floor=1 win=0 jumped=0
+EXIT id=71r0 start=71@224,96 strat=RIGHT stood=1 rooms=71>72 land=72@8,96 killed=0 final=72@8,88 floor=1 win=0
+EXIT id=71r1 start=71@216,96 strat=JUMPRIGHT stood=1 rooms=71>72 land=72@32,68(air) killed=0 final=72@32,68 floor=0 win=1 jumped=1
+EXIT id=71d0 start=71@112,96 strat=LEFT stood=1 rooms=71>70>54 land=54@212,75(air) killed=0 final=54@212,75 floor=0 win=1
+EXIT id=71r2 start=71@224,152 strat=RIGHT stood=1 rooms=71>72 land=72@8,152 killed=0 final=72@8,152 floor=1 win=0
+EXIT id=71r3 start=71@216,152 strat=JUMPRIGHT stood=1 rooms=71>72 land=72@36,125(air) killed=0 final=72@36,125 floor=0 win=1 jumped=1
+EXIT id=72l0 start=72@16,88 strat=LEFT stood=1 rooms=72>71 land=71@224,88 killed=0 final=71@224,96 floor=1 win=0
+EXIT id=72l1 start=72@24,88 strat=JUMPLEFT stood=1 rooms=72>71>87 land=87@216,181(air) killed=0 final=87@216,181 floor=0 win=1 jumped=1
+EXIT id=72l2 start=72@8,152 strat=LEFT stood=1 rooms=72>71 land=71@224,152 killed=0 final=71@224,152 floor=1 win=0
+EXIT id=72l3 start=72@16,152 strat=JUMPLEFT stood=1 rooms=72>71 land=71@180,139(air) killed=0 final=71@180,139 floor=0 win=1 jumped=1
+EXIT id=72d0 start=72@48,160 strat=LEFT stood=1 rooms=72>71 land=71@224,152 killed=0 final=71@224,152 floor=1 win=0
+EXIT id=72d1 start=72@192,168 strat=LEFT stood=1 rooms=72 land=72@192,168 killed=0 final=72@20,152 floor=1 win=1
+EXIT id=72d2 start=72@208,176 strat=LEFT stood=1 rooms=72 land=72@208,176 killed=0 final=72@36,152 floor=1 win=1
+EXIT id=83r0 start=83@224,128 strat=RIGHT stood=1 rooms=83>84 land=84@8,124 killed=0 final=84@8,128 floor=1 win=0
+EXIT id=83r1 start=83@216,128 strat=JUMPRIGHT stood=1 rooms=83>84 land=84@8,119 killed=0 final=84@8,128 floor=1 win=1 jumped=1
+EXIT id=83r2 start=83@216,176 strat=RIGHT stood=1 rooms=83>84 land=84@8,176 killed=0 final=84@8,128 floor=1 win=1
+EXIT id=83r3 start=83@208,176 strat=JUMPRIGHT stood=1 rooms=83>84>68 land=68@40,68(air) killed=0 final=68@40,68 floor=0 win=1 jumped=1
+EXIT id=84u0 start=84@88,48 strat=NONE stood=0 rooms=84>100 land=100@88,176 killed=0 final=100@88,176 floor=1 win=0
+EXIT id=84l0 start=84@32,48 strat=JUMPLEFT stood=0 rooms=84>100 land=100@32,162 killed=0 final=100@32,116 floor=1 win=0 jumped=0
+EXIT id=84u1 start=84@204,48 strat=NONE stood=0 rooms=84>100 land=100@204,162 killed=0 final=100@204,121 floor=1 win=0
+EXIT id=84r0 start=84@200,48 strat=JUMPRIGHT stood=0 rooms=84>100 land=100@200,162 killed=0 final=100@200,116 floor=1 win=0 jumped=0
+EXIT id=84u2 start=84@184,72 strat=JUMP stood=1 rooms=84>100>84 land=84@184,182(air) killed=0 final=84@184,182 floor=0 win=1 jumped=1
+EXIT id=84u3 start=84@184,72 strat=JUMPLEFT stood=1 rooms=84 land=84@184,72 killed=0 final=84@180,72 floor=1 win=1 jumped=0
+EXIT id=84u4 start=84@184,72 strat=JUMPRIGHT stood=1 rooms=84>100>84 land=84@184,182(air) killed=0 final=84@184,182 floor=0 win=1 jumped=1
+EXIT id=84u5 start=84@188,72 strat=JUMP stood=1 rooms=84>100>84 land=84@188,182(air) killed=0 final=84@188,182 floor=0 win=1 jumped=1
+EXIT id=84u6 start=84@188,72 strat=JUMPLEFT stood=0 rooms=84>100 land=100@180,183(air) killed=0 final=100@180,183 floor=0 win=1 jumped=1
+EXIT id=84u7 start=84@188,72 strat=JUMPRIGHT stood=1 rooms=84>100>84 land=84@188,182(air) killed=0 final=84@188,182 floor=0 win=1 jumped=1
+EXIT id=84u8 start=84@192,72 strat=JUMP stood=1 rooms=84>100 land=100@192,175 killed=0 final=100@192,108 floor=1 win=1 jumped=1
+EXIT id=84u9 start=84@192,72 strat=JUMPLEFT stood=1 rooms=84 land=84@192,68 killed=0 final=84@104,107 floor=0 win=1 jumped=0
+EXIT id=84u10 start=84@192,72 strat=JUMPRIGHT stood=1 rooms=84>100 land=100@192,175 killed=0 final=100@192,108 floor=1 win=1 jumped=1
+EXIT id=84u11 start=84@168,80 strat=JUMP stood=1 rooms=84>100 land=100@168,176 killed=0 final=100@168,176 floor=1 win=1 jumped=1
+EXIT id=84u12 start=84@168,80 strat=JUMPLEFT stood=1 rooms=84 land=84@168,80 killed=0 final=84@80,122 floor=0 win=1 jumped=0
+EXIT id=84u13 start=84@168,80 strat=JUMPRIGHT stood=1 rooms=84>100>84 land=84@184,68(air) killed=0 final=84@184,68 floor=0 win=1 jumped=1
+EXIT id=84u14 start=84@172,80 strat=JUMP stood=1 rooms=84>100>84 land=84@172,68(air) killed=0 final=84@172,68 floor=0 win=1 jumped=1
+EXIT id=84u15 start=84@172,80 strat=JUMPLEFT stood=0 rooms=84>100 land=100@164,183(air) killed=0 final=100@164,183 floor=0 win=1 jumped=1
+EXIT id=84u16 start=84@172,80 strat=JUMPRIGHT stood=1 rooms=84>100>84 land=84@184,68(air) killed=0 final=84@184,68 floor=0 win=1 jumped=1
+EXIT id=84u17 start=84@176,80 strat=JUMP stood=1 rooms=84>100>84 land=84@176,182(air) killed=0 final=84@176,182 floor=0 win=1 jumped=1
+EXIT id=84u18 start=84@176,80 strat=JUMPLEFT stood=1 rooms=84 land=84@176,72 killed=0 final=84@172,77 floor=0 win=1 jumped=0
+EXIT id=84u19 start=84@176,80 strat=JUMPRIGHT stood=1 rooms=84>100>84 land=84@184,182(air) killed=0 final=84@184,182 floor=0 win=1 jumped=1
+EXIT id=84u20 start=84@152,88 strat=JUMP stood=1 rooms=84 land=84@152,88 killed=0 final=84@152,88 floor=1 win=1 jumped=1
+EXIT id=84u21 start=84@152,88 strat=JUMPLEFT stood=1 rooms=84 land=84@152,88 killed=0 final=84@148,88 floor=1 win=1 jumped=0
+EXIT id=84u22 start=84@152,88 strat=JUMPRIGHT stood=1 rooms=84>100>84 land=84@184,68(air) killed=0 final=84@184,68 floor=0 win=1 jumped=1
+EXIT id=84u23 start=84@156,88 strat=JUMP stood=1 rooms=84 land=84@156,88 killed=0 final=84@156,88 floor=1 win=1 jumped=1
+EXIT id=84u24 start=84@156,88 strat=JUMPLEFT stood=1 rooms=84 land=84@156,88 killed=0 final=84@152,88 floor=1 win=1 jumped=0
+EXIT id=84u25 start=84@156,88 strat=JUMPRIGHT stood=1 rooms=84>100>84 land=84@184,68(air) killed=0 final=84@184,68 floor=0 win=1 jumped=1
+EXIT id=84u26 start=84@160,88 strat=JUMP stood=1 rooms=84 land=84@160,80 killed=0 final=84@160,80 floor=1 win=1 jumped=1
+EXIT id=84u27 start=84@160,88 strat=JUMPLEFT stood=1 rooms=84 land=84@160,80 killed=0 final=84@156,85 floor=0 win=1 jumped=0
+EXIT id=84u28 start=84@160,88 strat=JUMPRIGHT stood=1 rooms=84>100>84 land=84@184,68(air) killed=0 final=84@184,68 floor=0 win=1 jumped=1
+EXIT id=84u29 start=84@136,96 strat=JUMP stood=1 rooms=84 land=84@136,96 killed=0 final=84@136,96 floor=1 win=1 jumped=1
+EXIT id=84u30 start=84@136,96 strat=JUMPLEFT stood=1 rooms=84 land=84@136,96 killed=0 final=84@132,96 floor=1 win=1 jumped=0
+EXIT id=84u31 start=84@136,96 strat=JUMPRIGHT stood=1 rooms=84 land=84@164,80 killed=0 final=84@184,72 floor=1 win=1 jumped=1
+EXIT id=84u32 start=84@140,96 strat=JUMP stood=1 rooms=84 land=84@140,96 killed=0 final=84@140,96 floor=1 win=1 jumped=1
+EXIT id=84u33 start=84@140,96 strat=JUMPLEFT stood=1 rooms=84 land=84@140,96 killed=0 final=84@136,96 floor=1 win=1 jumped=0
+EXIT id=84u34 start=84@140,96 strat=JUMPRIGHT stood=1 rooms=84 land=84@168,80 killed=0 final=84@184,72 floor=1 win=1 jumped=1
+EXIT id=84u35 start=84@144,96 strat=JUMP stood=1 rooms=84 land=84@144,88 killed=0 final=84@144,88 floor=1 win=1 jumped=1
+EXIT id=84u36 start=84@144,96 strat=JUMPLEFT stood=1 rooms=84 land=84@144,88 killed=0 final=84@140,93 floor=0 win=1 jumped=0
+EXIT id=84u37 start=84@144,96 strat=JUMPRIGHT stood=1 rooms=84 land=84@168,80 killed=0 final=84@184,72 floor=1 win=1 jumped=1
+EXIT id=84u38 start=84@120,104 strat=JUMP stood=1 rooms=84 land=84@120,104 killed=0 final=84@120,104 floor=1 win=1 jumped=1
+EXIT id=84u39 start=84@120,104 strat=JUMPLEFT stood=1 rooms=84 land=84@120,104 killed=0 final=84@116,104 floor=1 win=1 jumped=0
+EXIT id=84u40 start=84@120,104 strat=JUMPRIGHT stood=1 rooms=84 land=84@164,80 killed=0 final=84@184,72 floor=1 win=1 jumped=1
+EXIT id=84u41 start=84@124,104 strat=JUMP stood=1 rooms=84 land=84@124,104 killed=0 final=84@124,104 floor=1 win=1 jumped=1
+EXIT id=84u42 start=84@124,104 strat=JUMPLEFT stood=1 rooms=84 land=84@124,104 killed=0 final=84@120,104 floor=1 win=1 jumped=0
+EXIT id=84u43 start=84@124,104 strat=JUMPRIGHT stood=1 rooms=84 land=84@168,80 killed=0 final=84@184,72 floor=1 win=1 jumped=1
+EXIT id=84u44 start=84@128,104 strat=JUMP stood=1 rooms=84 land=84@128,96 killed=0 final=84@128,96 floor=1 win=1 jumped=1
+EXIT id=84u45 start=84@128,104 strat=JUMPLEFT stood=1 rooms=84 land=84@128,96 killed=0 final=84@124,101 floor=0 win=1 jumped=0
+EXIT id=84u46 start=84@128,104 strat=JUMPRIGHT stood=1 rooms=84 land=84@164,80 killed=0 final=84@184,72 floor=1 win=1 jumped=1
+EXIT id=84l1 start=84@8,128 strat=LEFT stood=1 rooms=84>83 land=83@224,128 killed=0 final=83@224,84 floor=1 win=0
+EXIT id=84l2 start=84@16,128 strat=JUMPLEFT stood=1 rooms=84>83 land=83@224,104 killed=0 final=83@224,84 floor=1 win=1 jumped=1
+EXIT id=84r1 start=84@216,128 strat=RIGHT stood=1 rooms=84>85 land=85@8,123 killed=0 final=85@8,84 floor=1 win=0
+EXIT id=84r2 start=84@208,128 strat=JUMPRIGHT stood=1 rooms=84>85 land=85@8,119 killed=0 final=85@8,84 floor=1 win=1 jumped=1
+EXIT id=84l3 start=84@16,176 strat=LEFT stood=1 rooms=84 land=84@16,176 killed=0 final=84@16,176 floor=1 win=1
+EXIT id=84l4 start=84@24,176 strat=JUMPLEFT stood=1 rooms=84 land=84@16,176 killed=0 final=84@16,176 floor=1 win=1 jumped=1
+EXIT id=84d0 start=84@8,176 strat=RIGHT stood=1 rooms=84>68 land=68@56,88 killed=0 final=68@56,88 floor=1 win=0
+EXIT id=84r3 start=84@216,176 strat=RIGHT stood=1 rooms=84>85 land=85@8,176 killed=0 final=85@8,176 floor=1 win=0
+EXIT id=84r4 start=84@208,176 strat=JUMPRIGHT stood=1 rooms=84>85>69 land=69@32,75(air) killed=0 final=69@32,75 floor=0 win=1 jumped=1
+EXIT id=84d1 start=84@80,176 strat=LEFT stood=1 rooms=84>68 land=68@32,88 killed=0 final=68@32,88 floor=1 win=0
+EXIT id=85l0 start=85@16,128 strat=LEFT stood=1 rooms=85>84 land=84@224,116 killed=0 final=84@224,128 floor=1 win=0
+EXIT id=85l1 start=85@24,128 strat=JUMPLEFT stood=1 rooms=85>84 land=84@224,112 killed=0 final=84@224,128 floor=1 win=1 jumped=1
+EXIT id=85l2 start=85@8,176 strat=LEFT stood=1 rooms=85>84 land=84@224,172 killed=0 final=84@224,176 floor=1 win=0
+EXIT id=85l3 start=85@16,176 strat=JUMPLEFT stood=0 rooms=85>69 land=69@16,128 killed=0 final=69@16,128 floor=1 win=0 jumped=0
+EXIT id=85d0 start=85@0,176 strat=RIGHT stood=1 rooms=85>69 land=69@32,128 killed=0 final=69@32,128 floor=1 win=0
+EXIT id=85d1 start=85@56,176 strat=LEFT stood=1 rooms=85>69 land=69@16,128 killed=0 final=69@16,128 floor=1 win=1
+EXIT id=86r0 start=86@216,176 strat=JUMPRIGHT stood=1 rooms=86>87>71 land=71@64,68(air) killed=0 final=71@64,68 floor=0 win=1 jumped=1
+EXIT id=86d0 start=86@176,176 strat=LEFT NEVER-ARRIVED room=87 x=68 y=64
+EXIT id=87d0 start=87@96,160 strat=LEFT stood=1 rooms=87>71>70>54 land=54@200,182(air) killed=0 final=54@200,182 floor=0 win=0
+EXIT id=87d1 start=87@160,168 strat=LEFT stood=1 rooms=87>71 land=71@36,96(air) killed=0 final=71@36,96 floor=0 win=1
+EXIT id=87d2 start=87@176,176 strat=LEFT stood=1 rooms=87>71 land=71@48,75(air) killed=0 final=71@48,75 floor=0 win=1
+EXIT id=100d0 start=100@152,176 strat=RIGHT stood=1 rooms=100>84 land=84@184,72 killed=0 final=84@184,72 floor=1 win=0
+EXITSUM 358 cases
+Average speed: 6562.44% (2131 seconds)

@@ -1,0 +1,101 @@
+[[tasks]]
+id = "T0001"
+stage = "identify"
+title = "Inventory and hash source files; record exact versions/regions in NOTES.md"
+status = "done"
+depends_on = []
+note = ""
+tier = "haiku"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0002"
+stage = "identify"
+title = "Fingerprint the engine and toolchain the original was built with"
+status = "done"
+depends_on = ["T0001"]
+note = ""
+tier = "sonnet"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0003"
+stage = "identify"
+title = "PRIOR ART SWEEP: existing disassemblies, decomps, source releases, ports, format docs"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0004"
+stage = "classify"
+title = "Answer: does source exist? is target >= source in capability?"
+status = "done"
+depends_on = [
+    "T0002",
+    "T0003",
+]
+note = ""
+tier = "opus"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0005"
+stage = "classify"
+title = "Commit to a strategy (source-port | recompile | reimplement) and record why"
+status = "done"
+depends_on = ["T0004"]
+note = ""
+tier = "opus"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0006"
+stage = "scaffold"
+title = "Stand up target toolchain + emulator; build and run a hello-world on target"
+status = "todo"
+depends_on = ["T0005"]
+note = ""
+tier = "sonnet"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0007"
+stage = "scaffold"
+title = "Stand up differential harness: scripted input, frame capture, side-by-side diff"
+status = "todo"
+depends_on = ["T0006"]
+note = ""
+tier = "sonnet"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0008"
+stage = "scaffold"
+title = "ZX48 build: sjasmplus, same gpf_state contract; diff via MAME poll of RAM"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = "make -C ports/brickfall-zxspectrum48/target check && make -C ports/brickfall-c64/target check && cargo test --offline --manifest-path factory/tools/gpfdiff/Cargo.toml"
+attempts = 0
+
+[[tasks]]
+id = "T0009"
+stage = "slice"
+title = "ZX48 art+sound polish"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = "make -C ports/brickfall-zxspectrum48/target check"
+attempts = 0

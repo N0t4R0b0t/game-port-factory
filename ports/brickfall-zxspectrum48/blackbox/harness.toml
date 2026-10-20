@@ -1,0 +1,83 @@
+# BLACK-BOX manifest for the ZX Spectrum Brickfall: it is treated as an UNKNOWN ORIGINAL.
+#   gpfdiff capture ports/brickfall-zxspectrum48/blackbox --out <dir>      (make -C ../target check-blackbox)
+# Nothing here uses the cooperative contract: no gpf_state / gpf_bricks / gpf_input_ret, no symbol file. The
+# program runs free under MAME; keys are pressed through the emulated keyboard matrix on a frame clock and
+# its state is read from RAM at RAW ADDRESSES that `gpfdiff watch` can find (README, "watch"). The
+# addresses below are the ones brickfall.sym lists ($F000..), written as literals on purpose.
+# Reference: factory/tools/gpfdiff/README.md ("Keys mode", "boot", "Time axis").
+platform = "zx48"
+recipe   = "../../../games/brickfall/recipe"  # scenarios (and, for `check`, goldens) come from here
+repeat   = 2
+
+[emulator]
+mame    = "mame"
+machine = "spectrum"
+# The `spectrum` ROM is your own: $ZX_ROMPATH, --rompath or ~/.mame/roms.
+
+[input]
+mode = "keys"
+
+[input.keys]            # button -> emulated key (the game reads Z/Q = left, X/A = right, SPACE = fire)
+LEFT  = "Z"
+RIGHT = "X"
+FIRE  = "SPACE"
+
+[time]                  # fps defaults to 50 for zx48; one scenario step = 20 ms
+step_ms = 20
+# input_latency_frames = 0   # measured: the program sees a key applied at hook t in its frame t+1 (README, "Frame clock")
+
+[boot]
+image = "../target/brickfall.sna"
+# Ready gate: byte $F046 is 255 until the first frame has been drawn, then holds the ball's row (172 at
+# the start). The timeline starts at the first frame where it is in 1..=254: the program is then idle in
+# its main loop with zero simulation steps taken. (Found with `gpfdiff watch --no-gate`.)
+ready = { addr = 0xF046, in = [1, 254] }
+timeout_ms = 2000
+
+[state]
+source = "map"
+
+# One [[field]] per golden column, in the golden's order: the captured trace is comparable with games/brickfall/recipe/golden.
+[[field]]
+name = "step"
+addr = 0xF000
+size = 2
+[[field]]
+name = "mode"
+addr = 0xF002
+[[field]]
+name = "lives"
+addr = 0xF003
+[[field]]
+name = "score"
+addr = 0xF004
+size = 2
+[[field]]
+name = "paddle_x"
+addr = 0xF006
+[[field]]
+name = "cleared"
+addr = 0xF007
+[[field]]
+name = "ball_x"
+addr = 0xF008
+size = 2
+[[field]]
+name = "ball_y"
+addr = 0xF00A
+size = 2
+[[field]]
+name = "ball_vx"
+addr = 0xF00C
+size = 2
+signed = true
+[[field]]
+name = "ball_vy"
+addr = 0xF00E
+size = 2
+signed = true
+[[field]]
+name = "bricks"
+addr = 0xF010
+size = 5
+format = "hex"           # the five brick-row bytes, as hex text

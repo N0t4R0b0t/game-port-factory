@@ -1,0 +1,20 @@
+; silently spilled past $6000 into the LIVE framebuffer B -- same
+; corruption class as the original problem this file's own org exists
+; to prevent, just one level removed. Reverted to frame36. The actual
+; fix for the memory crunch is shared_sprites_data.asm getting its OWN
+; org into a SEPARATE, previously entirely unused 2KB block at
+; $7800-$7FFF (right after framebuffer B, before $8000 where ROM starts
+; on both the 32K and 64K CoCo2 -- genuinely safe, no SAM all-RAM/
+; banking mode needed: ordinary RAM, always mapped, on the SAME 32K
+; address range a base CoCo2 already has. Confirmed the active stack
+; pointer sits at ~$03D3 at runtime, nowhere near either gap, before
+; relying on either). See room36.asm's own include-chain comment.
+
+
+; T0107: the tail of dizzy_frames_all.asm (frame36 on, plus the lookup
+; tables), split out by an earlier session specifically to relocate into
+; the $5800 inter-buffer gap -- see NOTES.md, the fix that stopped this
+; file silently overrunning framebuffer A. Kept exactly where it was:
+; this piece stays resident, only the main body (dizzy_frames_body.asm)
+; moves to $8000+.
+        org $5800

@@ -1,0 +1,2 @@
+2026-08-12	turrican	T0010	local->haiku	attempt=1	Local model produced off-palette colours; cell-2-colour constraint violated on 31/128 tiles
+2026-08-12	turrican	T0010	haiku->sonnet	attempt=2	Haiku fixed palette but dithering choice needs judgement on which detail to sacrifice

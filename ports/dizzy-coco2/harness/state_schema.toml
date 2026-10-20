@@ -1,0 +1,36 @@
+# Normalization schema for the differential harness (compare.py).
+#
+# The two sides log different raw units at different frame rates; this
+# file is what lets compare.py turn each into one comparable shape rather
+# than hardcoding the conversion in Python.
+#
+# fps: CoCo2 target is NTSC (60Hz), ZX Spectrum source is PAL (50Hz).
+# Scenarios are authored in real milliseconds (harness/scenarios/*.toml)
+# and converted to each side's own frame count separately -- never share
+# a raw frame axis between the two, they will silently desync.
+[fps]
+coco2 = 60
+zxspectrum = 50
+
+# Coordinate scale to a common "ZX-native" unit. Confirmed against
+# target/room36.asm's own START_X=184 (CoCo2 px) / START_Y=168 vs
+# X-ALL.TXT resetlives x=46,y=168 (46*4=184): x needs /4, y is 1:1. Also
+# matches harness/zx_warp.lua's own comment ("x = port dizzy_x / 4").
+[coco2.scale]
+x = 0.25
+y = 1.0
+
+[zxspectrum.scale]
+x = 1.0
+y = 1.0
+
+# Per-field tolerance in common units after scaling. room/floor/lives
+# must match exactly by default; position gets a little slack for
+# rounding/sub-pixel accumulation differences between the two engines'
+# physics, not to paper over a real placement bug.
+[tolerance]
+x = 3
+y = 3
+room = 0
+floor = 0
+lives = 0

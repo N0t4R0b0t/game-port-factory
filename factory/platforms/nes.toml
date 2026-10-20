@@ -1,0 +1,11 @@
+id = "nes"
+name = "Nintendo Entertainment System"
+year = 1983
+memory_kb = 2
+
+[axes]
+cpu = "6502"
+raster = "lores-8bit"
+color = "palette54-cell4"
+audio = "apu"
+storage = "cartridge"

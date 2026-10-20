@@ -1,0 +1,10 @@
+steps = 400
+sample_every = 5
+
+[[input]]
+step = 0
+buttons = 5
+
+[[input]]
+step = 1
+buttons = 0

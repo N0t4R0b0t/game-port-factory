@@ -1,0 +1,27 @@
+# WAIT mode only: paddle driven into both edges, then LEFT+RIGHT together cancels
+steps = 300
+sample_every = 5
+
+[[input]]
+step = 0
+buttons = 1
+
+[[input]]
+step = 60
+buttons = 2
+
+[[input]]
+step = 120
+buttons = 0
+
+[[input]]
+step = 140
+buttons = 2
+
+[[input]]
+step = 200
+buttons = 1
+
+[[input]]
+step = 280
+buttons = 3

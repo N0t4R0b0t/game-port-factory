@@ -1,0 +1,88 @@
+id = "coco2"
+name = "Tandy Color Computer 2"
+year = 1983
+memory_kb = 64
+
+[axes]
+cpu = "6809"
+raster = "lores-8bit"
+# Deliberately NOT "inkpaper-cell2" or "palette16-cell4": the 6847 VDG has no
+# per-cell attribute clash at all. PMODE 4 (RG6, 256x192) is genuinely just 2
+# colors for the whole screen — a different clash-avoidance problem than
+# Spectrum ink/paper, so this axis should NOT read as transferring from
+# zxspectrum48/128 even though CPU and storage do. The NTSC composite
+# "artifact color" trick (alternating 1-pixel columns read as extra hues on
+# a color TV) can fake 4 colors in a 2-color mode; several commercial CoCo
+# games use it, but it's monitor-dependent and RGB-monitor-hostile, so treat
+# it as an optional technique, not the baseline color model.
+color = "lores-2color-artifact"
+# 6-bit DAC on the same port that reads the joystick pots (PIA). Real
+# volume-modulated tone/noise, not an on/off beeper edge — meaningfully more
+# capable than zxspectrum48's beeper, so this axis should NOT read as
+# transferring from Spectrum even though most others do.
+audio = "dac6bit"
+storage = "tape"
+
+# MC6847 VDG geometry. PMODE 4 is the common game mode: 256x192, 2 colors,
+# no attribute cells (contrast with c64.toml's char_cell, which is a real
+# clash boundary — here it's just the SG4 alpha/semigraphics text grid).
+[video]
+screen_pixels = [256, 192]
+screen_chars = [32, 16]
+char_cell = [8, 12]
+sprites = false
+
+# Base 2-color set (mode/CSS-dependent: black+white or black+"green/buff"
+# on an RGB monitor). Artifact colors are a composite-only illusion, not a
+# real palette entry, so they are not listed here.
+[palette]
+names = ["black", "white"]
+rgb = ["#000000", "#FFFFFF"]
+
+# Real hardware feature the Spectrum and C64 both lack: two analog
+# potentiometer-based joystick axes (X/Y) per controller, read through the
+# same PIA/DAC port pair as sound output. Not one of the standard AXES yet,
+# recorded here so a later port session doesn't have to rediscover it.
+[input]
+analog_joystick = true
+axes_per_stick = 2
+# T0240 (verified in MAME coco2b with dizzy-coco2's harness/joystick.lua; polarity as Color BASIC's JOYIN $A9DE):
+#   pot read = 6-bit successive approximation: write trial*4 (bits 7..2; keep bit 1 high, it is the serial-out line)
+#              to the DAC $FF20, read the comparator at $FF00 bit 7 (1 = pot ABOVE the DAC -> keep the bit).
+#   axis mux = PIA0 CA2 ($FF01 bit 3, LSB) and CB2 ($FF03 bit 3, MSB): 00 right X, 01 right Y, 10 left X, 11 left Y.
+#              The SOUND source mux is the same two bits (00 = the DAC), so right X needs no change while sound plays.
+#   buttons  = $FF00 bit 0 (right), bit 1 (left), ACTIVE LOW, read with every keyboard column released ($FF02 = $FF).
+#   the DAC IS the speaker: mute it ($FF23 bit 3 = PIA1 CB2 sound enable) around the probe, leave the DAC at 0.
+#   an unplugged port is expected to read pegged/floating, not centred (UNVERIFIED on hardware): require one reading in the centre before trusting an axis.
+joystick_pot_comparator = "$FF00 bit7"
+joystick_buttons = "$FF00 bit0 right, bit1 left, active low, $FF02=$FF"
+joystick_mux = "$FF01 bit3 (CA2, LSB) / $FF03 bit3 (CB2); 00 = right X = DAC sound source"
+
+# Memory map at LOAD time -- the constraint that sized dizzy-coco2's whole
+# delivery architecture, and which a later port must not re-derive.
+#
+# BASIC's CLOADM/LOADM runs in SAM map type 0 (ROM mode): $8000-$FEFF reads
+# come from BASIC ROM, and CPU WRITES THERE ARE DROPPED -- they do NOT land in
+# the RAM underneath. Measured 2026-09-27 on BOTH MAME coco2b and XRoar
+# coco2bus with the same test (plant $5A under the ROM in all-RAM mode,
+# switch to map type 0, write $A5 to $9000 and $C123, switch back, read):
+# both returned $5A. So a DECB segment addressed at $8000+ is silently lost,
+# and on a 64K machine only $0100-$7FFF is deliverable by the stock loader.
+#
+# Consequences for a port:
+#   * Anything destined for $8000+ must be STAGED below $8000 at load time and
+#     relocated after the program itself engages all-RAM mode (sta $FFDF).
+#     The framebuffers are the natural staging windows ($4000/$6000 in PMODE4).
+#   * So the real capacity limit is load-time RAM below $8000 (~32.5KB), not
+#     the 64K total -- and resident code, resident data and packed staging all
+#     compete for it.
+#   * The canonical 64K ROM-to-RAM copy must TOGGLE $FFDE/$FFDF per byte
+#     (read in ROM mode, write in RAM mode) precisely because ROM-mode writes
+#     do not reach RAM. A single-mode `lda ,x / sta ,x+` loop does NOT work.
+#   * Going past the ~32.5KB load ceiling needs a custom loader stage (a small
+#     first program that engages all-RAM mode, then reads the rest of the
+#     file itself). That is how commercial >32K CoCo titles shipped.
+[load]
+stock_loader_writable = "$0100-$7FFF"
+rom_mode_writes_reach_ram = false
+verified_on = ["mame coco2b", "xroar coco2bus"]

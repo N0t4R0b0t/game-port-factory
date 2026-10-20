@@ -1,0 +1,14 @@
+[port]
+slug = "brickfall-c64"
+title = "Brickfall"
+game = "brickfall"
+created = "2026-10-17"
+source_platform = "c64"
+target_platform = "c64"
+strategy = "reimplement"
+stage = "scaffold"
+
+[status]
+next_action = "Brickfall complete for both targets: sim bit-exact vs model, art+sound polished, screenshots, release script (scripts/release-brickfall.sh -> dist/, gitignored). Sound never heard by a human; C64 joystick manual-only. NEXT: user decisions -- publish repo to GitHub, attach dist/* as a release, email Oliver Twins re Dizzy. Optional: chain soundcheck/check-render into check; Rust PNG scaler to drop ImageMagick dependency."
+blocked_on = ""
+last_session = "2026-10-17"

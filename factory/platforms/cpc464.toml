@@ -1,0 +1,11 @@
+id = "cpc464"
+name = "Amstrad CPC 464"
+year = 1984
+memory_kb = 64
+
+[axes]
+cpu = "z80"
+raster = "lores-8bit"
+color = "palette27-free"
+audio = "ay"
+storage = "tape"

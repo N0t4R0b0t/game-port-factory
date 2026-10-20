@@ -1,0 +1,3 @@
+# idle: stays in WAIT so the title screen can be photographed
+steps = 100
+sample_every = 100

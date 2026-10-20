@@ -1,0 +1,16 @@
+; This file, in full, sits right at the $4000 PMODE4 buffer-A boundary
+; -- close enough that a small addition elsewhere in the assembly can
+; push its tail past $4000 and into the live framebuffer, silently
+; corrupting Dizzy's own sprite data every time the screen is drawn
+; (confirmed the hard way: a hang, not a visible glitch, since the
+; corruption feeds into blit/collision code downstream). Relocating
+; this tail (frame36 on, plus the lookup tables) into the 2KB gap
+; between the two framebuffers ($5800-$5FFF) gives real headroom
+; instead of sitting exactly on the edge. Pure data, no internal
+; branches, only ever reached via an absolute address -- safe to move.
+;
+; T0033 follow-up/memory audit: DID try moving this split point earlier
+; (to frame24) to free more low-region space, on the theory that a
+; bigger gap-resident tail was fine since the gap has 2048 bytes. Real
+; bug, not just tight: that left too little of the gap for
+; shared_sprites_data.asm (1109 bytes) to also fit, and its own tail

@@ -1,0 +1,11 @@
+id = "dreamcast"
+name = "Sega Dreamcast"
+year = 1998
+memory_kb = 16384
+
+[axes]
+cpu = "sh4"
+raster = "3d-gpu"
+color = "truecolor"
+audio = "pcm"
+storage = "gdrom"

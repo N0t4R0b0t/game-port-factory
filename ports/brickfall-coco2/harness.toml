@@ -1,0 +1,15 @@
+# gpfdiff manifest for this port: `gpfdiff check ports/brickfall-coco2`
+# Reference: factory/tools/gpfdiff/README.md ("harness.toml reference").
+# Relative paths are relative to this file. Build first: make -C target all
+platform = "coco2"
+image    = "target/brickfall.bin"        # lwasm --format=decb output
+labels   = "target/brickfall.map"        # lwasm --map output
+recipe   = "../../games/brickfall/recipe" # holds scenarios/*.toml and golden/*.trace
+repeat   = 2                              # fresh emulator per run; traces must be identical
+
+[emulator]
+mame    = "mame"
+machine = "coco2b"
+# The `coco2b` ROMs (bas13.rom + extbas11.rom) are your own and are not distributed.
+# rompath is searched after --rompath and $COCO_ROMPATH, before ~/.mame/roms.
+# Leave it unset to use those.

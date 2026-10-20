@@ -1,0 +1,12 @@
+# The baseline Fallout 1 (1997) shipped against. Source platform, not a port target.
+id = "dos"
+name = "PC / DOS (mid-90s)"
+year = 1997
+memory_kb = 16384
+
+[axes]
+cpu = "x86"
+raster = "vga-640x480"
+color = "palette256-free"
+audio = "pcm"
+storage = "cdrom"

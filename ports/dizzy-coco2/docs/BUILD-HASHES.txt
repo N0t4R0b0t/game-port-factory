@@ -1,0 +1,16 @@
+# Expected build outputs of the Dizzy CoCo2 port. `tools/bootstrap.sh --verify` compares your
+# rebuild against the five lines below (sha256sum format: hash, two spaces, path from ports/dizzy-coco2/).
+# A mismatch means different inputs (see tools/inputs.toml) or a different toolchain.
+#
+# Inputs: the Oliver Twins' released Fantasy World Dizzy source as redistributed in
+#   picosonic/D3 @ 4ac31df (https://github.com/picosonic/D3); per-file sha256 in tools/inputs.toml.
+#   CoCo ROMs and the ZX tape/ROM are NOT build inputs.
+# Toolchain used for these hashes: lwasm from lwtools 4.24, Python 3.14.7, rustc 1.94.1.
+#   Output was identical across repeated builds and across a clean-then-bootstrap rebuild, so
+#   the build is deterministic (no timestamps or hash-map order in any artifact).
+# Build order that produces them: tools/bootstrap.sh (the default step list).
+da61515b99974a4e1193d2045205f5dcafeec3a41e2e76996d1636baf020463c  target/room36.bin
+04858c8a5b870c8b233824da5d83078709abd78dd29a5dc304eb20056a338811  target/room36_tape.bin
+2c6fa5fbd06207f162382bad80d00009b35f0bd5dd07adee3c8fe6dff315aaf3  target/room36_floppy.bin
+885868eff521afec347d2677e03e4d1c4decdbeeac7d2169f03912770da342b8  target/room36.cas
+cd17b749800708ffdf2ee978358171e7877487b4e8c7b741ccdc17f58934ecb2  target/dizzy.dsk

@@ -1,0 +1,19 @@
+# Strings from the original text set that may appear in port code COMMENTS and
+# identifiers (never inside an `fcc "..."` operand). Only the game's name, its
+# characters and ordinary English words/phrases. Matched as whole words,
+# case-insensitive, ':' = space. Anything not listed here must not appear in a
+# public template.
+dizzy
+dozy
+until
+the apple
+a coin
+# Object and mechanic names that are also message rows. Allowed because they name a game object in
+# running prose ("the portcullis rises"), not because they are dialogue. Every entry is 1-3 ordinary words.
+the portcullis
+sleeping potion
+of the lift
+and the dragon
+to the troll
+the bean
+top of the lift

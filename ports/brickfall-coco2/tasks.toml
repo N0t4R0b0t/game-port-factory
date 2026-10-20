@@ -1,0 +1,112 @@
+[[tasks]]
+id = "T0001"
+stage = "recover"
+title = "Recipe: games/brickfall/recipe/README.md (shared, already written for the c64 port; nothing to do for coco2)"
+status = "done"
+depends_on = []
+note = ""
+tier = "opus"
+verify = "test -f games/brickfall/recipe/README.md"
+attempts = 0
+
+[[tasks]]
+id = "T0002"
+stage = "recover"
+title = "Reference model + golden traces: games/brickfall/recipe/{model,golden} (shared; consumed as is)"
+status = "done"
+depends_on = ["T0001"]
+note = ""
+tier = "sonnet"
+verify = "ls games/brickfall/recipe/golden/*.trace | wc -l | grep -qx 11"
+attempts = 0
+
+[[tasks]]
+id = "T0003"
+stage = "scaffold"
+title = "Stand up target toolchain + emulator; build and run a hello-world on target"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = "factory/tools/gpfdiff/target/release/gpfdiff doctor --platform coco2"
+attempts = 0
+
+[[tasks]]
+id = "T0004"
+stage = "scaffold"
+title = "gpfdiff coco2 backend (MAME coco2b, DECB loader in Lua, A register injection) + doctor/manifest/README"
+status = "done"
+depends_on = [
+    "T0002",
+    "T0003",
+]
+note = ""
+tier = "sonnet"
+verify = "cargo test --offline --manifest-path factory/tools/gpfdiff/Cargo.toml"
+attempts = 0
+
+[[tasks]]
+id = "T0005"
+stage = "slice"
+title = "6809 build, PMODE4 minimal art, 60->50 Hz accumulator; bit-exact vs golden traces"
+status = "done"
+depends_on = ["T0004"]
+note = ""
+tier = "sonnet"
+verify = "make -C ports/brickfall-coco2/target check"
+attempts = 0
+
+[[tasks]]
+id = "T0006"
+stage = "iterate"
+title = "Art and sound polish (row colours via artifact, text, DAC sound); sim untouched"
+status = "todo"
+depends_on = ["T0005"]
+note = ""
+tier = "sonnet"
+verify = "make -C ports/brickfall-coco2/target check && make -C ports/brickfall-coco2/target smoke-keys"
+attempts = 0
+
+[[tasks]]
+id = "T0007"
+stage = "scaffold"
+title = "Friction: gpf init --original seeds recipe/model tasks as todo even when games/<game>/recipe/ already exists (second port of a game); detect and pre-close, fix source_platform/next_action text"
+status = "todo"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = "cargo test --offline --manifest-path gpf/Cargo.toml"
+attempts = 0
+
+[[tasks]]
+id = "T0008"
+stage = "scaffold"
+title = "Friction: gpf task edit cannot set the note; add --note. And gpf task done should offer --run-verify to execute the verify string"
+status = "todo"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = "cargo test --offline --manifest-path gpf/Cargo.toml"
+attempts = 0
+
+[[tasks]]
+id = "T0009"
+stage = "scaffold"
+title = "Friction: gpf init creates empty extracted/ source/ research/ harness/ dirs that git drops; create .gitkeep or only the dirs the mode uses"
+status = "todo"
+depends_on = []
+note = ""
+tier = "haiku"
+verify = "true"
+attempts = 0
+
+[[tasks]]
+id = "T0010"
+stage = "scaffold"
+title = "Tech debt: merge duplicated MAME spawn/reader-thread code between gpfdiff mame.rs and keysrun.rs"
+status = "todo"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = "cargo test --offline --manifest-path factory/tools/gpfdiff/Cargo.toml"
+attempts = 0

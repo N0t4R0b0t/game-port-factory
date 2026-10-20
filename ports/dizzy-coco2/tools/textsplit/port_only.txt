@@ -1,0 +1,14 @@
+# Strings the PORT wrote itself (not in the original game text). The only fcc/fcs string
+# operands allowed in text templates besides @orig(...) keys. Read by check_templates.sh,
+# which scripts/export-public.sh runs as a gate. Colon-separated, as in the source ( : = space ).
+# Adding a line here is a review decision: it must not be original text.
+GAME:OVER
+PRESS:SPACE
+AN:OBJECT
+EXIT
+GAME:SAVED
+GAME:LOADED
+NO:SAVED:GAME
+DISK:ERROR
+SAVE:IS:FROM
+ANOTHER:VERSION

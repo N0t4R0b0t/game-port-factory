@@ -1,0 +1,11 @@
+id = "msx1"
+name = "MSX1"
+year = 1983
+memory_kb = 64
+
+[axes]
+cpu = "z80"
+raster = "lores-8bit"
+color = "inkpaper-cell2"
+audio = "ay"
+storage = "cartridge"

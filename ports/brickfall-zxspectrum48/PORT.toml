@@ -1,0 +1,14 @@
+[port]
+slug = "brickfall-zxspectrum48"
+title = "Brickfall"
+game = "brickfall"
+created = "2026-10-17"
+source_platform = "c64"
+target_platform = "zxspectrum48"
+strategy = "reimplement"
+stage = "scaffold"
+
+[status]
+next_action = "Complete; see brickfall-c64 handoff. check + check-render pass; needs user's spectrum.zip."
+blocked_on = ""
+last_session = "2026-10-17"

@@ -1,0 +1,12 @@
+# gpfdiff manifest for this port: `gpfdiff check ports/brickfall-c64`
+# Reference: factory/tools/gpfdiff/README.md ("harness.toml reference").
+# Relative paths are relative to this file. Build first: make -C target all
+platform = "c64"
+image    = "target/brickfall.prg"        # acme -f cbm output
+labels   = "target/brickfall.vs"         # acme --vicelabels output
+recipe   = "../../games/brickfall/recipe" # holds scenarios/*.toml and golden/*.trace
+repeat   = 2                              # fresh emulator per run; traces must be identical
+
+[emulator]
+x64sc = "x64sc"                           # name on PATH or a full path
+xvfb  = "auto"                            # auto | always | never

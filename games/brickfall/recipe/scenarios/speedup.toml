@@ -1,0 +1,2728 @@
+# recorded paddle strategy; input list is the fixed artefact. Clears >=10 bricks (speed-up)
+steps = 1500
+sample_every = 10
+
+[[input]]
+step = 0
+buttons = 4
+
+[[input]]
+step = 1
+buttons = 2
+
+[[input]]
+step = 4
+buttons = 0
+
+[[input]]
+step = 147
+buttons = 1
+
+[[input]]
+step = 157
+buttons = 0
+
+[[input]]
+step = 159
+buttons = 1
+
+[[input]]
+step = 160
+buttons = 0
+
+[[input]]
+step = 162
+buttons = 1
+
+[[input]]
+step = 163
+buttons = 0
+
+[[input]]
+step = 164
+buttons = 1
+
+[[input]]
+step = 165
+buttons = 0
+
+[[input]]
+step = 167
+buttons = 1
+
+[[input]]
+step = 168
+buttons = 0
+
+[[input]]
+step = 170
+buttons = 1
+
+[[input]]
+step = 171
+buttons = 0
+
+[[input]]
+step = 172
+buttons = 1
+
+[[input]]
+step = 173
+buttons = 0
+
+[[input]]
+step = 175
+buttons = 1
+
+[[input]]
+step = 176
+buttons = 0
+
+[[input]]
+step = 178
+buttons = 1
+
+[[input]]
+step = 179
+buttons = 0
+
+[[input]]
+step = 180
+buttons = 1
+
+[[input]]
+step = 181
+buttons = 0
+
+[[input]]
+step = 183
+buttons = 1
+
+[[input]]
+step = 184
+buttons = 0
+
+[[input]]
+step = 186
+buttons = 1
+
+[[input]]
+step = 187
+buttons = 0
+
+[[input]]
+step = 188
+buttons = 1
+
+[[input]]
+step = 189
+buttons = 0
+
+[[input]]
+step = 191
+buttons = 1
+
+[[input]]
+step = 192
+buttons = 0
+
+[[input]]
+step = 194
+buttons = 1
+
+[[input]]
+step = 195
+buttons = 0
+
+[[input]]
+step = 196
+buttons = 1
+
+[[input]]
+step = 197
+buttons = 0
+
+[[input]]
+step = 199
+buttons = 1
+
+[[input]]
+step = 200
+buttons = 0
+
+[[input]]
+step = 202
+buttons = 1
+
+[[input]]
+step = 203
+buttons = 0
+
+[[input]]
+step = 204
+buttons = 1
+
+[[input]]
+step = 205
+buttons = 0
+
+[[input]]
+step = 207
+buttons = 1
+
+[[input]]
+step = 208
+buttons = 0
+
+[[input]]
+step = 210
+buttons = 1
+
+[[input]]
+step = 211
+buttons = 0
+
+[[input]]
+step = 212
+buttons = 1
+
+[[input]]
+step = 213
+buttons = 0
+
+[[input]]
+step = 215
+buttons = 1
+
+[[input]]
+step = 249
+buttons = 0
+
+[[input]]
+step = 251
+buttons = 2
+
+[[input]]
+step = 252
+buttons = 0
+
+[[input]]
+step = 254
+buttons = 2
+
+[[input]]
+step = 255
+buttons = 0
+
+[[input]]
+step = 256
+buttons = 2
+
+[[input]]
+step = 257
+buttons = 0
+
+[[input]]
+step = 259
+buttons = 2
+
+[[input]]
+step = 260
+buttons = 0
+
+[[input]]
+step = 262
+buttons = 2
+
+[[input]]
+step = 263
+buttons = 0
+
+[[input]]
+step = 264
+buttons = 2
+
+[[input]]
+step = 265
+buttons = 0
+
+[[input]]
+step = 267
+buttons = 2
+
+[[input]]
+step = 268
+buttons = 0
+
+[[input]]
+step = 270
+buttons = 2
+
+[[input]]
+step = 271
+buttons = 0
+
+[[input]]
+step = 272
+buttons = 2
+
+[[input]]
+step = 273
+buttons = 0
+
+[[input]]
+step = 275
+buttons = 2
+
+[[input]]
+step = 276
+buttons = 0
+
+[[input]]
+step = 278
+buttons = 2
+
+[[input]]
+step = 279
+buttons = 0
+
+[[input]]
+step = 280
+buttons = 2
+
+[[input]]
+step = 281
+buttons = 0
+
+[[input]]
+step = 283
+buttons = 2
+
+[[input]]
+step = 284
+buttons = 0
+
+[[input]]
+step = 286
+buttons = 2
+
+[[input]]
+step = 287
+buttons = 0
+
+[[input]]
+step = 288
+buttons = 2
+
+[[input]]
+step = 289
+buttons = 0
+
+[[input]]
+step = 291
+buttons = 2
+
+[[input]]
+step = 292
+buttons = 0
+
+[[input]]
+step = 293
+buttons = 2
+
+[[input]]
+step = 300
+buttons = 0
+
+[[input]]
+step = 302
+buttons = 2
+
+[[input]]
+step = 303
+buttons = 0
+
+[[input]]
+step = 304
+buttons = 2
+
+[[input]]
+step = 305
+buttons = 0
+
+[[input]]
+step = 307
+buttons = 2
+
+[[input]]
+step = 308
+buttons = 0
+
+[[input]]
+step = 310
+buttons = 2
+
+[[input]]
+step = 311
+buttons = 0
+
+[[input]]
+step = 312
+buttons = 2
+
+[[input]]
+step = 313
+buttons = 0
+
+[[input]]
+step = 315
+buttons = 2
+
+[[input]]
+step = 316
+buttons = 0
+
+[[input]]
+step = 318
+buttons = 2
+
+[[input]]
+step = 319
+buttons = 0
+
+[[input]]
+step = 320
+buttons = 2
+
+[[input]]
+step = 321
+buttons = 0
+
+[[input]]
+step = 323
+buttons = 2
+
+[[input]]
+step = 324
+buttons = 0
+
+[[input]]
+step = 326
+buttons = 2
+
+[[input]]
+step = 327
+buttons = 0
+
+[[input]]
+step = 328
+buttons = 2
+
+[[input]]
+step = 329
+buttons = 0
+
+[[input]]
+step = 331
+buttons = 2
+
+[[input]]
+step = 332
+buttons = 0
+
+[[input]]
+step = 334
+buttons = 2
+
+[[input]]
+step = 335
+buttons = 0
+
+[[input]]
+step = 336
+buttons = 2
+
+[[input]]
+step = 337
+buttons = 0
+
+[[input]]
+step = 339
+buttons = 2
+
+[[input]]
+step = 340
+buttons = 0
+
+[[input]]
+step = 342
+buttons = 2
+
+[[input]]
+step = 343
+buttons = 0
+
+[[input]]
+step = 344
+buttons = 2
+
+[[input]]
+step = 345
+buttons = 0
+
+[[input]]
+step = 347
+buttons = 2
+
+[[input]]
+step = 348
+buttons = 0
+
+[[input]]
+step = 350
+buttons = 2
+
+[[input]]
+step = 351
+buttons = 0
+
+[[input]]
+step = 352
+buttons = 2
+
+[[input]]
+step = 353
+buttons = 0
+
+[[input]]
+step = 355
+buttons = 2
+
+[[input]]
+step = 356
+buttons = 0
+
+[[input]]
+step = 358
+buttons = 2
+
+[[input]]
+step = 359
+buttons = 0
+
+[[input]]
+step = 360
+buttons = 2
+
+[[input]]
+step = 361
+buttons = 0
+
+[[input]]
+step = 363
+buttons = 2
+
+[[input]]
+step = 364
+buttons = 0
+
+[[input]]
+step = 366
+buttons = 2
+
+[[input]]
+step = 367
+buttons = 0
+
+[[input]]
+step = 368
+buttons = 2
+
+[[input]]
+step = 369
+buttons = 0
+
+[[input]]
+step = 371
+buttons = 2
+
+[[input]]
+step = 372
+buttons = 0
+
+[[input]]
+step = 374
+buttons = 2
+
+[[input]]
+step = 375
+buttons = 0
+
+[[input]]
+step = 376
+buttons = 2
+
+[[input]]
+step = 377
+buttons = 0
+
+[[input]]
+step = 379
+buttons = 2
+
+[[input]]
+step = 380
+buttons = 0
+
+[[input]]
+step = 382
+buttons = 2
+
+[[input]]
+step = 383
+buttons = 0
+
+[[input]]
+step = 384
+buttons = 2
+
+[[input]]
+step = 385
+buttons = 0
+
+[[input]]
+step = 387
+buttons = 2
+
+[[input]]
+step = 388
+buttons = 0
+
+[[input]]
+step = 390
+buttons = 2
+
+[[input]]
+step = 412
+buttons = 0
+
+[[input]]
+step = 414
+buttons = 1
+
+[[input]]
+step = 415
+buttons = 0
+
+[[input]]
+step = 417
+buttons = 1
+
+[[input]]
+step = 418
+buttons = 0
+
+[[input]]
+step = 420
+buttons = 1
+
+[[input]]
+step = 421
+buttons = 0
+
+[[input]]
+step = 422
+buttons = 1
+
+[[input]]
+step = 423
+buttons = 0
+
+[[input]]
+step = 425
+buttons = 1
+
+[[input]]
+step = 426
+buttons = 0
+
+[[input]]
+step = 428
+buttons = 1
+
+[[input]]
+step = 429
+buttons = 0
+
+[[input]]
+step = 430
+buttons = 1
+
+[[input]]
+step = 431
+buttons = 0
+
+[[input]]
+step = 433
+buttons = 1
+
+[[input]]
+step = 434
+buttons = 0
+
+[[input]]
+step = 436
+buttons = 1
+
+[[input]]
+step = 437
+buttons = 0
+
+[[input]]
+step = 438
+buttons = 1
+
+[[input]]
+step = 441
+buttons = 0
+
+[[input]]
+step = 442
+buttons = 1
+
+[[input]]
+step = 443
+buttons = 2
+
+[[input]]
+step = 444
+buttons = 1
+
+[[input]]
+step = 445
+buttons = 0
+
+[[input]]
+step = 448
+buttons = 1
+
+[[input]]
+step = 449
+buttons = 0
+
+[[input]]
+step = 453
+buttons = 1
+
+[[input]]
+step = 454
+buttons = 0
+
+[[input]]
+step = 458
+buttons = 1
+
+[[input]]
+step = 459
+buttons = 2
+
+[[input]]
+step = 460
+buttons = 1
+
+[[input]]
+step = 461
+buttons = 0
+
+[[input]]
+step = 464
+buttons = 1
+
+[[input]]
+step = 465
+buttons = 0
+
+[[input]]
+step = 469
+buttons = 1
+
+[[input]]
+step = 470
+buttons = 0
+
+[[input]]
+step = 474
+buttons = 1
+
+[[input]]
+step = 475
+buttons = 2
+
+[[input]]
+step = 476
+buttons = 1
+
+[[input]]
+step = 477
+buttons = 0
+
+[[input]]
+step = 480
+buttons = 1
+
+[[input]]
+step = 481
+buttons = 0
+
+[[input]]
+step = 485
+buttons = 1
+
+[[input]]
+step = 486
+buttons = 0
+
+[[input]]
+step = 490
+buttons = 1
+
+[[input]]
+step = 491
+buttons = 2
+
+[[input]]
+step = 492
+buttons = 1
+
+[[input]]
+step = 493
+buttons = 0
+
+[[input]]
+step = 496
+buttons = 1
+
+[[input]]
+step = 497
+buttons = 0
+
+[[input]]
+step = 501
+buttons = 1
+
+[[input]]
+step = 502
+buttons = 0
+
+[[input]]
+step = 506
+buttons = 1
+
+[[input]]
+step = 507
+buttons = 2
+
+[[input]]
+step = 508
+buttons = 1
+
+[[input]]
+step = 509
+buttons = 0
+
+[[input]]
+step = 512
+buttons = 1
+
+[[input]]
+step = 513
+buttons = 0
+
+[[input]]
+step = 517
+buttons = 1
+
+[[input]]
+step = 518
+buttons = 0
+
+[[input]]
+step = 522
+buttons = 1
+
+[[input]]
+step = 523
+buttons = 2
+
+[[input]]
+step = 524
+buttons = 1
+
+[[input]]
+step = 525
+buttons = 0
+
+[[input]]
+step = 528
+buttons = 1
+
+[[input]]
+step = 529
+buttons = 0
+
+[[input]]
+step = 533
+buttons = 1
+
+[[input]]
+step = 534
+buttons = 0
+
+[[input]]
+step = 538
+buttons = 1
+
+[[input]]
+step = 539
+buttons = 2
+
+[[input]]
+step = 540
+buttons = 1
+
+[[input]]
+step = 541
+buttons = 0
+
+[[input]]
+step = 544
+buttons = 1
+
+[[input]]
+step = 545
+buttons = 0
+
+[[input]]
+step = 549
+buttons = 1
+
+[[input]]
+step = 550
+buttons = 0
+
+[[input]]
+step = 554
+buttons = 1
+
+[[input]]
+step = 555
+buttons = 2
+
+[[input]]
+step = 556
+buttons = 1
+
+[[input]]
+step = 557
+buttons = 0
+
+[[input]]
+step = 560
+buttons = 1
+
+[[input]]
+step = 561
+buttons = 0
+
+[[input]]
+step = 565
+buttons = 1
+
+[[input]]
+step = 566
+buttons = 0
+
+[[input]]
+step = 570
+buttons = 1
+
+[[input]]
+step = 571
+buttons = 2
+
+[[input]]
+step = 572
+buttons = 1
+
+[[input]]
+step = 573
+buttons = 0
+
+[[input]]
+step = 576
+buttons = 1
+
+[[input]]
+step = 577
+buttons = 0
+
+[[input]]
+step = 581
+buttons = 1
+
+[[input]]
+step = 582
+buttons = 0
+
+[[input]]
+step = 585
+buttons = 2
+
+[[input]]
+step = 591
+buttons = 0
+
+[[input]]
+step = 595
+buttons = 2
+
+[[input]]
+step = 596
+buttons = 1
+
+[[input]]
+step = 597
+buttons = 2
+
+[[input]]
+step = 598
+buttons = 0
+
+[[input]]
+step = 601
+buttons = 2
+
+[[input]]
+step = 602
+buttons = 0
+
+[[input]]
+step = 606
+buttons = 2
+
+[[input]]
+step = 607
+buttons = 0
+
+[[input]]
+step = 611
+buttons = 2
+
+[[input]]
+step = 612
+buttons = 1
+
+[[input]]
+step = 613
+buttons = 2
+
+[[input]]
+step = 614
+buttons = 0
+
+[[input]]
+step = 617
+buttons = 2
+
+[[input]]
+step = 618
+buttons = 0
+
+[[input]]
+step = 622
+buttons = 2
+
+[[input]]
+step = 623
+buttons = 0
+
+[[input]]
+step = 627
+buttons = 2
+
+[[input]]
+step = 628
+buttons = 1
+
+[[input]]
+step = 629
+buttons = 2
+
+[[input]]
+step = 630
+buttons = 0
+
+[[input]]
+step = 633
+buttons = 2
+
+[[input]]
+step = 634
+buttons = 0
+
+[[input]]
+step = 638
+buttons = 2
+
+[[input]]
+step = 639
+buttons = 0
+
+[[input]]
+step = 643
+buttons = 2
+
+[[input]]
+step = 644
+buttons = 1
+
+[[input]]
+step = 645
+buttons = 2
+
+[[input]]
+step = 646
+buttons = 0
+
+[[input]]
+step = 649
+buttons = 2
+
+[[input]]
+step = 650
+buttons = 0
+
+[[input]]
+step = 654
+buttons = 2
+
+[[input]]
+step = 655
+buttons = 0
+
+[[input]]
+step = 659
+buttons = 2
+
+[[input]]
+step = 660
+buttons = 1
+
+[[input]]
+step = 661
+buttons = 2
+
+[[input]]
+step = 662
+buttons = 0
+
+[[input]]
+step = 665
+buttons = 2
+
+[[input]]
+step = 666
+buttons = 0
+
+[[input]]
+step = 670
+buttons = 2
+
+[[input]]
+step = 671
+buttons = 0
+
+[[input]]
+step = 675
+buttons = 2
+
+[[input]]
+step = 676
+buttons = 1
+
+[[input]]
+step = 677
+buttons = 2
+
+[[input]]
+step = 678
+buttons = 0
+
+[[input]]
+step = 681
+buttons = 2
+
+[[input]]
+step = 682
+buttons = 0
+
+[[input]]
+step = 686
+buttons = 2
+
+[[input]]
+step = 687
+buttons = 0
+
+[[input]]
+step = 691
+buttons = 2
+
+[[input]]
+step = 692
+buttons = 1
+
+[[input]]
+step = 693
+buttons = 2
+
+[[input]]
+step = 694
+buttons = 0
+
+[[input]]
+step = 697
+buttons = 2
+
+[[input]]
+step = 698
+buttons = 0
+
+[[input]]
+step = 702
+buttons = 2
+
+[[input]]
+step = 703
+buttons = 0
+
+[[input]]
+step = 707
+buttons = 2
+
+[[input]]
+step = 708
+buttons = 1
+
+[[input]]
+step = 709
+buttons = 2
+
+[[input]]
+step = 710
+buttons = 0
+
+[[input]]
+step = 713
+buttons = 2
+
+[[input]]
+step = 714
+buttons = 0
+
+[[input]]
+step = 718
+buttons = 2
+
+[[input]]
+step = 719
+buttons = 0
+
+[[input]]
+step = 723
+buttons = 2
+
+[[input]]
+step = 724
+buttons = 1
+
+[[input]]
+step = 725
+buttons = 2
+
+[[input]]
+step = 726
+buttons = 0
+
+[[input]]
+step = 729
+buttons = 2
+
+[[input]]
+step = 730
+buttons = 0
+
+[[input]]
+step = 734
+buttons = 2
+
+[[input]]
+step = 735
+buttons = 0
+
+[[input]]
+step = 739
+buttons = 2
+
+[[input]]
+step = 740
+buttons = 1
+
+[[input]]
+step = 751
+buttons = 0
+
+[[input]]
+step = 752
+buttons = 1
+
+[[input]]
+step = 753
+buttons = 0
+
+[[input]]
+step = 755
+buttons = 1
+
+[[input]]
+step = 756
+buttons = 0
+
+[[input]]
+step = 757
+buttons = 1
+
+[[input]]
+step = 758
+buttons = 0
+
+[[input]]
+step = 760
+buttons = 1
+
+[[input]]
+step = 761
+buttons = 0
+
+[[input]]
+step = 763
+buttons = 1
+
+[[input]]
+step = 764
+buttons = 0
+
+[[input]]
+step = 765
+buttons = 1
+
+[[input]]
+step = 766
+buttons = 0
+
+[[input]]
+step = 768
+buttons = 1
+
+[[input]]
+step = 769
+buttons = 0
+
+[[input]]
+step = 771
+buttons = 1
+
+[[input]]
+step = 772
+buttons = 0
+
+[[input]]
+step = 773
+buttons = 1
+
+[[input]]
+step = 774
+buttons = 0
+
+[[input]]
+step = 776
+buttons = 1
+
+[[input]]
+step = 777
+buttons = 0
+
+[[input]]
+step = 779
+buttons = 1
+
+[[input]]
+step = 780
+buttons = 0
+
+[[input]]
+step = 781
+buttons = 1
+
+[[input]]
+step = 782
+buttons = 0
+
+[[input]]
+step = 784
+buttons = 1
+
+[[input]]
+step = 785
+buttons = 0
+
+[[input]]
+step = 787
+buttons = 1
+
+[[input]]
+step = 788
+buttons = 0
+
+[[input]]
+step = 789
+buttons = 1
+
+[[input]]
+step = 790
+buttons = 0
+
+[[input]]
+step = 792
+buttons = 1
+
+[[input]]
+step = 793
+buttons = 0
+
+[[input]]
+step = 795
+buttons = 1
+
+[[input]]
+step = 796
+buttons = 0
+
+[[input]]
+step = 797
+buttons = 1
+
+[[input]]
+step = 798
+buttons = 0
+
+[[input]]
+step = 800
+buttons = 1
+
+[[input]]
+step = 801
+buttons = 0
+
+[[input]]
+step = 803
+buttons = 1
+
+[[input]]
+step = 804
+buttons = 0
+
+[[input]]
+step = 805
+buttons = 1
+
+[[input]]
+step = 806
+buttons = 0
+
+[[input]]
+step = 808
+buttons = 1
+
+[[input]]
+step = 809
+buttons = 0
+
+[[input]]
+step = 811
+buttons = 1
+
+[[input]]
+step = 812
+buttons = 0
+
+[[input]]
+step = 813
+buttons = 1
+
+[[input]]
+step = 814
+buttons = 0
+
+[[input]]
+step = 816
+buttons = 1
+
+[[input]]
+step = 817
+buttons = 0
+
+[[input]]
+step = 819
+buttons = 1
+
+[[input]]
+step = 820
+buttons = 0
+
+[[input]]
+step = 821
+buttons = 1
+
+[[input]]
+step = 822
+buttons = 0
+
+[[input]]
+step = 824
+buttons = 1
+
+[[input]]
+step = 825
+buttons = 0
+
+[[input]]
+step = 827
+buttons = 1
+
+[[input]]
+step = 828
+buttons = 0
+
+[[input]]
+step = 829
+buttons = 1
+
+[[input]]
+step = 830
+buttons = 0
+
+[[input]]
+step = 832
+buttons = 1
+
+[[input]]
+step = 833
+buttons = 0
+
+[[input]]
+step = 835
+buttons = 1
+
+[[input]]
+step = 836
+buttons = 0
+
+[[input]]
+step = 837
+buttons = 1
+
+[[input]]
+step = 838
+buttons = 0
+
+[[input]]
+step = 840
+buttons = 1
+
+[[input]]
+step = 841
+buttons = 0
+
+[[input]]
+step = 843
+buttons = 1
+
+[[input]]
+step = 844
+buttons = 0
+
+[[input]]
+step = 845
+buttons = 1
+
+[[input]]
+step = 846
+buttons = 0
+
+[[input]]
+step = 848
+buttons = 1
+
+[[input]]
+step = 849
+buttons = 0
+
+[[input]]
+step = 851
+buttons = 1
+
+[[input]]
+step = 852
+buttons = 0
+
+[[input]]
+step = 853
+buttons = 1
+
+[[input]]
+step = 854
+buttons = 0
+
+[[input]]
+step = 856
+buttons = 1
+
+[[input]]
+step = 857
+buttons = 0
+
+[[input]]
+step = 859
+buttons = 1
+
+[[input]]
+step = 887
+buttons = 2
+
+[[input]]
+step = 889
+buttons = 0
+
+[[input]]
+step = 890
+buttons = 2
+
+[[input]]
+step = 891
+buttons = 0
+
+[[input]]
+step = 895
+buttons = 2
+
+[[input]]
+step = 896
+buttons = 1
+
+[[input]]
+step = 897
+buttons = 2
+
+[[input]]
+step = 898
+buttons = 0
+
+[[input]]
+step = 901
+buttons = 2
+
+[[input]]
+step = 902
+buttons = 0
+
+[[input]]
+step = 906
+buttons = 2
+
+[[input]]
+step = 907
+buttons = 0
+
+[[input]]
+step = 911
+buttons = 2
+
+[[input]]
+step = 912
+buttons = 1
+
+[[input]]
+step = 913
+buttons = 2
+
+[[input]]
+step = 914
+buttons = 0
+
+[[input]]
+step = 917
+buttons = 2
+
+[[input]]
+step = 918
+buttons = 0
+
+[[input]]
+step = 922
+buttons = 2
+
+[[input]]
+step = 923
+buttons = 0
+
+[[input]]
+step = 927
+buttons = 2
+
+[[input]]
+step = 928
+buttons = 1
+
+[[input]]
+step = 929
+buttons = 2
+
+[[input]]
+step = 930
+buttons = 0
+
+[[input]]
+step = 933
+buttons = 2
+
+[[input]]
+step = 934
+buttons = 0
+
+[[input]]
+step = 938
+buttons = 2
+
+[[input]]
+step = 939
+buttons = 0
+
+[[input]]
+step = 943
+buttons = 2
+
+[[input]]
+step = 944
+buttons = 1
+
+[[input]]
+step = 945
+buttons = 2
+
+[[input]]
+step = 946
+buttons = 0
+
+[[input]]
+step = 949
+buttons = 2
+
+[[input]]
+step = 950
+buttons = 0
+
+[[input]]
+step = 954
+buttons = 2
+
+[[input]]
+step = 955
+buttons = 0
+
+[[input]]
+step = 959
+buttons = 2
+
+[[input]]
+step = 960
+buttons = 1
+
+[[input]]
+step = 961
+buttons = 2
+
+[[input]]
+step = 962
+buttons = 0
+
+[[input]]
+step = 965
+buttons = 2
+
+[[input]]
+step = 966
+buttons = 0
+
+[[input]]
+step = 970
+buttons = 2
+
+[[input]]
+step = 971
+buttons = 0
+
+[[input]]
+step = 975
+buttons = 2
+
+[[input]]
+step = 976
+buttons = 1
+
+[[input]]
+step = 977
+buttons = 2
+
+[[input]]
+step = 978
+buttons = 0
+
+[[input]]
+step = 981
+buttons = 2
+
+[[input]]
+step = 982
+buttons = 0
+
+[[input]]
+step = 986
+buttons = 2
+
+[[input]]
+step = 987
+buttons = 0
+
+[[input]]
+step = 991
+buttons = 2
+
+[[input]]
+step = 992
+buttons = 1
+
+[[input]]
+step = 993
+buttons = 2
+
+[[input]]
+step = 994
+buttons = 0
+
+[[input]]
+step = 997
+buttons = 2
+
+[[input]]
+step = 998
+buttons = 0
+
+[[input]]
+step = 1002
+buttons = 2
+
+[[input]]
+step = 1003
+buttons = 0
+
+[[input]]
+step = 1007
+buttons = 2
+
+[[input]]
+step = 1008
+buttons = 1
+
+[[input]]
+step = 1009
+buttons = 2
+
+[[input]]
+step = 1010
+buttons = 0
+
+[[input]]
+step = 1013
+buttons = 2
+
+[[input]]
+step = 1014
+buttons = 0
+
+[[input]]
+step = 1018
+buttons = 2
+
+[[input]]
+step = 1019
+buttons = 0
+
+[[input]]
+step = 1023
+buttons = 2
+
+[[input]]
+step = 1024
+buttons = 1
+
+[[input]]
+step = 1025
+buttons = 2
+
+[[input]]
+step = 1026
+buttons = 0
+
+[[input]]
+step = 1029
+buttons = 2
+
+[[input]]
+step = 1030
+buttons = 0
+
+[[input]]
+step = 1034
+buttons = 2
+
+[[input]]
+step = 1035
+buttons = 0
+
+[[input]]
+step = 1039
+buttons = 2
+
+[[input]]
+step = 1040
+buttons = 1
+
+[[input]]
+step = 1041
+buttons = 2
+
+[[input]]
+step = 1042
+buttons = 0
+
+[[input]]
+step = 1043
+buttons = 1
+
+[[input]]
+step = 1047
+buttons = 0
+
+[[input]]
+step = 1049
+buttons = 1
+
+[[input]]
+step = 1050
+buttons = 0
+
+[[input]]
+step = 1054
+buttons = 1
+
+[[input]]
+step = 1055
+buttons = 2
+
+[[input]]
+step = 1056
+buttons = 1
+
+[[input]]
+step = 1057
+buttons = 0
+
+[[input]]
+step = 1060
+buttons = 1
+
+[[input]]
+step = 1061
+buttons = 0
+
+[[input]]
+step = 1065
+buttons = 1
+
+[[input]]
+step = 1066
+buttons = 0
+
+[[input]]
+step = 1070
+buttons = 1
+
+[[input]]
+step = 1071
+buttons = 2
+
+[[input]]
+step = 1072
+buttons = 1
+
+[[input]]
+step = 1073
+buttons = 0
+
+[[input]]
+step = 1076
+buttons = 1
+
+[[input]]
+step = 1077
+buttons = 0
+
+[[input]]
+step = 1081
+buttons = 1
+
+[[input]]
+step = 1082
+buttons = 0
+
+[[input]]
+step = 1086
+buttons = 1
+
+[[input]]
+step = 1087
+buttons = 2
+
+[[input]]
+step = 1088
+buttons = 1
+
+[[input]]
+step = 1089
+buttons = 0
+
+[[input]]
+step = 1092
+buttons = 1
+
+[[input]]
+step = 1093
+buttons = 0
+
+[[input]]
+step = 1097
+buttons = 1
+
+[[input]]
+step = 1098
+buttons = 0
+
+[[input]]
+step = 1102
+buttons = 1
+
+[[input]]
+step = 1103
+buttons = 2
+
+[[input]]
+step = 1104
+buttons = 1
+
+[[input]]
+step = 1105
+buttons = 0
+
+[[input]]
+step = 1108
+buttons = 1
+
+[[input]]
+step = 1109
+buttons = 0
+
+[[input]]
+step = 1113
+buttons = 1
+
+[[input]]
+step = 1114
+buttons = 0
+
+[[input]]
+step = 1118
+buttons = 1
+
+[[input]]
+step = 1119
+buttons = 2
+
+[[input]]
+step = 1120
+buttons = 1
+
+[[input]]
+step = 1121
+buttons = 0
+
+[[input]]
+step = 1124
+buttons = 1
+
+[[input]]
+step = 1125
+buttons = 0
+
+[[input]]
+step = 1129
+buttons = 1
+
+[[input]]
+step = 1130
+buttons = 0
+
+[[input]]
+step = 1134
+buttons = 1
+
+[[input]]
+step = 1135
+buttons = 2
+
+[[input]]
+step = 1136
+buttons = 1
+
+[[input]]
+step = 1137
+buttons = 0
+
+[[input]]
+step = 1140
+buttons = 1
+
+[[input]]
+step = 1141
+buttons = 0
+
+[[input]]
+step = 1145
+buttons = 1
+
+[[input]]
+step = 1146
+buttons = 0
+
+[[input]]
+step = 1150
+buttons = 1
+
+[[input]]
+step = 1151
+buttons = 2
+
+[[input]]
+step = 1152
+buttons = 1
+
+[[input]]
+step = 1153
+buttons = 0
+
+[[input]]
+step = 1156
+buttons = 1
+
+[[input]]
+step = 1157
+buttons = 0
+
+[[input]]
+step = 1161
+buttons = 1
+
+[[input]]
+step = 1162
+buttons = 0
+
+[[input]]
+step = 1166
+buttons = 1
+
+[[input]]
+step = 1167
+buttons = 2
+
+[[input]]
+step = 1168
+buttons = 1
+
+[[input]]
+step = 1169
+buttons = 0
+
+[[input]]
+step = 1172
+buttons = 1
+
+[[input]]
+step = 1173
+buttons = 0
+
+[[input]]
+step = 1177
+buttons = 1
+
+[[input]]
+step = 1178
+buttons = 0
+
+[[input]]
+step = 1182
+buttons = 1
+
+[[input]]
+step = 1183
+buttons = 2
+
+[[input]]
+step = 1184
+buttons = 1
+
+[[input]]
+step = 1185
+buttons = 0
+
+[[input]]
+step = 1188
+buttons = 1
+
+[[input]]
+step = 1189
+buttons = 0
+
+[[input]]
+step = 1193
+buttons = 1
+
+[[input]]
+step = 1204
+buttons = 2
+
+[[input]]
+step = 1206
+buttons = 1
+
+[[input]]
+step = 1207
+buttons = 0
+
+[[input]]
+step = 1210
+buttons = 1
+
+[[input]]
+step = 1211
+buttons = 2
+
+[[input]]
+step = 1212
+buttons = 1
+
+[[input]]
+step = 1213
+buttons = 0
+
+[[input]]
+step = 1216
+buttons = 1
+
+[[input]]
+step = 1224
+buttons = 0
+
+[[input]]
+step = 1228
+buttons = 2
+
+[[input]]
+step = 1229
+buttons = 1
+
+[[input]]
+step = 1230
+buttons = 2
+
+[[input]]
+step = 1231
+buttons = 0
+
+[[input]]
+step = 1234
+buttons = 2
+
+[[input]]
+step = 1235
+buttons = 0
+
+[[input]]
+step = 1239
+buttons = 2
+
+[[input]]
+step = 1240
+buttons = 0
+
+[[input]]
+step = 1244
+buttons = 2
+
+[[input]]
+step = 1245
+buttons = 1
+
+[[input]]
+step = 1246
+buttons = 2
+
+[[input]]
+step = 1247
+buttons = 0
+
+[[input]]
+step = 1250
+buttons = 2
+
+[[input]]
+step = 1251
+buttons = 0
+
+[[input]]
+step = 1255
+buttons = 2
+
+[[input]]
+step = 1256
+buttons = 0
+
+[[input]]
+step = 1260
+buttons = 2
+
+[[input]]
+step = 1261
+buttons = 1
+
+[[input]]
+step = 1262
+buttons = 2
+
+[[input]]
+step = 1263
+buttons = 0
+
+[[input]]
+step = 1266
+buttons = 2
+
+[[input]]
+step = 1267
+buttons = 0
+
+[[input]]
+step = 1271
+buttons = 2
+
+[[input]]
+step = 1272
+buttons = 0
+
+[[input]]
+step = 1276
+buttons = 2
+
+[[input]]
+step = 1277
+buttons = 1
+
+[[input]]
+step = 1278
+buttons = 2
+
+[[input]]
+step = 1279
+buttons = 0
+
+[[input]]
+step = 1282
+buttons = 2
+
+[[input]]
+step = 1283
+buttons = 0
+
+[[input]]
+step = 1287
+buttons = 2
+
+[[input]]
+step = 1288
+buttons = 0
+
+[[input]]
+step = 1292
+buttons = 2
+
+[[input]]
+step = 1293
+buttons = 1
+
+[[input]]
+step = 1294
+buttons = 2
+
+[[input]]
+step = 1295
+buttons = 0
+
+[[input]]
+step = 1298
+buttons = 2
+
+[[input]]
+step = 1299
+buttons = 0
+
+[[input]]
+step = 1303
+buttons = 2
+
+[[input]]
+step = 1304
+buttons = 0
+
+[[input]]
+step = 1308
+buttons = 2
+
+[[input]]
+step = 1309
+buttons = 1
+
+[[input]]
+step = 1310
+buttons = 2
+
+[[input]]
+step = 1311
+buttons = 0
+
+[[input]]
+step = 1314
+buttons = 2
+
+[[input]]
+step = 1315
+buttons = 0
+
+[[input]]
+step = 1319
+buttons = 2
+
+[[input]]
+step = 1320
+buttons = 0
+
+[[input]]
+step = 1324
+buttons = 2
+
+[[input]]
+step = 1325
+buttons = 1
+
+[[input]]
+step = 1326
+buttons = 2
+
+[[input]]
+step = 1327
+buttons = 0
+
+[[input]]
+step = 1330
+buttons = 2
+
+[[input]]
+step = 1331
+buttons = 0
+
+[[input]]
+step = 1335
+buttons = 2
+
+[[input]]
+step = 1336
+buttons = 0
+
+[[input]]
+step = 1340
+buttons = 2
+
+[[input]]
+step = 1341
+buttons = 1
+
+[[input]]
+step = 1342
+buttons = 2
+
+[[input]]
+step = 1343
+buttons = 0
+
+[[input]]
+step = 1346
+buttons = 1
+
+[[input]]
+step = 1349
+buttons = 0
+
+[[input]]
+step = 1353
+buttons = 1
+
+[[input]]
+step = 1354
+buttons = 0
+
+[[input]]
+step = 1358
+buttons = 1
+
+[[input]]
+step = 1359
+buttons = 0
+
+[[input]]
+step = 1363
+buttons = 1
+
+[[input]]
+step = 1364
+buttons = 2
+
+[[input]]
+step = 1365
+buttons = 1
+
+[[input]]
+step = 1366
+buttons = 0
+
+[[input]]
+step = 1369
+buttons = 1
+
+[[input]]
+step = 1370
+buttons = 0
+
+[[input]]
+step = 1374
+buttons = 1
+
+[[input]]
+step = 1375
+buttons = 0
+
+[[input]]
+step = 1379
+buttons = 1
+
+[[input]]
+step = 1380
+buttons = 2
+
+[[input]]
+step = 1381
+buttons = 1
+
+[[input]]
+step = 1382
+buttons = 0
+
+[[input]]
+step = 1385
+buttons = 1
+
+[[input]]
+step = 1386
+buttons = 0
+
+[[input]]
+step = 1390
+buttons = 1
+
+[[input]]
+step = 1391
+buttons = 0
+
+[[input]]
+step = 1395
+buttons = 1
+
+[[input]]
+step = 1396
+buttons = 2
+
+[[input]]
+step = 1397
+buttons = 1
+
+[[input]]
+step = 1398
+buttons = 0
+
+[[input]]
+step = 1401
+buttons = 1
+
+[[input]]
+step = 1402
+buttons = 0
+
+[[input]]
+step = 1406
+buttons = 1
+
+[[input]]
+step = 1407
+buttons = 0
+
+[[input]]
+step = 1411
+buttons = 1
+
+[[input]]
+step = 1412
+buttons = 2
+
+[[input]]
+step = 1413
+buttons = 1
+
+[[input]]
+step = 1414
+buttons = 0
+
+[[input]]
+step = 1417
+buttons = 1
+
+[[input]]
+step = 1418
+buttons = 0
+
+[[input]]
+step = 1422
+buttons = 1
+
+[[input]]
+step = 1423
+buttons = 0
+
+[[input]]
+step = 1427
+buttons = 1
+
+[[input]]
+step = 1428
+buttons = 2
+
+[[input]]
+step = 1429
+buttons = 1
+
+[[input]]
+step = 1430
+buttons = 0
+
+[[input]]
+step = 1433
+buttons = 1
+
+[[input]]
+step = 1434
+buttons = 0
+
+[[input]]
+step = 1438
+buttons = 1
+
+[[input]]
+step = 1439
+buttons = 0
+
+[[input]]
+step = 1443
+buttons = 1
+
+[[input]]
+step = 1444
+buttons = 2
+
+[[input]]
+step = 1445
+buttons = 1
+
+[[input]]
+step = 1446
+buttons = 0
+
+[[input]]
+step = 1449
+buttons = 1
+
+[[input]]
+step = 1450
+buttons = 0
+
+[[input]]
+step = 1454
+buttons = 1
+
+[[input]]
+step = 1492
+buttons = 0
+
+[[input]]
+step = 1496
+buttons = 2
+
+[[input]]
+step = 1497
+buttons = 0
+

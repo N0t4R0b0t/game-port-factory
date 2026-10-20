@@ -1,0 +1,12 @@
+[package]
+name = "gpfdiff"
+version = "0.1.0"
+edition = "2021"
+description = "Generic gpf_state trace differ: drive an emulator step by step, compare against a golden trace"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+
+[[bin]]
+name = "gpfdiff"
+path = "src/main.rs"

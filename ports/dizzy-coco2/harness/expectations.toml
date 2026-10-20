@@ -1,0 +1,47 @@
+# Differential-harness expectations for dizzy-coco2 (compare.py).
+#
+# Two tiers:
+#
+# platform_deviation -- GENERAL. Always-true consequences of CoCo2 vs ZX
+# Spectrum technical differences. Apply to every scenario, are not
+# something any future task is expected to close, and are matched by
+# `axis` (a field or capability name compare.py checks before failing).
+#
+# room_expectation -- SPECIFIC. A named feature that is known partially
+# or not-yet implemented right now, scoped to one room/field. These are
+# meant to be temporary: remove the entry once the feature ships and a
+# real compare.py run shows zero diff without it. A stale entry here for
+# a room that's actually done is itself a bug -- grep this file by room
+# number before trusting "iterate" work in that room is finished.
+#
+# compare.py checks a real mismatch against both tiers before reporting
+# FAIL; a match is reported as EXPECTED (visible in the verdict, not
+# silently swallowed).
+
+[[platform_deviation]]
+axis = "color"
+reason = """CoCo2 target renders PMODE4 1bpp monochrome (NOTES.md's own \
+decision: flat pmode4 2-colour over semigraphics/artifact colour, for a \
+Spectrum source with detailed small sprite pixel art). The ZX Spectrum \
+source is 8-colour with attribute clash. This harness never diffs pixel \
+colour -- only room/position/floor/lives state, plus a side-by-side PNG \
+for a human (or the local vision model, forced-choice only) to judge \
+shape/readability."""
+
+[[platform_deviation]]
+axis = "audio"
+reason = "No AY-3-8912 equivalent is driven; CoCo2 uses a single-bit DAC beeper emulation instead. No audio is captured or diffed by this harness."
+
+[[platform_deviation]]
+axis = "frame_rate"
+reason = "CoCo2 target runs NTSC 60Hz, ZX Spectrum source is PAL 50Hz (see state_schema.toml [fps]). Scenarios are authored in real milliseconds and each side's frame numbers are derived separately; checkpoints are matched by nearest-sample-in-time (checkpoint_tolerance_ms), not by raw frame number."
+
+# Fill these in as partial-implementation gaps are found during future
+# room/feature tasks. Example shape:
+#
+# [[room_expectation]]
+# room = 87
+# feature = "npc_dialogue"
+# field = "kf"
+# status = "not_implemented"
+# reason = "T0122 built room 87 geometry only; dialogue trigger deferred to T0125."

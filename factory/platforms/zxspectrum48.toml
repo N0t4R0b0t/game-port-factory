@@ -1,0 +1,11 @@
+id = "zxspectrum48"
+name = "ZX Spectrum 48K"
+year = 1982
+memory_kb = 48
+
+[axes]
+cpu = "z80"
+raster = "lores-8bit"
+color = "inkpaper-cell2"
+audio = "beeper"
+storage = "tape"

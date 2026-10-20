@@ -1,0 +1,18 @@
+# Exact colon-encoded runs that check_docs_nodata.sh lets through: IDENTIFIERS only (room titles, item
+# names). Running dialogue never goes here. Adding a line is a policy decision: check
+# categories.txt says the string is a room/item/ui string before you add it.
+:THE:MARKET:SQUARE::
+GOING:DOWN:THE:WELL@
+THE:CASTLE;S:DUNGEON
+A:PIECE:OF:RAILING
+A:BUCKET:OF:WATER
+BRASS:DOOR:KNOCKER
+AN:OLD:THICK:RUG
+AN:EMPTY:BUCKET
+A:HEAVY:BOULDER
+A:BOTTLE:OF:WHISKEY
+AN:EMPTY:BOTTLE
+A:HEAVY:DRAGON:EGG
+SOME:SLEEPING:POTION
+A:STRONG:CROWBAR
+A:WINDOW:FRAME

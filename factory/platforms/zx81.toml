@@ -1,0 +1,11 @@
+id = "zx81"
+name = "Sinclair ZX81"
+year = 1981
+memory_kb = 16
+
+[axes]
+cpu = "z80"
+raster = "charblock-mono"
+color = "mono"
+audio = "none"
+storage = "tape"

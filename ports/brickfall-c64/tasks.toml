@@ -1,0 +1,145 @@
+[[tasks]]
+id = "T0001"
+stage = "identify"
+title = "Inventory and hash source files; record exact versions/regions in NOTES.md"
+status = "done"
+depends_on = []
+note = ""
+tier = "haiku"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0002"
+stage = "identify"
+title = "Fingerprint the engine and toolchain the original was built with"
+status = "done"
+depends_on = ["T0001"]
+note = ""
+tier = "sonnet"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0003"
+stage = "identify"
+title = "PRIOR ART SWEEP: existing disassemblies, decomps, source releases, ports, format docs"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0004"
+stage = "classify"
+title = "Answer: does source exist? is target >= source in capability?"
+status = "done"
+depends_on = [
+    "T0002",
+    "T0003",
+]
+note = ""
+tier = "opus"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0005"
+stage = "classify"
+title = "Commit to a strategy (source-port | recompile | reimplement) and record why"
+status = "done"
+depends_on = ["T0004"]
+note = ""
+tier = "opus"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0006"
+stage = "scaffold"
+title = "Stand up target toolchain + emulator; build and run a hello-world on target"
+status = "todo"
+depends_on = ["T0005"]
+note = ""
+tier = "sonnet"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0007"
+stage = "scaffold"
+title = "Stand up differential harness: scripted input, frame capture, side-by-side diff"
+status = "todo"
+depends_on = ["T0006"]
+note = ""
+tier = "sonnet"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0008"
+stage = "identify"
+title = "Factory friction: gpf init seeds 'original source' tasks; add an original-game mode (recipe is the source of truth, stages 1-3 collapse)"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = "gpf init --help | grep -q original"
+attempts = 0
+
+[[tasks]]
+id = "T0009"
+stage = "scaffold"
+title = "Reference model: Rust oracle implementing games/brickfall/recipe/README.md, emits golden traces for scenarios/*.toml"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = "cargo test --manifest-path games/brickfall/recipe/model/Cargo.toml"
+attempts = 0
+
+[[tasks]]
+id = "T0010"
+stage = "scaffold"
+title = "C64 build: acme, exports gpf_state/gpf_bricks via symbol file"
+status = "done"
+depends_on = ["T0009"]
+note = ""
+tier = "sonnet"
+verify = "make -C ports/brickfall-c64/target check"
+attempts = 0
+
+[[tasks]]
+id = "T0011"
+stage = "scaffold"
+title = "Generic harness: poll gpf_state under headless VICE, diff vs golden trace (promote to factory/tools/ on 2nd caller)"
+status = "done"
+depends_on = ["T0009"]
+note = ""
+tier = "sonnet"
+verify = "make -C ports/brickfall-c64/target check && cargo test --manifest-path factory/tools/gpfdiff/Cargo.toml"
+attempts = 0
+
+[[tasks]]
+id = "T0012"
+stage = "scaffold"
+title = "Factory friction: gpf task has no command to edit verify/tier on an existing task"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = "gpf task --help | grep -q edit"
+attempts = 0
+
+[[tasks]]
+id = "T0013"
+stage = "slice"
+title = "C64 art+sound polish"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = "make -C ports/brickfall-c64/target check"
+attempts = 0

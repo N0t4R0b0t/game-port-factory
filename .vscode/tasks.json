@@ -1,0 +1,36 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "fallout1-c64: run vaultexit in VICE",
+            "detail": "Builds the current vault-exit scene and launches it interactively in x64sc — a real window, real keyboard, not the headless harness used for automated checks. Runs ports/fallout1-c64/target/run-vice.sh as a real script file rather than an inline shell one-liner — an earlier version embedded the whole command (including a $'...'-quoted -keybuf string) directly in this JSON's args, and on a real machine that extra layer of quoting corrupted the auto-typed LOAD command. A script file has one unambiguous layer of shell parsing.",
+            "type": "shell",
+            "command": "${workspaceFolder}/ports/fallout1-c64/target/run-vice.sh",
+            "args": [],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "fallout1-c64: run vaultexit in VICE (no auto-load)",
+            "detail": "Same as above but drops the auto-typed LOAD/RUN — use if you want to type the load command yourself, or explore the emulator's own UI first.",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "cd \"${workspaceFolder}/ports/fallout1-c64/target\" && make vaultexit && x64sc -fs8 \"$PWD/hostdir\" -busdevice8 +drive8truedrive"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        }
+    ]
+}

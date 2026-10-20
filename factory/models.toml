@@ -1,0 +1,45 @@
+# Recommended local-tier roster, by factory role.
+# `gpf models` compares this against what is installed and what the hardware can run.
+# size_gb is the on-disk/quantised size as ollama reports it.
+
+[[model]]
+name = "qwen2.5:7b"
+role = "structured"
+size_gb = 4.7
+why = "Tier-0 structured extraction — JSON output, list extraction, schema-checkable work."
+
+[[model]]
+name = "llama3.1:8b"
+role = "text"
+size_gb = 4.9
+why = "Tier-0 general text — summarising files to judge relevance, triaging search results."
+
+[[model]]
+name = "qwen2.5vl:7b"
+role = "vision"
+size_gb = 6.0
+why = "Sprite readability verifier. VERIFIED WORKING 2026-08-12, but only with forced-choice prompts — open-ended identification fails completely. See docs/COST-MODEL.md."
+
+[[model]]
+name = "llama3.2-vision:11b"
+role = "vision"
+size_gb = 7.8
+why = "BROKEN on this ollama build: unknown model architecture mllama. Update ollama or remove (7.8 GB reclaimable). Use minicpm-v or llava:7b as the second opinion instead."
+
+[[model]]
+name = "qwen2.5-coder:7b"
+role = "code"
+size_gb = 4.7
+why = "Tier-0 mechanical code work: boilerplate, test stubs, format-spec scaffolding."
+
+[[model]]
+name = "qwen2.5:14b"
+role = "structured"
+size_gb = 9.0
+why = "Upgrade path for structured work when the 7b escalates too often."
+
+[[model]]
+name = "qwen2.5-coder:14b"
+role = "code"
+size_gb = 9.0
+why = "Upgrade path for tier-0 code work. Borderline on a 12GB card once a desktop is running."

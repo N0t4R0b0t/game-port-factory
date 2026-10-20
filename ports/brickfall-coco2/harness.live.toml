@@ -1,0 +1,19 @@
+# Example: verify the CoCo port against a LIVE Spectrum port instead of the recipe golden files.
+#   gpfdiff check ports/brickfall-coco2 --manifest harness.live.toml     (or: make -C target check-live)
+# The Spectrum Brickfall is run first (its own harness.toml, its own emulator, ZX_ROMPATH), then the
+# CoCo port (COCO_ROMPATH), sequentially, on the same scenario; both traces are normalised by their own
+# manifests and diffed. A 60 Hz CoCo port against a 50 Hz Spectrum one: the harness compares per STEP.
+# Reference: factory/tools/gpfdiff/README.md ("oracle sources").
+platform = "coco2"
+image    = "target/brickfall.bin"
+labels   = "target/brickfall.map"
+recipe   = "../../games/brickfall/recipe"   # scenarios come from here; the golden/ dir is NOT used in live mode
+repeat   = 2
+
+[emulator]
+mame    = "mame"
+machine = "coco2b"
+
+[oracle]
+source = "live"
+port   = "ports/brickfall-zxspectrum48"     # relative to this file, else searched up through the parent dirs

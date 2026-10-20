@@ -1,0 +1,15 @@
+[package]
+name = "dskwriter"
+version = "0.1.0"
+edition = "2021"
+
+# T0241: RS-DOS (Disk Extended Color BASIC) .dsk writer/reader. No dependencies on purpose.
+[dependencies]
+
+[[bin]]
+name = "dskwriter"
+path = "src/main.rs"
+
+[[bin]]
+name = "floppypack"
+path = "src/bin/floppypack.rs"

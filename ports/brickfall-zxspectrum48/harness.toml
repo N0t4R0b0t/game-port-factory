@@ -1,0 +1,14 @@
+# gpfdiff manifest for this port: `gpfdiff check ports/brickfall-zxspectrum48`
+# Reference: factory/tools/gpfdiff/README.md ("harness.toml reference").
+# Relative paths are relative to this file. Build first: make -C target all
+platform = "zx48"
+image    = "target/brickfall.sna"        # sjasmplus SAVESNA output
+labels   = "target/brickfall.sym"        # sjasmplus --sym output
+recipe   = "../../games/brickfall/recipe" # holds scenarios/*.toml and golden/*.trace
+repeat   = 2                              # fresh emulator per run; traces must be identical
+
+[emulator]
+mame    = "mame"
+machine = "spectrum"
+# The `spectrum` ROM is your own and is not distributed. rompath is searched after
+# --rompath and $ZX_ROMPATH, before ~/.mame/roms. Leave it unset to use those.

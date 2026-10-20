@@ -1,0 +1,19 @@
+# Verify the CoCo port against the ZX Spectrum Brickfall treated as an UNKNOWN ORIGINAL: its black-box manifest
+# (no gpf_state, no breakpoint; keys pressed on a 50 Hz frame clock, state read from raw RAM addresses).
+#   gpfdiff check ports/brickfall-coco2 --manifest harness.live-blackbox.toml    (make -C target check-live-blackbox)
+# The original runs first, then this port (sequential); both traces are normalised by their own manifests and diffed.
+# Reference: factory/tools/gpfdiff/README.md ("Keys mode", "Oracle sources").
+platform = "coco2"
+image    = "target/brickfall.bin"
+labels   = "target/brickfall.map"
+recipe   = "../../games/brickfall/recipe"   # scenarios come from here; golden/ is NOT used in live mode
+repeat   = 2
+
+[emulator]
+mame    = "mame"
+machine = "coco2b"
+
+[oracle]
+source   = "live"
+port     = "ports/brickfall-zxspectrum48"   # relative to this file, else searched up through the parent dirs
+manifest = "blackbox/harness.toml"          # the black-box manifest of that port

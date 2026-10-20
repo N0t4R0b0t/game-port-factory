@@ -1,0 +1,17 @@
+# Which original strings are IDENTIFIERS (may be named in public docs and comments) and which are
+# running MESSAGE text (dialogue, action and death messages: never quoted in a tracked file).
+#
+#   <source tag> <first line> <last line> <category>        category: room | item | ui | message
+#
+# Line numbers are 1-based lines of the pinned source (picosonic/D3 4ac31df X-ALL.TXT; PRTDIZZY.PDS).
+# These are source regions, not text. The regions follow the banners in X-ALL.TXT:
+#   'PEOPLE TALKING MESSAGES' (540), 'MESSAGES FOR DOING THINGS' (838), 'ALL DEAD MESSAGES' (988),
+#   'ODD MESSAGES' (1051). Everything up to the ODD MESSAGES banner is running text.
+# FAIL CLOSED: a string whose line matches no rule is a MESSAGE. A different source revision
+# therefore tightens the gate instead of loosening it. First matching rule wins.
+X-ALL   401    503  room      # room title table (emptyroom, room0 .. room100)
+X-ALL     1    539  ui        # title screen, credits, press-to-start, fonts banner
+X-ALL   540   1050  message   # dialogue, action messages, death messages
+X-ALL  1051   1080  ui        # coin/inventory/carrying UI boxes, bag exit label
+X-ALL  1081   1200  item      # item description strings (greenbeanmess .. windowmess)
+PRTDIZZY  1  100000 ui        # editor strings

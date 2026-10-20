@@ -1,0 +1,14 @@
+[port]
+slug = "brickfall-coco2"
+title = "Brickfall"
+game = "brickfall"
+created = "2026-10-20"
+source_platform = "coco2"
+target_platform = "coco2"
+strategy = "reimplement"
+stage = "scaffold"
+
+[status]
+next_action = "coco2 port + gpfdiff coco2 backend verified (check 11/11 x2, smoke-keys, 84 cargo tests, zx48+c64 no regression). Next: T0006 art/sound polish (row colours via artifact, text, DAC sound) with sim untouched; joystick input is a design call; real-hardware/XRoar check not done."
+blocked_on = ""
+last_session = "2026-10-20"

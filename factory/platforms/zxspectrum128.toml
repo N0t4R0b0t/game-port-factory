@@ -1,0 +1,11 @@
+id = "zxspectrum128"
+name = "ZX Spectrum 128K"
+year = 1985
+memory_kb = 128
+
+[axes]
+cpu = "z80"
+raster = "lores-8bit"
+color = "inkpaper-cell2"
+audio = "ay"
+storage = "tape"

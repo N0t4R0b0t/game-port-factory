@@ -1,0 +1,15 @@
+[package]
+name = "gpf"
+version = "0.1.0"
+edition = "2021"
+description = "Game Port Factory — on-disk state machine for resumable, episodic porting projects"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+toml = "1"
+chrono = "0.4"
+
+[[bin]]
+name = "gpf"
+path = "src/main.rs"

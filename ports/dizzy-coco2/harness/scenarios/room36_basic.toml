@@ -1,0 +1,45 @@
+# Scenario: room 36's real opening beat (boot, troll knockback), then a
+# short walk right. Semantic actions/timing are shared between both
+# sides; harness/gen_scenario.py compiles this into a CoCo2 lua timeline
+# and a ZX Spectrum KEYS= schedule for harness/zx_film.lua.
+#
+# No jump event: "jump" and "dismiss message" are the same SPACE key on
+# both sides, and gen_scenario.py's build_zx_keys refuses two separate
+# events on the same ZX key (see its docstring) -- a real jump test needs
+# its own scenario once that limitation is worth lifting.
+#
+# warp_zx is ZX-native units, and is also this room's real spawn point:
+# target/room36.asm START_X=184 (CoCo2 px) / START_Y=168 -> 184/4=46 ZX
+# units, matching X-ALL.TXT's resetlives x=46,y=168. The CoCo2 side needs
+# no warp (new_game already boots here); it's used only to set the ZX
+# side's WX/WY so both sides start from the identical in-game position.
+name = "room36_basic"
+room = 36
+warp_zx = { x = 46, y = 168 }
+
+duration_ms = 2200
+checkpoints_ms = [250, 700, 1200, 1600, 2000]
+checkpoint_tolerance_ms = 150
+
+# SPACE held early: msg_wait_dismiss (target/gameplay.asm) blocks the
+# WHOLE game loop until SPACE is pressed, and boot/respawn messages use
+# it -- a scenario that never presses SPACE before its first checkpoint
+# reads as "the game is frozen" (T0129 room36_basic originally hit
+# exactly this: x/y never changed because nothing had dismissed a
+# blocking message, not because movement was broken). One continuous
+# hold rather than several separate taps for the same key: gen_scenario's
+# ZX side (zx_film.lua's KEYS= schedule) re-evaluates every scheduled
+# range for a key on every frame, so two non-overlapping ranges for the
+# SAME key fight each other (whichever is later in the schedule wins that
+# frame) -- see gen_scenario.py's build_zx_keys docstring.
+[[events]]
+action = "jump"
+start_ms = 0
+end_ms = 750
+
+# Let the troll's knockback play out (the actual opening beat -- see
+# room36.asm's comment on START_X), then walk right.
+[[events]]
+action = "right"
+start_ms = 900
+end_ms = 1500

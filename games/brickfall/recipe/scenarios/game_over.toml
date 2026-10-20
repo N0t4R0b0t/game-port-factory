@@ -1,0 +1,27 @@
+# three launches drifting left, paddle never covers the landing: three misses -> OVER
+steps = 700
+sample_every = 10
+
+[[input]]
+step = 0
+buttons = 5
+
+[[input]]
+step = 1
+buttons = 0
+
+[[input]]
+step = 200
+buttons = 5
+
+[[input]]
+step = 201
+buttons = 0
+
+[[input]]
+step = 400
+buttons = 5
+
+[[input]]
+step = 401
+buttons = 0

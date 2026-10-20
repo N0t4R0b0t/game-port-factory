@@ -1,0 +1,177 @@
+# Every file you must supply to build the Dizzy CoCo2 port. NOTHING here is in the repo and
+# nothing is ever downloaded for you: tools/bootstrap.sh only verifies these by sha256 and copies
+# them to where the tools expect them (all destinations are gitignored).
+#
+# Read by tools/bootstrap.sh with a deliberately dumb parser: keep one `key = "value"` per line
+# and the [[input]] tables flat. Paths are relative to the group root given below.
+#
+# group "d3"      root = the picosonic/D3 checkout (bootstrap --d3 DIR); required to BUILD
+# group "rom"     root = a dir holding the Tandy CoCo ROMs (bootstrap --roms DIR); RUN-ONLY, not needed to build
+# group "harness" located in place under source/; only the original-vs-port harnesses use them; optional
+
+[upstream]
+repo   = "picosonic/D3"
+url    = "https://github.com/picosonic/D3"
+commit = "4ac31df"
+date   = "2026-04-17"
+note   = "MIT-licensed redistribution of the Oliver Twins' released Fantasy World Dizzy source and data (NOTES.md:155). The sha256 sums below were taken from the local copy of that checkout."
+
+# ---- required to build (group d3) -------------------------------------------------------------
+
+[[input]]
+id       = "x-all"
+group    = "d3"
+path     = "original_source/X-ALL.TXT"
+dest     = "research/D3-prior-art/original_source/X-ALL.TXT"
+sha256   = "63763cd3dec3716f52a404d5dad9e3a9e89a8e35adaf362b9c380ab2d29e768d"
+required = "yes"
+use      = "actordata (actors.json); source of the game text"
+get      = "https://github.com/picosonic/D3 @ 4ac31df, original_source/X-ALL.TXT"
+
+[[input]]
+id       = "frames"
+group    = "d3"
+path     = "original_source/FRAMES.DAT"
+dest     = "research/D3-prior-art/original_source/FRAMES.DAT"
+sha256   = "dc9a3e7667b8b83012f73acd169339761f14fcd807afc3256265a90306838701"
+required = "yes"
+use      = "spritedata frmtable, roompack (all room and scenery art)"
+get      = "https://github.com/picosonic/D3 @ 4ac31df, original_source/FRAMES.DAT"
+
+[[input]]
+id       = "roomdata"
+group    = "d3"
+path     = "original_source/ROOMDATA.DAT"
+dest     = "research/D3-prior-art/original_source/ROOMDATA.DAT"
+sha256   = "2c5b0b5f3788065607df5ab31c63d80f87b0634cdfb3f602b9ccb899b649b6ec"
+required = "yes"
+use      = "roomdata (rooms.json)"
+get      = "https://github.com/picosonic/D3 @ 4ac31df, original_source/ROOMDATA.DAT"
+
+[[input]]
+id       = "dizzyfrm"
+group    = "d3"
+path     = "original_source/DIZZYFRM.DAT"
+dest     = "research/D3-prior-art/original_source/DIZZYFRM.DAT"
+sha256   = "9e957dabc92ebe909900c1ae5626877628317f3379c197b2770b07cc273f06be"
+required = "yes"
+use      = "spritedata dizzy-pack-all (Dizzy's 39 animation frames)"
+get      = "https://github.com/picosonic/D3 @ 4ac31df, original_source/DIZZYFRM.DAT"
+
+[[input]]
+id       = "music128"
+group    = "d3"
+path     = "original_source/MUSIC128.SPC"
+dest     = "research/D3-prior-art/original_source/MUSIC128.SPC"
+sha256   = "5b237d50a6705418ceb9399d6e56c16ebfd20ec9f96f13a5620a87b2b5d03f8c"
+required = "yes"
+use      = "tools/mksounds.sh (aycapture: tunes and sound effects)"
+get      = "https://github.com/picosonic/D3 @ 4ac31df, original_source/MUSIC128.SPC"
+
+[[input]]
+id       = "music48"
+group    = "d3"
+path     = "original_source/MUSIC48.SPC"
+dest     = "research/D3-prior-art/original_source/MUSIC48.SPC"
+sha256   = "9fbb6d1949f775681701f56bcd495fb647d1c8d6b8767af29b56934839be39aa"
+required = "yes"
+use      = "tools/mksounds.sh (beepcapture; alternative title tune capture)"
+get      = "https://github.com/picosonic/D3 @ 4ac31df, original_source/MUSIC48.SPC"
+
+[[input]]
+id       = "prtdizzy"
+group    = "d3"
+path     = "original_source/PRTDIZZY.PDS"
+dest     = "research/D3-prior-art/original_source/PRTDIZZY.PDS"
+sha256   = "ca47fc88c0a5a315ae9d7807796a63c39516e94ed3d1cd1ec5dd42aa8c18211b"
+required = "yes"
+use      = "game text and tables (textdata); kept in the pin so the whole source set is verified"
+get      = "https://github.com/picosonic/D3 @ 4ac31df, original_source/PRTDIZZY.PDS"
+
+[[input]]
+id       = "rooms-info"
+group    = "d3"
+path     = "info/rooms"
+dest     = "research/D3-prior-art/info/rooms"
+sha256   = "7d35a35723cee3c6e7b6282b24be6c1a9330e9f4075a21b73bb87b8488f75fab"
+required = "yes"
+use      = "roomdata --names (room names)"
+get      = "https://github.com/picosonic/D3 @ 4ac31df, info/rooms"
+
+[[input]]
+id       = "title-png"
+group    = "d3"
+path     = "info/dizzy3_title.png"
+dest     = "research/D3-prior-art/info/dizzy3_title.png"
+sha256   = "c9e39e76cc6f023a94905f3e552b01cce2673a8c09d08bfb9bfefbb9e21c1a27"
+required = "yes"
+use      = "tools/title_image.py (title screen)"
+get      = "https://github.com/picosonic/D3 @ 4ac31df, info/dizzy3_title.png"
+
+# ---- run-only (group rom) ---------------------------------------------------------------------
+# Needed to RUN the result in an emulator, never to build it. Checked only when --roms is given
+# (sha256 as recorded in NOTES.md:366-368; files named BASIC.ROM, EXTBASIC.ROM, DSKBASIC.ROM).
+
+[[input]]
+id       = "rom-basic"
+group    = "rom"
+path     = "BASIC.ROM"
+dest     = "source/roms/BASIC.ROM"
+sha256   = "40413d0f8bc1bb345ffe49404b3bf645a5417b02f32266536f6566dbf9ca70fb"
+required = "run-only"
+use      = "play.sh / XRoar / MAME coco2b"
+get      = "https://colorcomputerarchive.com/repo/ROMs/David%20Keil/coco-2/ (Color BASIC 1.2 as BASIC.ROM)"
+
+[[input]]
+id       = "rom-extbasic"
+group    = "rom"
+path     = "EXTBASIC.ROM"
+dest     = "source/roms/EXTBASIC.ROM"
+sha256   = "a18f270d3495d82b9f515de049f46253a623a2d9b1bb226c9ad338508344c5ee"
+required = "run-only"
+use      = "play.sh / XRoar / MAME coco2b"
+get      = "https://colorcomputerarchive.com/repo/ROMs/David%20Keil/coco-2/ (Extended Color BASIC 1.1 as EXTBASIC.ROM)"
+
+[[input]]
+id       = "rom-dskbasic"
+group    = "rom"
+path     = "DSKBASIC.ROM"
+dest     = "source/roms/DSKBASIC.ROM"
+sha256   = "1c40c5a74e72edaeecc2511fee1aab347eae2c3d5fc6778cb622e3df14d63157"
+required = "run-only"
+use      = "play.sh --floppy (Disk BASIC 1.1)"
+get      = "https://colorcomputerarchive.com/repo/ROMs/David%20Keil/coco-2/ (Disk Extended Color BASIC 1.1 as DSKBASIC.ROM)"
+
+# ---- harness-only, optional (group harness) ---------------------------------------------------
+# Original-vs-port comparison harnesses only. bootstrap.sh reports whether they are present,
+# never requires them, never copies them. Expected in place under ports/dizzy-coco2/.
+
+[[input]]
+id       = "zx-tzx-111"
+group    = "harness"
+path     = "source/Dizzy III - Fantasy World Dizzy (1989)(Codemasters).tzx"
+dest     = "source/Dizzy III - Fantasy World Dizzy (1989)(Codemasters).tzx"
+sha256   = "1458f6b4fbd6acb3882fad40add8a6fe91c870c84f9fac3f5302da746ccb6ea3"
+required = "harness"
+use      = "ZX ground truth under MAME (v1.11 tape, NOTES.md:130)"
+get      = "your own dump of the tape (World of Spectrum / TZX Vault style archives)"
+
+[[input]]
+id       = "zx-tzx-13a"
+group    = "harness"
+path     = "source/Dizzy III - Fantasy World Dizzy (1989)(Codemasters)[a].tzx"
+dest     = "source/Dizzy III - Fantasy World Dizzy (1989)(Codemasters)[a].tzx"
+sha256   = "6180674bbf1da726c3ac582dbf7e63e7f7a135bd23d24c93f6b9070ff0fd56cb"
+required = "harness"
+use      = "ZX ground truth under MAME (v1.3 [a] tape, NOTES.md:131)"
+get      = "your own dump of the tape (World of Spectrum / TZX Vault style archives)"
+
+[[input]]
+id       = "zx-rom-zip"
+group    = "harness"
+path     = "source/zx/roms/spectrum.zip"
+dest     = "source/zx/roms/spectrum.zip"
+sha256   = "d6bc813fb615a21be4d3a75796cbd2db1ba71d832f6bbfc7a3697b2391883d2d"
+required = "harness"
+use      = "ZX Spectrum 48K ROM for MAME (romset zip)"
+get      = "MAME spectrum romset (spectrum.zip)"
