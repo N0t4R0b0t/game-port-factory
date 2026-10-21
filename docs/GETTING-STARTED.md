@@ -147,6 +147,123 @@ Exit code 2 would mean something different: the *environment* is wrong (an emula
 missing, a ROM wasn't found, an emulator timed out). The two are never confused, so a script
 can tell "the port is broken" from "the machine is broken".
 
+## Port an existing game: use the original as the oracle
+
+For your own game the oracle was a Rust model. For a game you did not write, **the original
+binary is the oracle**, and it was never built to cooperate: no state block, no labels, no
+test hooks. `gpfdiff` drives it from outside: it injects keys on a frame clock, reads declared
+RAM addresses, and records a trace. The port is then diffed against that trace.
+
+You can practise the whole workflow with no copyrighted game. Brickfall's Spectrum build stands
+in as "an unknown original", and the repo already holds a black-box manifest for it that ignores
+every label the program exports.
+
+### 1. Start the port and read the task chain
+
+```bash
+gpf init mygame-c64 --title "My Game" --game mygame --source zxspectrum48 --target c64
+gpf next mygame-c64
+```
+
+The seeded chain after the usual identify/classify tasks is five oracle tasks: (1) find the
+state addresses, (2) write the field map and the ready gate and prove a capture of the original
+is deterministic, (3) capture golden traces, (4) run the first `gpfdiff check` and triage every
+diff, (5) write `expectations.toml` and fix real bugs until `check` passes. Add `--public` if
+the port will be published (see the Dizzy chapter below); it appends the release chain.
+Each task carries a tier and, where one exists, a verifier.
+
+### 2. Scaffold the oracle
+
+```bash
+gpfdiff init-oracle ports/mygame-c64 --platform zx48 --image original.sna
+```
+
+```
+wrote     ports/mygame-c64/harness.toml
+wrote     ports/mygame-c64/expectations.toml
+wrote     ports/mygame-c64/scenarios/example.toml
+wrote     ports/mygame-c64/NEXT-STEPS.md
+INIT-ORACLE OK: zx48 black-box oracle scaffold in ports/mygame-c64 (4 files)
+```
+
+It writes commented files with the key map for the platform, the frame rate, example fields
+and the rules for the ready gate. Nothing is guessed: the addresses and the gate are TODOs.
+It refuses to overwrite existing files, and exits 2 for c64 (the VICE backend has no keys mode,
+so a Commodore 64 original cannot be driven this way yet). `gpfdiff check ports/mygame-c64
+--list` already parses the scaffold.
+
+### 3. Find the state addresses
+
+Press a key and see which bytes move. On the Brickfall Spectrum build, hold LEFT for a second:
+
+```bash
+gpfdiff watch ports/brickfall-zxspectrum48/blackbox --region 0xF000:0xF0FF --keys "LEFT@0ms+1000ms" --frames 60
+```
+
+```
+    frame          ms  addr           old -> new
+    1..60    20..1200  0xF000         00 -> 3c  (0 -> 60)  x60 frames
+    1..28     20..560  0xF006         70 -> 00  (112 -> 0)  x28 frames
+    1..28     20..560  0xF026         70 -> 00  (112 -> 0)  x28 frames
+    1..28     20..560  0xF047         70 -> 00  (112 -> 0)  x28 frames
+    1..28     20..560  0xF076         70 -> 00  (112 -> 0)  x28 frames
+      29         580  0xF067         01 -> 00  (1 -> 0)
+520 byte changes at 18 addresses in 60 frames; 18 lines
+```
+
+Read it like a detective. `0xF000` increments every frame for 60 frames: a frame or step
+counter. Four addresses move from 112 to 0 over 28 frames and then stop: the paddle hitting the
+left wall. There are four because the program keeps several copies (a working value, the
+published one, the last-drawn one). `watch` cannot tell them apart; **a disassembly or source can**,
+which is why the prior-art sweep comes first. Pick the one the program publishes, not the one it
+redraws from.
+
+### 4. Declare fields and the ready gate
+
+```toml
+[boot]
+image = "../target/brickfall.sna"
+ready = { addr = 0xF046, in = [1, 254] }   # "first frame drawn"
+timeout_ms = 2000
+
+[[field]]
+name = "step"
+addr = 0xF000
+size = 2
+```
+
+The gate decides where the timeline starts, and it must be an **observed state, never a frame
+count**: title screens and loaders take a variable time. Choose it carefully. Brickfall's lives
+byte is set at boot, so gating on `lives == 3` starts the clock two frames early and every
+sample then lags by two steps. Gating on the byte that is 255 until the first frame is drawn is
+exact. If you leave the gate out, `check` and `capture` warn that the timeline starts at the
+first frame. Each `[[field]]` can carry `scale`, `offset` and `tolerance`, which is how a 4x
+coordinate system or a one-pixel jitter is normalised between the original and the port.
+
+### 5. Capture, then check
+
+```bash
+gpfdiff capture ports/mygame-c64 --scenario all --out ports/mygame-c64/harness/golden
+gpfdiff check ports/mygame-c64
+```
+
+`capture` records the original's trace (twice, to prove it is deterministic) and from then on
+the port is verified without the original running. Keep captured traces of a commercial game
+private. The first `check` will fail: that is how you discover differences. Sort each one into
+**platform physics** (a different frame rate, a monochrome screen) or **a port bug**. Name the
+former in `expectations.toml` with a reason; it then reports EXPECTED instead of FAIL, and a
+stale entry is warned. Fix the latter. Exit code 1 means the game is wrong; exit code 2 means
+the environment is (run `gpfdiff doctor`).
+
+To see the scaffold turn into a working oracle with only the addresses filled in:
+
+```bash
+make -C ports/brickfall-zxspectrum48/target check-scaffold
+```
+
+It scaffolds a fresh oracle, edits in just the addresses, the gate and the keys, captures all 11
+scenarios, and compares them with the reference model at every sample.
+
 ## The golden example: build Dizzy from your own copy
 
 Brickfall shows the method on an original game. *Fantasy World Dizzy* shows it on a real one:
@@ -259,7 +376,8 @@ gpf init mygame-c64 --title "My Game" --game mygame --source zxspectrum48 --targ
 ```
 
 This seeds the full stage model: identify, classify, excavate, recover, scaffold, slice,
-iterate. **Do not skip classify**: whether source exists and whether the target is at least
+iterate, with the oracle chain described in
+[Port an existing game](#port-an-existing-game-use-the-original-as-the-oracle). **Do not skip classify**: whether source exists and whether the target is at least
 as capable decides which of three strategies you use, and the strategies differ in cost by
 orders of magnitude. Read [`docs/STRATEGY.md`](STRATEGY.md) before that stage and
 [`docs/STAGES.md`](STAGES.md) for the exit criterion of each.

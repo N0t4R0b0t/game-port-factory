@@ -13,11 +13,13 @@ mod doctor;
 mod errors;
 mod expect;
 mod fields;
+mod init;
 mod keys;
 mod keysrun;
 mod mame;
 mod manifest;
 mod png;
+mod proc;
 mod report;
 mod runner;
 mod scenario;
@@ -224,6 +226,21 @@ enum Cmd {
         #[arg(long)]
         debug: bool,
     },
+    /// Scaffold a black-box (keys mode) oracle for an original: harness.toml, expectations.toml,
+    /// scenarios/example.toml and NEXT-STEPS.md in the port directory. Never overwrites without --force.
+    InitOracle {
+        /// Port directory to scaffold into (created if missing).
+        port_dir: String,
+        /// zx48 | coco2 (c64 has no keys mode).
+        #[arg(long)]
+        platform: String,
+        /// Path of the original's image, written to `[boot] image` (default: original.sna / original.bin).
+        #[arg(long)]
+        image: Option<String>,
+        /// Replace existing files.
+        #[arg(long)]
+        force: bool,
+    },
     /// Run a port's own target on scenarios and write its normalised traces (with a
     /// `# columns:` header) to a directory: how a trace is recorded from an original or another port.
     Capture {
@@ -305,6 +322,10 @@ fn main() -> ExitCode {
                 color: report::Style::from_env(std::io::stdout().is_terminal(), std::env::var_os("NO_COLOR").as_deref()).color,
             };
             ExitCode::from(check::run_check(&a, &mut std::io::stdout()))
+        }
+        Cmd::InitOracle { port_dir, platform, image, force } => {
+            let a = init::InitArgs { port: port_dir.into(), platform, image, force };
+            ExitCode::from(init::run_init(&a, &mut std::io::stdout()))
         }
         Cmd::Capture { port_dir, manifest, scenario, out, repeat, timeout, x64sc, xvfb, mame, machine, rompath, debug } => {
             let a = capture::CaptureArgs {
@@ -489,6 +510,16 @@ mod tests {
         }
         assert!(Cli::try_parse_from(["gpfdiff", "capture", "p", "--scenario", "all"]).is_ok());
         assert!(Cli::try_parse_from(["gpfdiff", "check", "p", "--manifest", "harness.live.toml"]).is_ok());
+    }
+
+    #[test]
+    fn init_oracle_flags_parse() {
+        let c = Cli::try_parse_from(["gpfdiff", "init-oracle", "d", "--platform", "zx48", "--image", "a.sna", "--force"]).unwrap();
+        match c.cmd {
+            Cmd::InitOracle { port_dir, platform, image, force } => assert_eq!((port_dir.as_str(), platform.as_str(), image.as_deref(), force), ("d", "zx48", Some("a.sna"), true)),
+            _ => panic!(),
+        }
+        assert!(Cli::try_parse_from(["gpfdiff", "init-oracle", "d"]).is_err());
     }
 
     #[test]

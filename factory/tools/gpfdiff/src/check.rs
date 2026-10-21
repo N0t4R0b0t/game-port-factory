@@ -253,6 +253,9 @@ pub fn build_target(m: &Manifest, dir: &Path, o: &Overrides, repeat: u32) -> Res
                 }
                 None => Default::default(),
             };
+            if m.boot.ready.is_none() {
+                eprintln!("warning: no [boot] ready gate: the timeline starts at the first frame, so results depend on boot timing. Set the gate on an observed RAM state (`gpfdiff watch` finds one); see README, \"Boot and the ready gate\".");
+            }
             Some(keys::KeysCfg {
                 platform: platform.clone(),
                 time: keys::TimeAxis { fps: m.time.fps.unwrap_or_else(|| keys::default_fps(&platform)), step_ms: m.time.step_ms },

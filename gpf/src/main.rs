@@ -1,6 +1,7 @@
 mod model;
 mod models;
 mod platform;
+mod seeds;
 
 use clap::{Parser, Subcommand};
 use model::*;
@@ -33,6 +34,12 @@ enum Cmd {
         /// task list, strategy=reimplement, stage=scaffold
         #[arg(long)]
         original: bool,
+        /// Also seed the public-release chain (provenance audit, inputs manifest,
+        /// bootstrap, hash list, export gates, clean-clone proof), modelled on
+        /// ports/dizzy-coco2. With --original only the subset that applies is seeded
+        /// (no user-supplied media, so no inputs manifest and no original-text gate).
+        #[arg(long)]
+        public: bool,
     },
     /// List all port projects and their stage
     List,
@@ -119,9 +126,22 @@ enum TaskCmd {
         verify: Option<String>,
         #[arg(long)]
         stage: Option<String>,
+        /// APPEND text to the task's note (joined with " | " to any existing note;
+        /// never replaces). Escalate and block still set the note.
+        #[arg(long)]
+        note: Option<String>,
     },
     Start { slug: String, id: String },
-    Done { slug: String, id: String },
+    /// Mark a task done. With --run-verify, first run its verify string.
+    Done {
+        slug: String,
+        id: String,
+        /// Run the task's verify command (`sh -c`, from the repo root); refuse to
+        /// mark done on a nonzero exit (exit code 1, tail of output printed) and
+        /// record the result in SESSION-LOG.md. Error if the task has no verify.
+        #[arg(long)]
+        run_verify: bool,
+    },
     Block {
         slug: String,
         id: String,
@@ -149,8 +169,8 @@ fn run() -> Result<(), String> {
     let cli = Cli::parse();
     let root = find_root()?;
     match cli.cmd {
-        Cmd::Init { slug, title, game, source, target, original } => {
-            let n = init(&root, &slug, &title, &game, source.as_deref(), &target, original)?;
+        Cmd::Init { slug, title, game, source, target, original, public } => {
+            let n = init(&root, &slug, &title, &game, source.as_deref(), &target, original, public)?;
             println!("created ports/{slug}/ with {n} seeded tasks");
             println!("next: gpf status {slug}");
             Ok(())
@@ -249,36 +269,6 @@ fn log_line(root: &Path, slug: &str, msg: &str) -> Result<(), String> {
     writeln!(f, "- {} — {}", today(), msg).map_err(|e| e.to_string())
 }
 
-/// Seed tasks: (stage, title, depends-on, tier).
-type Seed = (&'static str, &'static str, Vec<&'static str>, &'static str);
-
-fn seed_standard() -> Vec<Seed> {
-    vec![
-        ("identify", "Inventory and hash source files; record exact versions/regions in NOTES.md", vec![], "haiku"),
-        ("identify", "Fingerprint the engine and toolchain the original was built with", vec!["T0001"], "sonnet"),
-        // Deliberately depends on nothing: the sweep needs a title, not the media,
-        // and its result can cancel the project before you ever dump a disk.
-        ("identify", "PRIOR ART SWEEP: existing disassemblies, decomps, source releases, ports, format docs", vec![], "sonnet"),
-        ("classify", "Answer: does source exist? is target >= source in capability?", vec!["T0002", "T0003"], "opus"),
-        ("classify", "Commit to a strategy (source-port | recompile | reimplement) and record why", vec!["T0004"], "opus"),
-        ("scaffold", "Stand up target toolchain + emulator; build and run a hello-world on target", vec!["T0005"], "sonnet"),
-        ("scaffold", "Stand up differential harness: scripted input, frame capture, side-by-side diff", vec!["T0006"], "sonnet"),
-    ]
-}
-
-/// An original design has no binary to excavate and nothing to classify: the
-/// oracle is a reference model we write ourselves.
-fn seed_original() -> Vec<Seed> {
-    vec![
-        ("recover", "Write platform-neutral recipe: games/<game>/recipe/README.md (rules, state contract, input contract, acceptance)", vec![], "opus"),
-        ("recover", "Reference model as oracle: implement the recipe rules in Rust, emit golden traces", vec!["T0001"], "sonnet"),
-        ("scaffold", "Stand up target toolchain + emulator; build and run a hello-world on target", vec![], "sonnet"),
-        ("scaffold", "Stand up differential harness: scripted input, state capture, diff against reference-model traces", vec!["T0002", "T0003"], "sonnet"),
-        ("slice", "Vertical slice on target: smallest playable thing, passing the harness", vec!["T0004"], "sonnet"),
-        ("iterate", "Art and sound polish within the asset budget", vec!["T0005"], "sonnet"),
-    ]
-}
-
 const RECIPE_STUB: &str = "# {game} — platform-neutral recipe\n\n\
     Shared by every port of this game. Fill these in; ports diff against the reference model.\n\n\
     ## Rules\n\n_TBD_\n\n\
@@ -287,6 +277,12 @@ const RECIPE_STUB: &str = "# {game} — platform-neutral recipe\n\n\
     ## Acceptance (what \"done\" means for a port)\n\n_TBD_\n";
 
 /// Create a port. Returns the number of seeded tasks. Pure w.r.t. stdout.
+///
+/// Directories: only what the mode uses, because git drops empty ones.
+/// harness/ and target/ always (each gets a .gitkeep so they survive a clone);
+/// a normal port (with a binary to excavate) also gets source/ and extracted/
+/// (gitignored, no .gitkeep) and research/ (tracked notes live there, so it gets one).
+#[allow(clippy::too_many_arguments)]
 fn init(
     root: &Path,
     slug: &str,
@@ -295,6 +291,7 @@ fn init(
     source: Option<&str>,
     target: &str,
     original: bool,
+    public: bool,
 ) -> Result<usize, String> {
     let source = match (source, original) {
         (Some(s), _) => s,
@@ -305,12 +302,68 @@ fn init(
     if dir.exists() {
         return Err(format!("port '{slug}' already exists"));
     }
-    // Workspace layout, one directory per concern.
-    for sub in ["source", "extracted", "research", "target", "harness"] {
+    let mut subdirs = vec!["harness", "target"];
+    if !original {
+        subdirs.extend(["source", "extracted", "research"]);
+    }
+    for sub in subdirs {
         fs::create_dir_all(dir.join(sub)).map_err(|e| e.to_string())?;
+        if matches!(sub, "harness" | "target" | "research") {
+            fs::write(dir.join(sub).join(".gitkeep"), "").map_err(|e| e.to_string())?;
+        }
     }
     let game = if game.is_empty() { slug.to_string() } else { game.to_string() };
+    let recipe_dir = root.join("games").join(&game).join("recipe");
+    let recipe_readme = recipe_dir.join("README.md");
+    // A second port of the same game inherits the recipe and reference model.
+    // An unfilled stub (still carrying the generator's `_TBD_` markers) does not count.
+    let recipe_exists = original
+        && fs::read_to_string(&recipe_readme).map(|b| !b.contains("_TBD_")).unwrap_or(false);
 
+    let base = if original { seeds::original() } else { seeds::standard(slug) };
+    let seed = if public { seeds::chain(base, seeds::public(slug, original)) } else { base };
+
+    let mut tf = TaskFile::default();
+    let mut ids: Vec<(&str, String)> = Vec::new();
+    for sd in &seed {
+        let id = tf.next_id();
+        ids.push((sd.key, id.clone()));
+        let depends_on = sd
+            .deps
+            .iter()
+            .map(|d| ids.iter().find(|(k, _)| k == d).map(|(_, i)| i.clone()).expect("seed deps are ordered"))
+            .collect();
+        let mut t = Task {
+            id,
+            stage: sd.stage.into(),
+            title: sd.title.clone(),
+            status: "todo".into(),
+            depends_on,
+            note: sd.note.clone(),
+            tier: sd.tier.into(),
+            verify: sd.verify.clone(),
+            attempts: 0,
+        };
+        if recipe_exists && matches!(sd.key, "recipe" | "refmodel") {
+            t.status = "done".into();
+            t.note = format!(
+                "pre-closed by gpf init: games/{game}/recipe/README.md already exists (a previous port of this game). \
+                 Re-read it and the shared reference model/goldens under games/{game}/recipe/ before relying on them."
+            );
+        }
+        tf.tasks.push(t);
+    }
+
+    let next_action = if recipe_exists {
+        let first = tf.next().map(|t| format!("{}: {}", t.id, t.title)).unwrap_or_default();
+        format!(
+            "Original game, second port: games/{game}/recipe/ already exists, so the recipe and reference-model tasks are pre-closed. Start with {first}"
+        )
+    } else if original {
+        "Original game: no excavation. Start with T0001 (write the recipe spec), T0003 (toolchain) can run in parallel.".into()
+    } else {
+        "Run stage 1 (identify). Start with T0001.".into()
+    };
     let pf = PortFile {
         port: Port {
             slug: slug.into(),
@@ -322,37 +375,9 @@ fn init(
             strategy: if original { "reimplement" } else { "unknown" }.into(),
             stage: if original { "scaffold" } else { "identify" }.into(),
         },
-        status: Status {
-            next_action: if original {
-                "Original game: no excavation. Start with T0001 (write the recipe spec), T0003 (toolchain) can run in parallel."
-            } else {
-                "Run stage 1 (identify). Start with T0001."
-            }
-            .into(),
-            blocked_on: String::new(),
-            last_session: today(),
-        },
+        status: Status { next_action, blocked_on: String::new(), last_session: today() },
     };
     save_port(root, slug, &pf)?;
-
-    // Every port starts with opening moves. Seeding them means a cold
-    // session always has something concrete to pick up.
-    let seed = if original { seed_original() } else { seed_standard() };
-    let mut tf = TaskFile::default();
-    for (stage, title, deps, tier) in seed {
-        let id = tf.next_id();
-        tf.tasks.push(Task {
-            id,
-            stage: stage.into(),
-            title: title.into(),
-            status: "todo".into(),
-            depends_on: deps.into_iter().map(String::from).collect(),
-            note: String::new(),
-            tier: tier.into(),
-            verify: String::new(),
-            attempts: 0,
-        });
-    }
     save_tasks(root, slug, &tf)?;
 
     let sections = if original {
@@ -361,7 +386,8 @@ fn init(
     } else {
         "## Source inventory\n\n_TBD — task T0001_\n\n\
          ## Engine / toolchain\n\n_TBD — task T0002_\n\n\
-         ## Prior art\n\n_TBD — task T0003_\n\n"
+         ## Prior art\n\n_TBD — task T0003_\n\n\
+         ## State addresses (oracle)\n\n_TBD — state addresses_ (found with `gpfdiff watch`; record the command and the evidence)\n\n"
     };
     fs::write(
         dir.join("NOTES.md"),
@@ -386,11 +412,18 @@ fn init(
     log_line(root, slug, "port initialised")?;
     if original {
         log_line(root, slug, "strategy -> reimplement (original design: no source binary to excavate); stage -> scaffold")?;
-        let recipe = root.join("games").join(&game).join("recipe");
-        let readme = recipe.join("README.md");
-        if !readme.exists() {
-            fs::create_dir_all(&recipe).map_err(|e| e.to_string())?;
-            fs::write(&readme, RECIPE_STUB.replace("{game}", &game)).map_err(|e| e.to_string())?;
+        if recipe_exists {
+            log_line(root, slug, &format!("games/{game}/recipe/README.md exists: recipe and reference-model tasks pre-closed"))?;
+        } else {
+            fs::create_dir_all(&recipe_dir).map_err(|e| e.to_string())?;
+            fs::write(&recipe_readme, RECIPE_STUB.replace("{game}", &game)).map_err(|e| e.to_string())?;
+        }
+    }
+    if public {
+        if original {
+            log_line(root, slug, "--public with --original: seeded the subset that applies (no user-supplied media: no inputs manifest, no original-text gate)")?;
+        } else {
+            log_line(root, slug, "--public: seeded the public-release chain (model: ports/dizzy-coco2)")?;
         }
     }
     Ok(tf.tasks.len())
@@ -523,13 +556,18 @@ fn task(root: &Path, cmd: TaskCmd) -> Result<(), String> {
             println!("added {id}: {title}");
             Ok(())
         }
-        TaskCmd::Edit { slug, id, title, tier, verify, stage } => {
-            let changes = task_edit(root, &slug, &id, title, tier, verify, stage)?;
+        TaskCmd::Edit { slug, id, title, tier, verify, stage, note } => {
+            let changes = task_edit(root, &slug, &id, title, tier, verify, stage, note)?;
             println!("{id} edited: {changes}");
             Ok(())
         }
         TaskCmd::Start { slug, id } => set_task_status(root, &slug, &id, "doing", ""),
-        TaskCmd::Done { slug, id } => set_task_status(root, &slug, &id, "done", ""),
+        TaskCmd::Done { slug, id, run_verify } => {
+            if run_verify {
+                run_task_verify(root, &slug, &id)?;
+            }
+            set_task_status(root, &slug, &id, "done", "")
+        }
         TaskCmd::Block { slug, id, note } => set_task_status(root, &slug, &id, "blocked", &note),
         TaskCmd::List { slug } => {
             let tf = load_tasks(root, &slug)?;
@@ -609,9 +647,10 @@ fn task_edit(
     tier: Option<String>,
     verify: Option<String>,
     stage: Option<String>,
+    note: Option<String>,
 ) -> Result<String, String> {
-    if title.is_none() && tier.is_none() && verify.is_none() && stage.is_none() {
-        return Err("nothing to edit: give at least one of --title --tier --verify --stage".into());
+    if title.is_none() && tier.is_none() && verify.is_none() && stage.is_none() && note.is_none() {
+        return Err("nothing to edit: give at least one of --title --tier --verify --stage --note".into());
     }
     if let Some(t) = &tier {
         if !TIERS.contains(&t.as_str()) {
@@ -646,10 +685,46 @@ fn task_edit(
         parts.push(format!("stage {} -> {v}", t.stage));
         t.stage = v;
     }
+    if let Some(v) = note {
+        t.note = if t.note.is_empty() { v.clone() } else { format!("{} | {v}", t.note) };
+        parts.push(format!("note += '{v}'"));
+    }
     let summary = parts.join("; ");
     save_tasks(root, slug, &tf)?;
     log_line(root, slug, &format!("{id} edited: {summary}"))?;
     Ok(summary)
+}
+
+/// Run a task's verify string (`sh -c`, cwd = repo root). Ok only on exit 0.
+/// The outcome goes to SESSION-LOG.md either way; a failure prints the output tail.
+fn run_task_verify(root: &Path, slug: &str, id: &str) -> Result<(), String> {
+    let tf = load_tasks(root, slug)?;
+    let t = tf.tasks.iter().find(|t| t.id == id).ok_or_else(|| format!("no task '{id}'"))?;
+    if t.verify.trim().is_empty() {
+        return Err(format!(
+            "{id} has no verify command, so --run-verify has nothing to run. \
+             Set one with `gpf task edit {slug} {id} --verify '<cmd>'`, or mark it done without --run-verify"
+        ));
+    }
+    let cmd = t.verify.clone();
+    let out = std::process::Command::new("sh")
+        .arg("-c")
+        .arg(&cmd)
+        .current_dir(root)
+        .output()
+        .map_err(|e| format!("could not run sh: {e}"))?;
+    if out.status.success() {
+        log_line(root, slug, &format!("{id} verify PASSED: {cmd}"))?;
+        println!("{id} verify passed: {cmd}");
+        return Ok(());
+    }
+    let code = out.status.code().map(|c| c.to_string()).unwrap_or_else(|| "signal".into());
+    let mut text = String::from_utf8_lossy(&out.stdout).into_owned();
+    text.push_str(&String::from_utf8_lossy(&out.stderr));
+    let lines: Vec<&str> = text.lines().collect();
+    let tail = lines[lines.len().saturating_sub(20)..].join("\n");
+    log_line(root, slug, &format!("{id} verify FAILED (exit {code}): {cmd}"))?;
+    Err(format!("{id} verify FAILED (exit {code}): {cmd}\n--- last output ---\n{tail}\n{id} NOT marked done"))
 }
 
 fn set_task_status(root: &Path, slug: &str, id: &str, status: &str, note: &str) -> Result<(), String> {
@@ -883,7 +958,7 @@ mod tests {
     }
 
     fn mk(root: &Path) {
-        init(root, "demo-c64", "Demo", "demo", Some("c64"), "c64", false).unwrap();
+        init(root, "demo-c64", "Demo", "demo", Some("c64"), "c64", false, false).unwrap();
     }
 
     #[test]
@@ -915,20 +990,20 @@ mod tests {
     #[test]
     fn init_normal() {
         let root = temp_root("init-normal");
-        assert_eq!(init(&root, "demo-c64", "Demo", "", Some("zx"), "c64", false).unwrap(), 7);
+        assert_eq!(init(&root, "demo-c64", "Demo", "", Some("zx"), "c64", false, false).unwrap(), 11);
         let pf = load_port(&root, "demo-c64").unwrap();
         assert_eq!(pf.port.stage, "identify");
         assert_eq!(pf.port.strategy, "unknown");
         assert_eq!(pf.port.source_platform, "zx");
         assert_eq!(pf.port.game, "demo-c64");
         assert!(!root.join("games").exists());
-        assert!(init(&root, "demo-c64", "Demo", "", Some("zx"), "c64", false).unwrap_err().contains("already exists"));
+        assert!(init(&root, "demo-c64", "Demo", "", Some("zx"), "c64", false, false).unwrap_err().contains("already exists"));
     }
 
     #[test]
     fn init_requires_source_unless_original() {
         let root = temp_root("init-nosrc");
-        let e = init(&root, "d", "D", "", None, "c64", false).unwrap_err();
+        let e = init(&root, "d", "D", "", None, "c64", false, false).unwrap_err();
         assert!(e.contains("--source"));
         assert!(!port_dir(&root, "d").exists());
     }
@@ -936,7 +1011,7 @@ mod tests {
     #[test]
     fn init_original() {
         let root = temp_root("init-original");
-        let n = init(&root, "demo-c64", "Demo", "demo", None, "c64", true).unwrap();
+        let n = init(&root, "demo-c64", "Demo", "demo", None, "c64", true, false).unwrap();
         assert_eq!(n, 6);
         let pf = load_port(&root, "demo-c64").unwrap();
         assert_eq!(pf.port.stage, "scaffold");
@@ -967,8 +1042,8 @@ mod tests {
         let r = root.join("games/demo/recipe");
         fs::create_dir_all(&r).unwrap();
         fs::write(r.join("README.md"), "MINE").unwrap();
-        init(&root, "demo-c64", "Demo", "demo", None, "c64", true).unwrap();
-        init(&root, "demo-zx", "Demo", "demo", None, "zx", true).unwrap();
+        init(&root, "demo-c64", "Demo", "demo", None, "c64", true, false).unwrap();
+        init(&root, "demo-zx", "Demo", "demo", None, "zx", true, false).unwrap();
         assert_eq!(fs::read_to_string(r.join("README.md")).unwrap(), "MINE");
     }
 
@@ -1002,7 +1077,7 @@ mod tests {
         mk(&root);
         let s = "demo-c64";
         let id = task_add(&root, s, "slice", "new", "T0001, T0002", "haiku", "true").unwrap();
-        assert_eq!(id, "T0008");
+        assert_eq!(id, "T0012");
         let tf = load_tasks(&root, s).unwrap();
         let t = tf.tasks.last().unwrap();
         assert_eq!(t.depends_on, vec!["T0001", "T0002"]);
@@ -1010,7 +1085,7 @@ mod tests {
         assert!(task_add(&root, s, "slice", "x", "T0099", "haiku", "").unwrap_err().contains("does not exist"));
         assert!(task_add(&root, s, "bogus", "x", "", "haiku", "").unwrap_err().contains("unknown stage"));
         assert!(task_add(&root, s, "slice", "x", "", "gpt", "").unwrap_err().contains("unknown tier"));
-        assert_eq!(load_tasks(&root, s).unwrap().tasks.len(), 8);
+        assert_eq!(load_tasks(&root, s).unwrap().tasks.len(), 12);
     }
 
     #[test]
@@ -1020,14 +1095,14 @@ mod tests {
         let s = "demo-c64";
         set_task_status(&root, s, "T0002", "blocked", "keep me").unwrap();
         let before = load_tasks(&root, s).unwrap();
-        task_edit(&root, s, "T0002", Some("new title".into()), Some("opus".into()), Some("true".into()), Some("recover".into())).unwrap();
+        task_edit(&root, s, "T0002", Some("new title".into()), Some("opus".into()), Some("true".into()), Some("recover".into()), None).unwrap();
         let after = load_tasks(&root, s).unwrap();
         assert_eq!(after.tasks.len(), before.tasks.len());
         let (b, a) = (&before.tasks[1], &after.tasks[1]);
         assert_eq!((a.title.as_str(), a.tier.as_str(), a.verify.as_str(), a.stage.as_str()), ("new title", "opus", "true", "recover"));
         assert_eq!((&a.id, &a.depends_on, &a.note, &a.status), (&b.id, &b.depends_on, &b.note, &b.status));
         // partial edit leaves other fields alone
-        task_edit(&root, s, "T0002", None, Some("haiku".into()), None, None).unwrap();
+        task_edit(&root, s, "T0002", None, Some("haiku".into()), None, None, None).unwrap();
         let a = &load_tasks(&root, s).unwrap().tasks[1];
         assert_eq!((a.title.as_str(), a.tier.as_str(), a.verify.as_str()), ("new title", "haiku", "true"));
         let log = fs::read_to_string(port_dir(&root, s).join("SESSION-LOG.md")).unwrap();
@@ -1041,10 +1116,10 @@ mod tests {
         let s = "demo-c64";
         let p = port_dir(&root, s).join("tasks.toml");
         let before = fs::read_to_string(&p).unwrap();
-        assert!(task_edit(&root, s, "T0099", Some("x".into()), None, None, None).unwrap_err().contains("no task"));
-        assert!(task_edit(&root, s, "T0001", None, Some("gpt".into()), None, None).unwrap_err().contains("unknown tier"));
-        assert!(task_edit(&root, s, "T0001", Some("x".into()), None, None, Some("nope".into())).unwrap_err().contains("unknown stage"));
-        assert!(task_edit(&root, s, "T0001", None, None, None, None).unwrap_err().contains("nothing to edit"));
+        assert!(task_edit(&root, s, "T0099", Some("x".into()), None, None, None, None).unwrap_err().contains("no task"));
+        assert!(task_edit(&root, s, "T0001", None, Some("gpt".into()), None, None, None).unwrap_err().contains("unknown tier"));
+        assert!(task_edit(&root, s, "T0001", Some("x".into()), None, None, Some("nope".into()), None).unwrap_err().contains("unknown stage"));
+        assert!(task_edit(&root, s, "T0001", None, None, None, None, None).unwrap_err().contains("nothing to edit"));
         assert_eq!(fs::read_to_string(&p).unwrap(), before);
     }
 
@@ -1054,5 +1129,140 @@ mod tests {
         assert!(load_port(&root, "nope").unwrap_err().contains("no such port"));
         assert!(set_stage(&root, "nope", "slice").is_err());
         assert!(set_stage(&root, "nope", "bogus").unwrap_err().contains("unknown stage"));
+    }
+
+    fn ids_of(tf: &TaskFile) -> Vec<String> {
+        tf.tasks.iter().map(|t| t.id.clone()).collect()
+    }
+
+    #[test]
+    fn init_normal_oracle_chain_and_dirs() {
+        let root = temp_root("oracle");
+        init(&root, "demo-zx", "Demo", "demo", Some("zx"), "c64", false, false).unwrap();
+        let tf = load_tasks(&root, "demo-zx").unwrap();
+        assert_eq!(tf.tasks.len(), 11);
+        assert!(!tf.tasks.iter().any(|t| t.title.starts_with("Stand up differential harness")));
+        let t = |n: usize| &tf.tasks[n - 1];
+        assert_eq!((t(7).tier.as_str(), t(10).tier.as_str(), t(11).tier.as_str()), ("sonnet", "sonnet", "opus"));
+        assert_eq!(t(8).depends_on, vec!["T0007"]);
+        assert_eq!(t(7).depends_on, vec!["T0003", "T0006"]); // prior art + toolchain
+        assert!(t(8).verify.contains("gpfdiff capture ports/demo-zx") && t(11).verify.contains("gpfdiff check ports/demo-zx") && t(10).verify.contains("Diff triage"));
+        assert_eq!(t(11).depends_on, vec!["T0010"]);
+        assert!(t(8).title.contains("ports/demo-zx/harness.toml"));
+        let ids = ids_of(&tf);
+        assert!(tf.tasks.iter().all(|t| t.depends_on.iter().all(|d| ids.contains(d))));
+        let d = port_dir(&root, "demo-zx");
+        for sub in ["harness", "target", "source", "extracted", "research"] {
+            assert!(d.join(sub).is_dir(), "{sub}");
+        }
+        assert!(d.join("harness/.gitkeep").exists() && d.join("target/.gitkeep").exists());
+        assert!(fs::read_to_string(d.join("NOTES.md")).unwrap().contains("State addresses (oracle)"));
+        // no --public: no release chain
+        assert!(!tf.tasks.iter().any(|t| t.title.contains("Public")));
+    }
+
+    #[test]
+    fn init_original_dirs_minimal() {
+        let root = temp_root("orig-dirs");
+        init(&root, "demo-c64", "Demo", "demo", None, "c64", true, false).unwrap();
+        let d = port_dir(&root, "demo-c64");
+        assert!(d.join("harness/.gitkeep").exists() && d.join("target/.gitkeep").exists());
+        for sub in ["source", "extracted", "research"] {
+            assert!(!d.join(sub).exists(), "{sub}");
+        }
+    }
+
+    #[test]
+    fn init_public_adds_chain() {
+        let root = temp_root("public");
+        let n = init(&root, "demo-zx", "Demo", "demo", Some("zx"), "c64", false, true).unwrap();
+        let tf = load_tasks(&root, "demo-zx").unwrap();
+        assert_eq!(n, 11 + 6);
+        let last: Vec<_> = tf.tasks[11..].iter().map(|t| t.title.as_str()).collect();
+        assert!(last[0].contains("provenance audit") && last[1].contains("inputs manifest"));
+        assert!(last.iter().any(|t| t.contains("no original text and no binaries")));
+        assert!(last.last().unwrap().contains("clean-clone"));
+        assert!(tf.tasks.last().unwrap().verify.contains("bootstrap.sh --verify"));
+        let ids = ids_of(&tf);
+        assert!(tf.tasks.iter().all(|t| t.depends_on.iter().all(|d| ids.contains(d))));
+        let log = fs::read_to_string(port_dir(&root, "demo-zx").join("SESSION-LOG.md")).unwrap();
+        assert!(log.contains("--public"));
+    }
+
+    #[test]
+    fn init_public_original_is_subset() {
+        let root = temp_root("public-orig");
+        let n = init(&root, "demo-c64", "Demo", "demo", None, "c64", true, true).unwrap();
+        assert_eq!(n, 6 + 5);
+        let tf = load_tasks(&root, "demo-c64").unwrap();
+        assert!(!tf.tasks.iter().any(|t| t.title.contains("inputs manifest") || t.title.contains("original text")));
+        assert!(tf.tasks.iter().any(|t| t.note.contains("--original")));
+        let log = fs::read_to_string(port_dir(&root, "demo-c64").join("SESSION-LOG.md")).unwrap();
+        assert!(log.contains("no user-supplied media"));
+    }
+
+    #[test]
+    fn second_original_port_preclosed() {
+        let root = temp_root("second");
+        init(&root, "demo-c64", "Demo", "demo", None, "c64", true, false).unwrap();
+        let first = load_port(&root, "demo-c64").unwrap();
+        assert!(first.status.next_action.contains("T0001 (write the recipe spec)"));
+        // the first port left only the generated stub: a second port is NOT pre-closed
+        init(&root, "demo-stub", "Demo", "demo", None, "zx", true, false).unwrap();
+        assert_eq!(load_tasks(&root, "demo-stub").unwrap().tasks[0].status, "todo");
+        // once the recipe is really written, it is
+        fs::write(root.join("games/demo/recipe/README.md"), "# Demo\n\nreal rules\n").unwrap();
+        init(&root, "demo-zx", "Demo", "demo", None, "zx", true, false).unwrap();
+        let tf = load_tasks(&root, "demo-zx").unwrap();
+        assert_eq!((tf.tasks[0].status.as_str(), tf.tasks[1].status.as_str()), ("done", "done"));
+        assert!(tf.tasks[0].note.contains("pre-closed"));
+        assert_eq!(tf.tasks[2].status, "todo");
+        let pf = load_port(&root, "demo-zx").unwrap();
+        assert!(!pf.status.next_action.contains("write the recipe"));
+        assert!(pf.status.next_action.contains("T0003"));
+        assert_eq!(tf.next().unwrap().id, "T0003");
+        assert_eq!(tf.count("done"), 2);
+    }
+
+    #[test]
+    fn task_edit_note_appends() {
+        let root = temp_root("note");
+        mk(&root);
+        let s = "demo-c64";
+        task_edit(&root, s, "T0001", None, None, None, None, Some("first".into())).unwrap();
+        task_edit(&root, s, "T0001", None, None, None, None, Some("second".into())).unwrap();
+        let tf = load_tasks(&root, s).unwrap();
+        assert_eq!(tf.tasks[0].note, "first | second");
+        assert_eq!(tf.tasks[0].title, "Inventory and hash source files; record exact versions/regions in NOTES.md");
+    }
+
+    #[test]
+    fn run_verify_pass_fail_and_empty() {
+        let root = temp_root("verify");
+        mk(&root);
+        let s = "demo-c64";
+        // empty verify is an error with a clear message
+        let e = run_task_verify(&root, s, "T0001").unwrap_err();
+        assert!(e.contains("no verify command"), "{e}");
+        // passing: runs from the repo root
+        fs::write(root.join("marker.txt"), "x").unwrap();
+        task_edit(&root, s, "T0001", None, None, Some("test -f marker.txt".into()), None, None).unwrap();
+        run_task_verify(&root, s, "T0001").unwrap();
+        // failing: nonzero exit, output tail reported, status untouched
+        task_edit(&root, s, "T0002", None, None, Some("echo boom-line; echo err-line >&2; exit 3".into()), None, None).unwrap();
+        let e = run_task_verify(&root, s, "T0002").unwrap_err();
+        assert!(e.contains("exit 3") && e.contains("boom-line") && e.contains("err-line") && e.contains("NOT marked done"), "{e}");
+        assert_eq!(load_tasks(&root, s).unwrap().tasks[1].status, "todo");
+        let log = fs::read_to_string(port_dir(&root, s).join("SESSION-LOG.md")).unwrap();
+        assert!(log.contains("T0001 verify PASSED") && log.contains("T0002 verify FAILED (exit 3)"));
+    }
+
+    #[test]
+    fn run_verify_tail_is_bounded() {
+        let root = temp_root("verify-tail");
+        mk(&root);
+        task_edit(&root, "demo-c64", "T0001", None, None, Some("seq 1 100; exit 1".into()), None, None).unwrap();
+        let e = run_task_verify(&root, "demo-c64", "T0001").unwrap_err();
+        assert!(e.contains("\n100\n") && e.contains("\n81\n") && !e.contains("\n80\n"), "{e}");
     }
 }

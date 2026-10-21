@@ -1,0 +1,120 @@
+# gpfdiff BLACK-BOX oracle manifest, scaffolded by `gpfdiff init-oracle` (platform @PLATFORM@).
+#
+# What this is: the description of an ORIGINAL program that was not written to cooperate (no exported
+# state block, no breakpoint label, nothing injected). gpfdiff runs it free under MAME, presses emulated
+# keys on a frame clock, and reads its state from RAW RAM ADDRESSES that you find with `gpfdiff watch`.
+# Read NEXT-STEPS.md (next to this file) for the order of work. Search for TODO: every value that only you
+# can supply is marked.
+#
+# Reference: factory/tools/gpfdiff/README.md ("Keys mode (black-box)", "Boot and the ready gate",
+# "Field maps", "Oracle sources"). Relative paths are relative to this file. `#` starts a comment.
+# Lines that start with `#> ` are working examples: delete the `#> ` and they are live.
+platform = "@PLATFORM@"
+recipe   = "."          # directory holding scenarios/*.toml (and golden/*.trace); `capture` writes to <recipe>/captured/ by default
+repeat   = 2            # every scenario runs this many times in fresh emulators; the runs must agree (determinism gate)
+
+[emulator]
+mame    = "mame"
+machine = "@MACHINE@"
+# The @MACHINE@ ROM is your own and is never distributed: set $@ROMVAR@, pass --rompath, or leave it in ~/.mame/roms.
+# `gpfdiff doctor --platform @PLATFORM@` tells you what is missing.
+#> rompath = "/path/to/roms"
+
+[input]
+mode = "keys"           # the only mode that works on an original (the other, "breakpoint", needs a cooperating program)
+
+# Button name -> emulated key. The scenarios say `press = ["LEFT", "FIRE"]`; this table says which key that is.
+# LEFT / RIGHT / FIRE are the three canonical buttons (bits 1/2/4 of `buttons` in a scenario); any other name you
+# add here (UP, DOWN, START ...) can be used in `press = [...]` too. A name that is not a button is taken as a key name.
+# Valid key names on @PLATFORM@: @VALID_NAMES@
+# These are the usual defaults for the platform; change them to the keys YOUR game reads.
+[input.keys]
+@KEYS@
+
+[time]
+fps = @FPS@                  # the machine's frame rate: ms in scenarios are converted to frames with it (nearest, halves up)
+step_ms = 20             # length of one scenario `step` (only matters for scenarios written in steps, not ms)
+# The program sees a key applied at hook t in its frame t+1 (README, "Frame clock"). If your game needs more, say so:
+#> input_latency_frames = 1
+
+[boot]
+image = "@IMAGE@"   # TODO: the original, @IMAGE_KIND@
+# READY GATE (the observed-state rule). The timeline starts at the first frame where this condition holds, so it must be
+# a statement about the program's OWN STATE that only becomes true once the program is really up and idle in its main
+# loop, e.g. "the byte that holds the ball row is no longer the 255 it has before the first draw". Never gate on the
+# clock or on a byte that is already true during boot (a ROM byte, a constant): the timeline would then start at an
+# arbitrary frame and the traces would not be reproducible. Conditions: eq = N, ne = N, in = [lo, hi]; optional size = 1|2|4
+# and endian = "le"|"be". If it never holds, the run ends with exit 2 naming the gate and the LAST VALUE observed, which
+# is what you need to correct it. Find the address and the value with `gpfdiff watch --no-gate`.
+# TODO: uncomment and fill in. Until then frame 0 is simply the first frame (fine for `watch`, not for a recorded oracle).
+#> ready = { addr = 0x0000, in = [1, 254] }
+# A title screen to get past before the gate can hold? Tap keys from the start of the boot clock: NAME@TIME[+HOLD]
+#> ready_keys = ["FIRE@500ms+100ms"]
+timeout_ms = 5000        # how long (emulated time) the gate may take before the run is an error
+
+# Where the state is read from: raw addresses, one [[field]] per column, in the order of the trace columns.
+[state]
+source = "map"
+
+# Where the EXPECTED trace comes from when you `check` a port against this original (default: <recipe>/golden/NAME.trace).
+# Record goldens once with `gpfdiff capture` and commit them, then you never need the original binary again.
+#   source = "recipe"  -> <recipe>/golden/NAME.trace   (default, no [oracle] table needed)
+#   source = "trace"   -> <dir>/NAME.trace             (what `capture --out <dir>` wrote)
+#   source = "live"    -> run another port's own harness on the same scenario and diff the two
+#> [oracle]
+#> source = "trace"
+#> dir    = "golden"
+
+# ---------------------------------------------------------------------------------------------------------------
+# THE FIELD MAP. TODO: every `addr = 0x0000` below is a placeholder; find the real addresses with
+#   gpfdiff watch . --keys "LEFT@0ms+1s"          (which RAM bytes move while LEFT is held?)
+# The example names (x, y, room, lives) are placeholders too: a golden trace has one column per field, in this order, and
+# the column names are what a diff reports, so name them for what they are.
+#
+# Keys of a [[field]]:
+#   name       column name (unique)
+#   addr       RAM address (0x1234, $1234 or decimal)  -- or `label = "NAME"` with `labels = "game.sym"` at the top
+#   size       1, 2 or 4 bytes (default 1)
+#   endian     "le" (default) or "be"
+#   signed     true: two's complement
+#   scale      multiply the raw value (default 1.0); offset adds after scaling (default 0)
+#   tolerance  accepted absolute difference after normalisation (default 0 = exact)
+#   format     "hex": the bytes (size 1..=32) as lower-case hex text, compared as text (bitmaps, tile rows)
+#   ignore     true: read it but do not compare it
+# ---------------------------------------------------------------------------------------------------------------
+[[field]]
+name = "x"
+addr = 0x0000            # TODO
+
+[[field]]
+name = "y"
+addr = 0x0000            # TODO
+
+[[field]]
+name = "room"
+addr = 0x0000            # TODO
+
+[[field]]
+name = "lives"
+addr = 0x0000            # TODO
+
+# More shapes, uncomment as needed:
+#> [[field]]
+#> name      = "score"
+#> addr      = 0x0000            # TODO
+#> size      = 2
+#> endian    = "be"              # e.g. a 6809 stores 16-bit values high byte first
+#> tolerance = 0
+#>
+#> [[field]]
+#> name   = "pos_x"
+#> addr   = 0x0000              # TODO
+#> size   = 2
+#> scale  = 0.00390625          # a 8.8 fixed-point value, compared as pixels
+#> tolerance = 0.5              # a half-pixel of slack
+#>
+#> [[field]]
+#> name   = "tiles"
+#> addr   = 0x0000              # TODO
+#> size   = 5
+#> format = "hex"               # five bytes of bitmap, as text

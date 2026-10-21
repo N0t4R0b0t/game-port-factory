@@ -1,0 +1,20 @@
+# A tiny scenario written in milliseconds: gpfdiff converts it to frames with [time] fps in harness.toml.
+# Buttons are the names of [input.keys] in harness.toml. A button is held from `at_ms` for `duration_ms` (or until the
+# next [[input]] entry); an entry at the same instant as a release wins. `step` / `buttons = 5` is the older step-clock form.
+length_ms       = 3000   # the scenario ends here
+sample_every_ms = 100    # one trace line every 100 ms, including 0 ms and the end
+
+[[input]]
+at_ms       = 0
+press       = ["FIRE"]
+duration_ms = 100
+
+[[input]]
+at_ms       = 500
+press       = ["LEFT"]
+duration_ms = 1000
+
+[[input]]
+at_ms       = 2000
+press       = ["RIGHT", "FIRE"]
+duration_ms = 500

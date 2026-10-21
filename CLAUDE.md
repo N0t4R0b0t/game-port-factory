@@ -105,6 +105,43 @@ Stages 5–7 run **once per target**, in `ports/<game>-<platform>/`.
 The second target is cheaper for logic and narrative, and **no cheaper for art or
 platform-native optimisation**. Say so when planning, so nobody is surprised at target #2.
 
+## Verifying a port: the oracle workflow
+
+The harness is `factory/tools/gpfdiff` (full reference: its `README.md`). Use it instead of
+inventing a per-port comparison script. Run `gpfdiff doctor --platform <p>` first when the
+environment is in doubt; it names what is missing and never installs.
+
+- **Original game of ours** (no binary to diff): the oracle is a reference model in
+  `games/<game>/recipe/` with golden traces. Ports expose a `gpf_state` block and are checked
+  with `gpfdiff check ports/<slug>`. Worked example: Brickfall (three CPUs).
+- **Existing commercial game**: the original binary is the oracle, driven from outside with no
+  cooperation. Order of work: find the state addresses with `gpfdiff watch` (press a key, see
+  which bytes move; use the prior-art disassembly to tell a working copy from the published
+  value), declare them as `[[field]]` entries in the port's `harness.toml`, gate the timeline on
+  an **observed state** (never a frame count), `gpfdiff capture` the original's traces, name
+  known platform differences in `expectations.toml` (a deviation is EXPECTED with a reason,
+  never silent), then `gpfdiff check`.
+- **Exit codes mean different things.** 1 = the game is wrong. 2 = the environment is wrong
+  (missing tool or ROM, timeout, bad gate). Never chase a 2 as if it were a port bug.
+- **Determinism before diffs.** Every check runs scenarios twice in fresh emulators and runs a
+  canary; do not believe a diff from a harness that has not passed both.
+- **Emulators run one at a time.** Never fan out a batch of MAME/VICE processes.
+- **Delegation:** harness batches and re-runs go to `gpf-grunt` (the verifier is `gpfdiff
+  check`); new backends and tool changes go to `gpf-builder`. A FAIL from a delegated batch is
+  a claim: re-run that one scenario yourself before diagnosing.
+
+## Derived data never enters git
+
+Anything derived from a user's media (converted art, music, text, level data, tape/disk images,
+emulator snapshots and save states, ROMs) is **generated locally and gitignored**, never
+committed. The model is `ports/dizzy-coco2/docs/PROVENANCE.md`: every file is *ours* (tracked),
+*yours* (user-supplied, hash-pinned in `tools/inputs.toml`) or *generated* (by `tools/bootstrap.sh`).
+Mixed files (code beside original text) are split into public templates plus keys into the
+user's data. Running dialogue is never quoted in a tracked file; identifiers (room titles, item
+names) may be. If a new file might be derived, make it generated (and gitignored) or keep it out
+of the repo **before** committing it. `gpf init --public` seeds the tasks for doing this from
+the start.
+
 ## Delegation and cost
 
 Full rules in `docs/COST-MODEL.md`. The short version:

@@ -2751,3 +2751,36 @@ note = ""
 tier = "sonnet"
 verify = "scripts/export-public.sh <scratch> passes with --max-words gate; the two tape_* harness scripts pass before/after"
 attempts = 0
+
+[[tasks]]
+id = "T0250"
+stage = "iterate"
+title = "Phase 3: gpf init existing-game oracle task chain, --public release tasks, friction fixes"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = "see task note"
+attempts = 0
+
+[[tasks]]
+id = "T0251"
+stage = "iterate"
+title = "Phase 3: gpfdiff init-oracle scaffold, MAME spawn-code merge"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = "see task note"
+attempts = 0
+
+[[tasks]]
+id = "T0252"
+stage = "iterate"
+title = "Phase 3: CLAUDE.md oracle workflow + guide chapter 'Port an existing game' + recipes"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = "see task note"
+attempts = 0

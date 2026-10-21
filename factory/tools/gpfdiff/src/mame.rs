@@ -20,10 +20,10 @@
 use crate::state::{RawState, BRICKS_LEN, STATE_LEN};
 use crate::target::Target;
 use std::collections::HashMap;
-use std::io::{BufRead, BufReader, Write};
-use std::process::{Child, ChildStdin, Command, Stdio};
-use std::sync::mpsc::{channel, Receiver, RecvTimeoutError};
-use std::time::{Duration, Instant};
+use crate::proc::LineProc;
+use std::io::Write;
+use std::process::{ChildStdin, Command, Stdio};
+use std::time::Duration;
 
 /// Unique temp-file names within one process (the unit tests run several targets in parallel).
 static SEQ: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
@@ -128,10 +128,8 @@ pub struct MameTarget {
     gpf_bricks: u16,
     input_ret: u16,
     labels: HashMap<String, u16>,
-    child: Option<Child>,
+    proc: Option<LineProc>,
     stdin: Option<ChildStdin>,
-    rx: Option<Receiver<String>>,
-    chatter: Vec<String>,
     state: Option<RawState>,
     script_path: Option<std::path::PathBuf>,
     /// coco2: the load list handed to the Lua script (written to a temp file at boot).
@@ -173,10 +171,8 @@ impl MameTarget {
             input_ret,
             labels,
             cfg,
-            child: None,
+            proc: None,
             stdin: None,
-            rx: None,
-            chatter: vec![],
             state: None,
             script_path: None,
             load_list,
@@ -190,47 +186,18 @@ impl MameTarget {
         }
     }
 
-    fn note_chatter(&mut self, l: String) {
-        if self.chatter.len() >= 12 {
-            self.chatter.remove(0);
-        }
-        self.chatter.push(l);
-    }
-
     fn context(&self) -> String {
-        if self.chatter.is_empty() {
-            String::new()
-        } else {
-            format!(" (last MAME output: {})", self.chatter.join(" | "))
-        }
+        self.proc.as_ref().map(|p| p.context()).unwrap_or_default()
     }
 
-    /// Next `GPF ` line (prefix stripped), skipping chatter.
+    /// Next `GPF ` line (prefix stripped), skipping chatter; a script `ERR` line is an error.
     fn next_gpf(&mut self) -> Result<String, String> {
-        let deadline = Instant::now() + self.cfg.timeout;
-        loop {
-            let now = Instant::now();
-            if now >= deadline {
-                return Err(format!("timed out waiting for MAME{}", self.context()));
-            }
-            let r = self.rx.as_ref().ok_or("not started")?.recv_timeout(deadline - now);
-            match r {
-                Ok(l) => {
-                    self.dbg(|| format!("<- {l}"));
-                    if let Some(rest) = l.strip_prefix("GPF ") {
-                        if let Some(e) = rest.strip_prefix("ERR ") {
-                            return Err(format!("script error: {e}{}", self.context()));
-                        }
-                        return Ok(rest.to_string());
-                    }
-                    self.note_chatter(l);
-                }
-                Err(RecvTimeoutError::Timeout) => {}
-                Err(RecvTimeoutError::Disconnected) => {
-                    return Err(format!("MAME exited unexpectedly{}", self.context()));
-                }
-            }
+        let (timeout, debug) = (self.cfg.timeout, self.cfg.debug);
+        let l = self.proc.as_mut().ok_or("not started")?.next_gpf(timeout, debug)?;
+        if let Some(e) = l.strip_prefix("ERR ") {
+            return Err(format!("script error: {e}{}", self.context()));
         }
+        Ok(l)
     }
 
     fn next_state(&mut self) -> Result<(), String> {
@@ -278,40 +245,11 @@ impl Target for MameTarget {
             .env("GPF_STATE", self.gpf_state.to_string())
             .env("GPF_BRICKS", self.gpf_bricks.to_string())
             .env("GPF_RET", self.input_ret.to_string())
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped());
+            .stdin(Stdio::piped());
         self.dbg(|| format!("spawn {cmd:?}"));
-        let mut child = cmd.spawn().map_err(|e| format!("cannot start `{}`: {e}", self.cfg.mame))?;
-        self.stdin = child.stdin.take();
-        let stdout = child.stdout.take().ok_or("no stdout")?;
-        let (tx, rx) = channel();
-        // stderr carries MAME's own complaints (missing ROM, bad snapshot): merge it into
-        // the same line stream so it shows up as context in error messages.
-        if let Some(stderr) = child.stderr.take() {
-            let tx2 = tx.clone();
-            std::thread::spawn(move || {
-                for l in BufReader::new(stderr).lines().map_while(Result::ok) {
-                    if tx2.send(l).is_err() {
-                        break;
-                    }
-                }
-            });
-        }
-        std::thread::spawn(move || {
-            for l in BufReader::new(stdout).lines() {
-                match l {
-                    Ok(l) => {
-                        if tx.send(l).is_err() {
-                            break;
-                        }
-                    }
-                    Err(_) => break,
-                }
-            }
-        });
-        self.rx = Some(rx);
-        self.child = Some(child);
+        let mut lp = LineProc::spawn(&mut cmd, &self.cfg.mame)?;
+        self.stdin = lp.child.stdin.take();
+        self.proc = Some(lp);
         self.script_path = Some(script);
         let l = self.next_gpf()?;
         if l != "READY" {
@@ -360,21 +298,9 @@ impl Target for MameTarget {
             let _ = writeln!(w, "Q");
             let _ = w.flush();
         }
-        if let Some(mut c) = self.child.take() {
-            let end = Instant::now() + Duration::from_secs(3);
-            loop {
-                match c.try_wait() {
-                    Ok(Some(_)) => break,
-                    Ok(None) if Instant::now() < end => std::thread::sleep(Duration::from_millis(20)),
-                    _ => {
-                        let _ = c.kill();
-                        let _ = c.wait();
-                        break;
-                    }
-                }
-            }
+        if let Some(mut p) = self.proc.take() {
+            p.reap();
         }
-        self.rx = None;
         if let Some(p) = self.script_path.take() {
             let _ = std::fs::remove_file(p);
         }

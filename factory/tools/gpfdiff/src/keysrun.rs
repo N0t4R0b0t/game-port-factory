@@ -11,10 +11,9 @@ use crate::mame::MameKind;
 use crate::runner::BackendOpts;
 use crate::scenario::Scenario;
 use crate::trace::Trace;
-use std::io::{BufRead, BufReader};
-use std::process::{Child, Command, Stdio};
-use std::sync::mpsc::{channel, Receiver, RecvTimeoutError};
-use std::time::{Duration, Instant};
+use crate::proc::LineProc;
+use std::process::{Command, Stdio};
+use std::time::Duration;
 
 const SCRIPT: &str = include_str!("../lua/gpf_keys.lua");
 
@@ -52,69 +51,30 @@ pub struct Outcome {
     pub bulk: Vec<(u32, u32)>,
 }
 
-/// One MAME process and its merged stdout/stderr line stream.
+/// One MAME process (shared line plumbing in `proc.rs`) and the temp files to remove afterwards.
 struct Proc {
-    child: Child,
-    rx: Receiver<String>,
-    chatter: Vec<String>,
+    lp: LineProc,
     files: Vec<std::path::PathBuf>,
 }
 
 impl Proc {
     fn context(&self) -> String {
-        if self.chatter.is_empty() {
-            String::new()
-        } else {
-            format!(" (last MAME output: {})", self.chatter.join(" | "))
-        }
+        self.lp.context()
     }
 
     fn note(&mut self, l: String) {
-        if self.chatter.len() >= 12 {
-            self.chatter.remove(0);
-        }
-        self.chatter.push(l);
+        self.lp.note(l)
     }
 
     /// Next `GPF ` line (prefix stripped), skipping chatter.
     fn next_gpf(&mut self, timeout: Duration, debug: bool) -> Result<String, String> {
-        let deadline = Instant::now() + timeout;
-        loop {
-            let now = Instant::now();
-            if now >= deadline {
-                return Err(format!("timed out waiting for MAME{}", self.context()));
-            }
-            match self.rx.recv_timeout(deadline - now) {
-                Ok(l) => {
-                    if debug {
-                        eprintln!("[mame] <- {l}");
-                    }
-                    if let Some(rest) = l.strip_prefix("GPF ") {
-                        return Ok(rest.to_string());
-                    }
-                    self.note(l);
-                }
-                Err(RecvTimeoutError::Timeout) => {}
-                Err(RecvTimeoutError::Disconnected) => return Err(format!("MAME exited unexpectedly{}", self.context())),
-            }
-        }
+        self.lp.next_gpf(timeout, debug)
     }
 }
 
 impl Drop for Proc {
     fn drop(&mut self) {
-        let end = Instant::now() + Duration::from_secs(3);
-        loop {
-            match self.child.try_wait() {
-                Ok(Some(_)) => break,
-                Ok(None) if Instant::now() < end => std::thread::sleep(Duration::from_millis(20)),
-                _ => {
-                    let _ = self.child.kill();
-                    let _ = self.child.wait();
-                    break;
-                }
-            }
-        }
+        self.lp.reap();
         for f in &self.files {
             let _ = std::fs::remove_file(f);
         }
@@ -154,33 +114,12 @@ fn spawn(cfg: &MameKeysCfg, plan: &Plan, load_list: Option<&str>) -> Result<Proc
         .arg("-cfg_directory")
         .arg(tmp.join("gpfdiff_mame_cfg"))
         .env("GPF_PLAN", &planf)
-        .stdin(Stdio::null())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped());
+        .stdin(Stdio::null());
     if cfg.debug {
         eprintln!("[mame] spawn {cmd:?}");
     }
-    let mut child = cmd.spawn().map_err(|e| format!("cannot start `{}`: {e}", cfg.mame))?;
-    let stdout = child.stdout.take().ok_or("no stdout")?;
-    let (tx, rx) = channel();
-    if let Some(stderr) = child.stderr.take() {
-        let tx2 = tx.clone();
-        std::thread::spawn(move || {
-            for l in BufReader::new(stderr).lines().map_while(Result::ok) {
-                if tx2.send(l).is_err() {
-                    break;
-                }
-            }
-        });
-    }
-    std::thread::spawn(move || {
-        for l in BufReader::new(stdout).lines().map_while(Result::ok) {
-            if tx.send(l).is_err() {
-                break;
-            }
-        }
-    });
-    Ok(Proc { child, rx, chatter: vec![], files })
+    let lp = LineProc::spawn(&mut cmd, &cfg.mame)?;
+    Ok(Proc { lp, files })
 }
 
 fn parse_hex(h: &str) -> Result<Vec<u8>, String> {

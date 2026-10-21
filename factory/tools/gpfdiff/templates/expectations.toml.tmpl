@@ -1,0 +1,19 @@
+# gpfdiff expectations: the named, reasoned DEVIATIONS of a port from its oracle.
+# Optional file (this exact name next to harness.toml is picked up by `check` and `capture`; `expectations = "path"` at the
+# top of harness.toml points elsewhere). With no [[expected_deviation]] table below it changes nothing.
+#
+# VERDICTS, per scenario and per field:
+#   PASS      no difference beyond the field's tolerance                       exit 0
+#   EXPECTED  every field that differs is covered by a deviation below         exit 0 (still listed, with its reason)
+#   FAIL      some differing field is NOT covered, or the trace length or determinism is wrong   exit 1
+# FAIL always beats EXPECTED: one uncovered field fails the scenario however many are covered.
+# A deviation that never triggered in a run is STALE: reported as a warning (the port got closer to the oracle, or the
+# deviation is mis-scoped), never an error. Clean it up when you see it.
+#
+# A deviation without a reason is a silent one, so `reason` is mandatory.
+#
+#> [[expected_deviation]]
+#> axis      = "x"                              # a field (column) name from harness.toml
+#> scenarios = ["example"]                      # optional; omit for every scenario
+#> reason    = "the port moves 1 px per frame, the original 1.5 px"
+#> until     = "T0123"                          # optional task id, informational

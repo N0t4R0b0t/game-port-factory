@@ -33,6 +33,8 @@ make -C ports/brickfall-coco2/target check    # build (lwasm) + gpfdiff check ..
 make -C ports/brickfall-zxspectrum48/target check-blackbox   # the ZX port as an UNKNOWN ORIGINAL: capture == golden, watch, negative tests
 make -C ports/brickfall-coco2/target check-live-blackbox     # CoCo port checked against that black-box original, live
 gpfdiff watch ports/brickfall-zxspectrum48/blackbox --keys "LEFT@0ms+1s"   # which RAM bytes move when LEFT is held?
+gpfdiff init-oracle my-original --platform zx48     # scaffold a black-box oracle for an original (commented harness.toml)
+make -C ports/brickfall-zxspectrum48/target check-scaffold   # proof: scaffold + minimal edits == golden at every sample
 ```
 
 Platforms:
@@ -72,7 +74,7 @@ Platforms:
 Oracle-mode modules: `fields.rs` (field map: where each column is read from, scale/offset/tolerance), `expect.rs`
 (`expectations.toml`, PASS/EXPECTED/FAIL verdicts, stale detection), `capture.rs` (`gpfdiff capture`).
 Keys mode: `keys.rs` (time axis, key names, plan: pure logic), `keysrun.rs` (MAME process + `lua/gpf_keys.lua`),
-`watch.rs` (`gpfdiff watch`, change de-noising). Keys mode is a second, free-running path next to the `Target` trait
+`watch.rs` (`gpfdiff watch`, change de-noising), `proc.rs` (the MAME child process: spawn, merged stdout/stderr line stream, timeout, reaping; shared by `mame.rs` and `keysrun.rs`), `init.rs` + `templates/` (`gpfdiff init-oracle`). Keys mode is a second, free-running path next to the `Target` trait
 (`runner::run_traces` picks it when the manifest says `[input] mode = "keys"`); `capture`, `check` and live oracles use it unchanged.
 Other modules: `coco.rs` (CoCo pure logic: lwasm map parser, DECB parser, load list), `check.rs` (the `check` command and canary), `report.rs` (table, diff context, JSON,
 colour), `doctor.rs` (prerequisites, ROM search, pre-flight), `errors.rs` (error classification and
@@ -428,6 +430,104 @@ So `$F046` (the ball's row, 255 until the first draw) in `1..=254` is a gate tha
 frame and is idle in its main loop".
 
 Exit 0 when the run completed; 2 for any harness/environment problem (bad manifest, bad `--keys`/`--region`, the ready gate never held, ...).
+
+### init-oracle
+
+`gpfdiff init-oracle <port-dir> --platform zx48|coco2 [--image PATH] [--force]`
+
+Scaffolds a **black-box oracle** (keys mode) for a port's original, so the first session does not start from a blank file.
+It writes four files into `<port-dir>` (created if missing), and the scaffold parses with the real parsers (`gpfdiff check <port-dir> --list` works at once):
+
+| File | What it holds |
+|---|---|
+| `harness.toml` | heavily commented: `[input] mode = "keys"` with `[input.keys]` pre-filled for the platform (zx48 `O P Q A SPACE ENTER`, coco2 the arrow keys + `SPACE`; the valid names are listed in a comment), `[time] fps` (50 / 60), `[boot] image` and the **ready gate** with the observed-state rule explained (commented out, `TODO`), `[state] source = "map"`, four example `[[field]]` entries (`x`, `y`, `room`, `lives`, every `addr = 0x0000  # TODO`) and, as `#> ` lines, working examples of `scale`, `tolerance`, `endian`, `format = "hex"`, `[oracle] source = "trace"`, `ready_keys`, `input_latency_frames` |
+| `expectations.toml` | all commented: the PASS / EXPECTED / FAIL / STALE semantics and one example deviation |
+| `scenarios/example.toml` | a 3 s scenario in milliseconds (`length_ms`, `sample_every_ms`, `at_ms`, `duration_ms`, named buttons) |
+| `NEXT-STEPS.md` | the order of work: `gpfdiff watch` to find the addresses and the gate, `gpfdiff capture` to record goldens |
+
+Lines starting `#> ` are examples that are valid once the `#> ` is deleted (a unit test makes them live and parses the result).
+`recipe` is `"."`, so scenarios go in `scenarios/` next to the manifest and `capture --out golden` makes `golden/`.
+It never overwrites: if any of the four files exists it lists them, writes nothing, and exits 2 (`--force` replaces them).
+`--platform c64` exits 2 and writes nothing (keys mode is not supported on c64: cooperative labels mode only).
+
+Real output:
+
+```
+$ gpfdiff init-oracle my-original --platform zx48 --image original.sna
+wrote     my-original/harness.toml
+wrote     my-original/expectations.toml
+wrote     my-original/scenarios/example.toml
+wrote     my-original/NEXT-STEPS.md
+INIT-ORACLE OK: zx48 black-box oracle scaffold in my-original (4 files)
+  next: edit the TODOs in my-original/harness.toml, then read my-original/NEXT-STEPS.md
+        gpfdiff check my-original --list      (the scaffold already parses)
+        gpfdiff watch my-original --keys "LEFT@0ms+1s" --no-gate      (find the state addresses)
+$ gpfdiff check my-original --list
+example  (150 steps)
+$ gpfdiff init-oracle my-original --platform zx48
+ERROR: refusing to overwrite 4 existing files in my-original:
+  harness.toml
+  expectations.toml
+  scenarios/example.toml
+  NEXT-STEPS.md
+  next: pass --force to replace them, or scaffold into another directory; nothing was written
+$ gpfdiff init-oracle my-original --platform c64
+ERROR: keys mode is not supported on c64 (cooperative labels mode only); see README, "Keys mode (black-box)": the VICE backend has no keys driver, so an original on c64 cannot be driven black-box
+```
+
+The generated `harness.toml` (excerpt; the file is about 100 lines, mostly comments):
+
+```toml
+platform = "zx48"
+recipe   = "."          # directory holding scenarios/*.toml (and golden/*.trace); `capture` writes to <recipe>/captured/ by default
+repeat   = 2            # every scenario runs this many times in fresh emulators; the runs must agree (determinism gate)
+
+...
+# LEFT / RIGHT / FIRE are the three canonical buttons (bits 1/2/4 of `buttons` in a scenario); any other name you
+# add here (UP, DOWN, START ...) can be used in `press = [...]` too. A name that is not a button is taken as a key name.
+...
+[input.keys]
+LEFT  = "O"
+RIGHT = "P"
+UP    = "Q"
+DOWN  = "A"
+FIRE  = "SPACE"
+START = "ENTER"
+
+[time]
+fps = 50                  # the machine's frame rate: ms in scenarios are converted to frames with it (nearest, halves up)
+step_ms = 20             # length of one scenario `step` (only matters for scenarios written in steps, not ms)
+...
+[boot]
+image = "original.sna"   # TODO: the original, a .sna snapshot of the game (MAME loads it with -snapshot)
+# READY GATE (the observed-state rule). ... (the rule is explained here)
+# TODO: uncomment and fill in. Until then frame 0 is simply the first frame (fine for `watch`, not for a recorded oracle).
+#> ready = { addr = 0x0000, in = [1, 254] }
+# A title screen to get past before the gate can hold? Tap keys from the start of the boot clock: NAME@TIME[+HOLD]
+#> ready_keys = ["FIRE@500ms+100ms"]
+timeout_ms = 5000        # how long (emulated time) the gate may take before the run is an error
+...
+[[field]]
+name = "x"
+addr = 0x0000            # TODO
+
+[[field]]
+name = "y"
+addr = 0x0000            # TODO
+
+[[field]]
+name = "room"
+addr = 0x0000            # TODO
+...
+```
+
+**Proof that the scaffold is enough:** `make -C ports/brickfall-zxspectrum48/target check-scaffold` scaffolds a zx48 oracle in a
+temp dir, makes only the edits a user makes (the keys the game reads, the ready gate and the 11 field addresses as literals taken from
+`brickfall.sym`, `recipe` pointing at the scenarios), then `capture` equals the reference model's golden at every sample of all 11
+scenarios and `check` with the scaffold's `[oracle] source = "trace"` example passes. The CoCo Brickfall cannot serve as the
+coco2 stand-in: its 50 Hz simulation takes input once per step on a 60 Hz field clock, so a key held for one 20 ms step (as in
+`paddle_zones`, `speedup`, `wall_bounces`, `full_win`, `miss_dense`) is not reproducible on a frame clock (the other 6 of 11
+scenarios do capture equal). coco2 is covered by the parser unit tests.
 
 ### run
 
@@ -925,6 +1025,9 @@ Built from the dead ends recorded in `ports/brickfall-c64/NOTES.md` and `ports/b
 | `key X: 0 MAME input fields match ...` (script error) | the key name resolved to text that no MAME input field of this machine has (MAME renamed a field) | `mame <machine> -listxml`, or print `ioport.ports[...].fields` in a script; report it |
 | `invalid scenario: the samples at A ms and B ms both land on frame F` | `sample_every_ms` is shorter than a frame at this machine's fps | sample at least one frame apart |
 | `watch` lists hundreds of lines / `bulk: more than 512 bytes changed per frame` | the region contains a screen, a sound buffer or a timer | narrow `--region`; the default excludes the ZX/CoCo video RAM |
+| `refusing to overwrite N existing files` (`init-oracle`, exit 2) | the port dir already has a scaffold file; nothing was written | pass `--force`, or scaffold into another directory |
+| `keys mode is not supported on c64` (`init-oracle`, exit 2) | the VICE backend has only the cooperative (breakpoint) mode | c64 ports use `labels` mode; see "Keys mode (black-box)" |
+| the scaffold's `check` says the golden is missing / `capture` records garbage | the placeholders are still there: every `addr = 0x0000`, the gate and the image path are `TODO` | follow `NEXT-STEPS.md`: `gpfdiff watch` for the addresses and the gate, then `capture` |
 | `canary: ... accepted it` / `CANARY NOT REJECTED` | the comparison cannot fail | harness bug (exit 2). Run `cargo test --offline` in this directory |
 | `unexpected display reply` (`shot`) | VICE sends the display buffer 4 bytes short (3.10) and warp mode skips frames | the crop code only needs the rows it uses; use real time (`shot` does) |
 | real joystick/keyboard input is not covered by `check` | `joyport set` does nothing in headless x64sc; xdotool keys never reach MAME under Xvfb; VICE keyboard-buffer input cannot drive a game that reads the CIA matrix directly | not automatable on c64: test `read_input` by hand. zx48: `make smoke-keys` presses keys in MAME's emulated matrix |
@@ -935,7 +1038,7 @@ Built from the dead ends recorded in `ports/brickfall-c64/NOTES.md` and `ports/b
 
 ## Tests
 
-`cargo test --offline --manifest-path factory/tools/gpfdiff/Cargo.toml` (154 tests, about 4 s, no real
+`cargo test --offline --manifest-path factory/tools/gpfdiff/Cargo.toml` (166 tests, about 4 s, no real
 emulator needed). It covers manifest parsing, the lwasm map and DECB parsers, table and JSON rendering, doctor
 remediation selection (including the CoCo ROM), error classification and exit-code mapping, the canary, and
 end-to-end `check` runs against a fake MAME (zx48 and coco2: the fake refuses to start unless it is handed the
@@ -956,3 +1059,8 @@ and prints the same `GPF` lines. They prove: PASS with the right `input_latency_
 equals the golden, a gate timeout is exit 2 with the gate and last value (JSON kind `ready_gate`), an unknown key lists the valid names,
 a keys-mode port works as a live oracle for a cooperative port, `watch` reports the moved address by frame. The Lua script itself and the real keyboard
 matrices are covered by the real-MAME checks: `make -C ports/brickfall-zxspectrum48/target check-blackbox`.
+
+`init.rs` tests load every scaffolded file (zx48 and coco2) with the real manifest, scenario and expectations parsers, make the `#> `
+examples live and parse those, check the key defaults against `keys::resolve_key`, run `check --list` on a scaffold, and cover the
+refusal to overwrite (including a partial clash that must write nothing) and the c64 / unknown-platform exits. `proc.rs` tests the
+shared MAME process code with `sh` stand-ins (chatter skipped and kept as context, exit reported, timeout, missing binary).

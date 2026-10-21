@@ -17,7 +17,7 @@ MAME    ?= mame
 ZX_ROMPATH ?= $(firstword $(foreach d,$(HOME)/.mame/roms,$(if $(wildcard $(d)/spectrum.zip),$(d))))
 GPFD    = $(GPFDIFF) run --platform zx48 --sna brickfall.sna --labels brickfall.sym --mame $(MAME) --rompath "$(ZX_ROMPATH)"
 
-.PHONY: all check check-blackbox check-render smoke-keys shots clean
+.PHONY: all check check-blackbox check-scaffold check-render smoke-keys shots clean
 all: brickfall.sna
 
 brickfall.sna brickfall.sym: brickfall.asm
@@ -50,6 +50,12 @@ check-blackbox: brickfall.sna $(GPFDIFF)
 	@out=$$($(GPFDIFF) check $(BB) --manifest harness.badkey.toml --only launch_left --no-canary $(BBEMU) 2>&1); rc=$$?; echo "$$out" | head -2; 	  test $$rc -eq 2 && echo "$$out" | grep -q 'unknown key name `CURSORLEFT`' && echo "$$out" | grep -q 'valid names: A-Z' 	  || { echo "FAIL: an unknown key must be exit 2 listing the valid names (got $$rc)"; exit 1; }
 	@$(GPFDIFF) watch $(BB) --region 0xF000:0xF0FF --keys "LEFT@0ms+1000ms" --frames 60 $(BBEMU) > $(BBOUT)/watch.txt; rc=$$?; head -8 $(BBOUT)/watch.txt; 	  test $$rc -eq 0 && grep -Eq '0xF006 +70 -> 00' $(BBOUT)/watch.txt 	  || { echo "FAIL: watch with LEFT held must report the paddle x byte 0xF006 moving (rc $$rc)"; exit 1; }
 	@echo "CHECK-BLACKBOX PASS"
+
+# `gpfdiff init-oracle` earns its keep: scaffold a black-box oracle for this port (as an unknown original), make only the
+# edits a user makes (image, ready gate, the real addresses from brickfall.sym as literals, the 11-column field map),
+# then capture == the reference model's golden at every sample, and `check` against the captured traces. ~45 s.
+check-scaffold: brickfall.sna $(GPFDIFF)
+	GPFDIFF=$(abspath $(GPFDIFF)) MAME=$(MAME) ZX_ROMPATH="$(ZX_ROMPATH)" ./check-scaffold.sh
 
 # read_input against MAME's emulated keyboard matrix (Z X Q A SPACE, Sinclair 2: 6 7 0).
 # Not part of `check` (which overwrites A at gpf_input_ret and so never exercises read_input).

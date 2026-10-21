@@ -1,0 +1,33 @@
+# Next steps for this black-box oracle (platform @PLATFORM@)
+
+`gpfdiff init-oracle` wrote `harness.toml`, `expectations.toml` and `scenarios/example.toml`. The manifest already parses
+(`gpfdiff check . --list` works) but it does not describe your game yet: every `TODO` in it is a value only you can supply.
+
+1. **Image.** Put the original in `@IMAGE@` (or edit `[boot] image`): @IMAGE_KIND@.
+   `gpfdiff doctor --platform @PLATFORM@` lists what is missing (MAME, the @MACHINE@ ROM, which is your own).
+2. **Find the state addresses.** Press a key and see which RAM bytes move:
+
+   ```
+   gpfdiff watch . --keys "LEFT@0ms+1s" --frames 60 --no-gate
+   ```
+
+   Default region is @REGION@ (RAM without the screen); narrow it with `--region A:B`. A group that changes every frame
+   is a counter; one that moves while LEFT is held and stops at a wall is a position. Repeat with RIGHT, FIRE, until each
+   column you want has an address, then put them in the `[[field]]` entries of `harness.toml`.
+3. **Find the ready gate.** The first frames of `watch --no-gate` are the program starting; pick a byte whose value changes once
+   it is idle in its main loop and put it in `[boot] ready` (the comment in `harness.toml` explains the rule).
+   Then run `watch` again WITHOUT `--no-gate` to confirm the timeline starts where you expect.
+4. **Write scenarios** in `scenarios/NAME.toml` (see `example.toml`).
+5. **Record goldens** from the original, once:
+
+   ```
+   gpfdiff capture . --scenario all --out golden
+   ```
+
+   Every scenario runs `repeat` times in fresh emulators and the runs must agree, otherwise nothing is written (exit 2).
+   Commit `golden/`; from then on a port is verified with `[oracle] source = "trace"`, `dir = "golden"` and no original.
+   (Traces of commercial games stay private.)
+6. **Check a port** against the goldens with `gpfdiff check <port-dir>` (its own harness.toml with the same field names).
+   Differences you accept on purpose go in `expectations.toml`, each with a reason.
+
+Reference: `factory/tools/gpfdiff/README.md`.
