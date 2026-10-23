@@ -5,6 +5,10 @@ tools, watched two ports of one original game pass the same tests on a Commodore
 ZX Spectrum, broken the game on purpose to see the harness catch it, and know how to start
 your own port.
 
+The examples are 8-bit computers because that is where the project started; the workflow is
+the same for any source and target, including consoles and DOS PCs. What changes per system
+is its platform profile and the emulator backend the harness uses to drive it.
+
 If you only want the idea first, read the [README](../README.md) (five minutes) and come back.
 
 ## The one idea you need

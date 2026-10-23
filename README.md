@@ -1,12 +1,23 @@
 # Game Port Factory
 
-An on-disk state machine for **resumable, episodic game porting projects** — built for work
-that happens in bursts, weeks apart, driven by a session that remembers nothing.
+A workflow and toolkit for **porting games from one system to another** (vintage computers,
+consoles, DOS PCs), built so that AI agents can do most of the work and a machine check
+proves each result. It started with 8-bit computers: an original game verified on three
+CPUs, and *Fantasy World Dizzy* from the ZX Spectrum to the Tandy CoCo 2.
 
 The premise: a port is never reusable, but the scaffolding around it is. This repo is that
-scaffolding — a stage model, a strategy-classification procedure, a task graph with cost
-routing, and a handoff discipline that lets a cold session resume exactly where the last
-one stopped.
+scaffolding:
+
+- **`gpf`**, an on-disk state machine for resumable, episodic projects: a stage model, a
+  strategy-classification procedure, a task graph where every task carries a model tier and
+  a verifier, and a handoff discipline that lets a cold session resume exactly where the last
+  one stopped.
+- **`gpfdiff`**, a differential harness that replaces the person watching two screens: it runs
+  a port and an oracle in emulators, injects the same input, reads the game state out of RAM
+  every step, and reports the first difference. The oracle is a reference model for a game you
+  wrote, or the original binary itself, driven from outside, for one you did not.
+- **Platform profiles as data** (`factory/platforms/`): ten so far, from the ZX81 and the NES to
+  DOS PCs and the Dreamcast, used to plan the order of ports by what actually carries over.
 
 **New here? Start with [`docs/GETTING-STARTED.md`](docs/GETTING-STARTED.md)** — a 30-minute
 guided tour: build the tools, run the Brickfall demo on a C64 and a ZX Spectrum, break it on
@@ -109,8 +120,15 @@ Stages 1–4 run once per **game** and produce the recipe. Stages 5–7 run once
 
 The factory is no longer scaffolding: it has been used end to end on a real port.
 
+**Scope.** Any source and target system is in scope: computers, consoles, DOS PCs. The
+first ports are 8-bit computers because they are small enough to finish and hard enough to
+matter. Adding a system means writing its platform profile (`gpf platforms` lists them) and,
+to verify ports on it, a harness backend for its emulator (`factory/tools/gpfdiff/README.md`,
+"Adding a backend"). Backends exist today for VICE (Commodore 64) and MAME (ZX Spectrum and
+Tandy CoCo 2).
+
 **`ports/dizzy-coco2`** — *Fantasy World Dizzy* from ZX Spectrum 48K to the Tandy CoCo 2
-(6809, 64K), reimplemented rather than translated. It is at the iterate stage: all 100-odd
+(6809, 64K), reimplemented rather than translated. It is at the iterate stage: all 101
 rooms, items, dialogue and sound are in, with a differential harness that runs the original
 and the port side by side in emulators and compares them, plus a playthrough bot that
 drives the real route. The last open item is one unreachable-by-bot puzzle step in room 93.
@@ -124,12 +142,14 @@ for byte identical to the author's. No game data is in this repo. See
 `factory/recipes/` holds the reusable decisions the ports produced, each with the
 precondition under which it is safe.
 
-## Demo: Brickfall (C64 and ZX Spectrum)
+## Demo: Brickfall (C64, ZX Spectrum, CoCo 2)
 
-A small original paddle-and-bricks game, built to show the factory end to end on two CPUs
-with no third-party IP. The rules live once in `games/brickfall/recipe/`; a Rust reference
-model is the oracle (there is no original to diff against); each port is verified by
-polling a 16-byte RAM state block and diffing it against golden traces, step by step.
+A small original paddle-and-bricks game, built to show the factory end to end on three CPUs
+(6502, Z80, 6809) with no third-party IP. The rules live once in `games/brickfall/recipe/`; a
+Rust reference model is the oracle (there is no original to diff against); each port is
+verified by polling a 16-byte RAM state block and diffing it against golden traces, step by
+step. The CoCo 2 port runs at 60 Hz instead of 50 Hz and still matches every step. The Spectrum
+build doubles as a stand-in "unknown original" for practising the black-box oracle workflow.
 
 | Commodore 64 (6502, VICE) | ZX Spectrum 48K (Z80, MAME) |
 |---|---|
@@ -144,10 +164,11 @@ make -C ports/brickfall-zxspectrum48/target check   # same traces, MAME backend
 Needs `acme`, `sjasmplus`, VICE (`x64sc`), MAME and Rust. The ZX check also needs your own
 `spectrum.zip` MAME romset in `~/.mame/roms` (or `ZX_ROMPATH`); no ROM is distributed.
 
-What it demonstrates: one recipe, two ports, one harness (`factory/tools/gpfdiff`) with a
+What it demonstrates: one recipe, three ports, one harness (`factory/tools/gpfdiff`) with a
 backend per emulator; mutation tests prove the checks fail when the game is wrong; art and
 sound are added without touching the verified simulation. Sound is verified by trigger
-tests, not by ear.
+tests, not by ear. `make -C ports/brickfall-coco2/target check` runs the third port, and
+`gpfdiff doctor --platform all` lists anything your machine is missing.
 
 ## Bring your own game
 
