@@ -1,5 +1,7 @@
 # Fantasy World Dizzy -- complete solution path vs the TAPE build
 
+**CURRENT STATE (2026-10-25): every row below is IMPLEMENTED in the tape and floppy builds and the whole game is played end to end by the bot (`tools/playthrough.sh`, 106 segments, 30 coins, `PLAYTHROUGH PASS deaths=0`; the same plan passes on the Spectrum original, `tools/zx_playthrough.sh`). The route the bots play is in `docs/PLAYTEST-GUIDE.md` and `harness/playthrough_route.lua`; the section "Order the bots play it" below lists the coin order. The status annotations in the tables are historical.**
+
 Analysis 2026-10-02; **STATUS UPDATE T0230: row 27 COMPLETE (black hole ON, whiskey/drunk, manure message) + inventory names of egg/potion/crowbar/window frame/empty bottle IMPLEMENTED -- NOTES.md `## T0230`**; **STATUS UPDATE T0227: row 19 (rug + room 94 daggers/carpets) IMPLEMENTED, row 27 PART (bag IMPLEMENTED, black hole built but OFF by `TAPE_HOLE`, whiskey + manure not built), inventory names fixed for tape items -- NOTES.md `## T0227`**; **STATUS UPDATE T0226: rows 18, 21, 22 (pickaxe + rock, door knocker, bucket fill) and the banners of the 19 tape-only rooms are IMPLEMENTED -- NOTES.md `## T0226`**; **STATUS UPDATE T0223 (same day)**: rows 20, 23, 24 (shopkeeper, plant, water + beanstalk) are now IMPLEMENTED -- see the 'T0223 status' block under section 5 and NOTES.md `## T0223`. The text below keeps the ORIGINAL audit findings (what was missing) for the record; statuses in the tables are annotated. Sources: `research/D3-prior-art/original_source/X-ALL.TXT`
 (cited as `X:<line>`), `extracted/actors.json`, `target/actor_data*.asm`,
 `target/text_src/{gameplay,actors}.asm`, `target/tape_code.asm`, `target/tape_win_code.asm`,
@@ -86,7 +88,7 @@ original's trigger logic (GUESS where the map/art route was not walked; marked ?
 
 | # | Room | raw -> px | Gate |
 |---|---|---|---|
-| 12 | 36 | (82,160) -> (200,160) | in the troll's launch zone (X:3359 box 82..90): needs the troll gone (row 17 miner) or, in the port, the apple (row 3) |
+| 12 | 36 | (82,160) -> (200,160) | in the troll's launch zone (X:3359 box 82..90): needs the troll gone (row 17 miner) or, in the port, the apple (row 3). The bot takes it late (28th coin), after the miner |
 | 29 | 52 | (86,88) -> (216,88) | row 4; railing decoy on top of it (row 26) |
 | 22 | 51 | (88,152) -> (224,152) | rows 4-5 |
 | 15 | 67 | (62,112) -> (120,112) | row 4 ? (west wing, 51+16) |
@@ -102,24 +104,36 @@ original's trigger logic (GUESS where the map/art route was not walked; marked ?
 | 25 | 57 | (72,160) -> (160,160) | row 9 route ? |
 | 28 | 72 | (76,80) -> (176,80) | row 9 route ?; railing decoy |
 | 6 | 73 | (56,72) -> (96,72) | row 9 route ?; window-frame decoy |
-| 27 | 40 | (50,72) -> (72,72) | row 16 (egg in nest) |
-| 10 | 41 | (44,64) -> (48,64) | row 17 shove is east edge; rock (row 18) absent in port |
+| 27 | 40 | (50,72) -> (72,72) | on the upper walkway: reachable by the lift without the egg (the bot takes it on the first visit, as the 22nd coin); the egg (row 16) is needed only to cross the floor east to the mines |
+| 10 | 41 | (44,64) -> (48,64) | pickaxe drop removes the rock (row 18, T0226); the miner (row 17) is a separate trigger at the east edge |
 | 21 | 49 | (62,160) -> (120,160) | row 15 hawk |
 | 9 | 22 | (36,104) -> (16,104) | row 11 (well -> 39 -> 23 -> 22) ? |
 | 8 | 24 | (44,160) -> (48,160) | row 11 ? |
-| 2 | 31 | (38,120) -> (24,120) | row 11 ? (south of 47) |
+| 2 | 31 | (38,120) -> (24,120) | none: reached by walking right off the left crate of 47; the way out is a chain of pixel-tight jumps (T0232; the bot does it with real keys on both machines, 7th coin) |
 | 13 | 46 | (86,128) -> (216,128) | row 11 ? (docks) |
-| 1 | 63 | (58,152) -> (104,152) | crafty cloud (47+16): from 47 ledge (88,104) jump right onto the roof cap (152,72), jump up (T0232, jumptrace-verified; bot pending) |
+| 1 | 63 | (58,152) -> (104,152) | crafty cloud (47+16): from 47 ledge (88,104) jump right onto the roof cap (152,72), jump up (T0232). Played by the bot as the 30th and last coin |
 | 30 | 76 | (70,64) -> (152,64) | ? volcano (60+16) |
 | 11 | 77 | (54,112) -> (88,112) | ? active volcano; lava kills |
 | 26 | 75 | (56,88) -> (96,88) | **rows 20-24 (beanstalk)**: 75 is above 59, east of 74 |
 | 14 | 92 | (68,88) -> (144,88) | **rows 20-24** via 74/75/91 (cloud rooms) ? |
-| 20 | 94 | (60,152) -> (112,152) | clouds (93 -> 94); NOTES T0239 reached it by warp, route from start untraced |
+| 20 | 94 | (60,152) -> (112,152) | clouds (93 -> 94), rug first (row 19); take it BEFORE the lift is lowered (the lowered lift covers it). Walked by the bot (29th coin) |
 
 Coins that only the beanstalk chain (rows 20, 23, 24) reaches: **75, 92, 94**. If the volcano slope
 (76 -> 77 -> 93) is a second route to the cloud castle (the ZX map image suggests the hill climbs
 toward it) then only **75 and 92** are strictly beanstalk-gated; I could not confirm that from data
-(GUESS). Coin 63's route: the roof cap of 47 (T0232, measured on the original and in the port). Coin 31 (The Amazing Illusion) is a one-way pocket in the original: OPEN.
+(GUESS). Coin 63's route: the roof cap of 47 (T0232, measured on the original and in the port). Coin 31 (The Amazing Illusion) is a pocket in the original with a pixel-tight way out (T0232), played by both bots: not open any more.
+
+### Order the bots play it (current; coin counter after each stage)
+
+1. Dungeon: jug, apple (troll), loaf (rat, from the shelf reached via room 35), out via 52. Coins 52, 51, 67, 68 (1-4); Denzil's rope ties the gator in 53.
+2. Rocks of 53 and 35, castle staircase coin (5), the attic bone, Armorog fed (50), hawk coin in 49 (6), three rocks into the river in 48, key 4.
+3. West: room 31 coin (7, the escape chain), docks coin (8), Dozy's potion in 45, the sleeping dragon in 54.
+4. Well room: bag, two coins under the leaves and the railing (10), tree house: cow, Dylan, leaves coin (11), volcano key 3 and coin (12-13), keys 3 and 4 into the hut.
+5. Denzil's Pad coin (14), East Wing coin (15), key 1 from the East Tower, hut railing coin (16), Doug and the crowbar, knocker, rooms 89/87/86 coins (17-19), the well lid, Market Square coin (20), shopkeeper trade (cow -> bean), church key 2 and coin (21), key 2 into the hut.
+6. First lair visit: the walkway coin only (22). **The lair floor cannot be crossed yet.** Window-frame coin in 73 (23), knocker -> West Tower -> empty bucket -> filled at the volcano, bean + full bucket -> beanstalk, clouds 75 / 92 / 76 coins (24-26).
+7. **The room-93 egg** is taken in the Cloud Castle, carried down through 92/59 and the village, into the hut and down its shaft, and dropped in the nest box: the lair dragon sleeps. Then mines: pickaxe + rock + coin (27), miner (troll leaves 36), rug, back up to the hut.
+8. Dungeon coin (28, troll gone), back up the clouds, rug over the daggers in 94, coin under the table (29), switch, Daisy meeting (heart demo), down the clouds.
+9. Back west along the whole route to the Warehouse roof: Crafty Cloud coin (63, the 30th), back east to Daisy's hut (73): the win.
 
 ## 3. Tape build status summary
 

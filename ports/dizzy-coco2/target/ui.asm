@@ -461,4 +461,3 @@ bd_pat  fcb $18,$3c,$7e,$7e,$ff,$ff,$7e,$3c
 bd_pat_end
 
 bd_n        fcb 0
-bd_m        fcb 0

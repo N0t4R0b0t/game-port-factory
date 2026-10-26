@@ -104,15 +104,18 @@ ur_loop
         cmpa #ROU_RAT
         bne ur_next
 
+        ; T0255: X-ALL `delay` of the rat's record is 2 (domoving's delayrou): the routine
+        ; runs on every 2nd actor tick, so the rat moves 4 px per 2 ticks (the port ran it every tick = twice as fast).
+        lda rat_dly
+        eora #1
+        sta rat_dly
+        lbne ur_done
+
         tst rat_fled
         bne ur_flee
 
-        lda rat_step
-        beq ur_flip
-        deca
-        sta rat_step
-        bra ur_boundcheck
-ur_flip
+        dec rat_step             ; T0255: ratrou's `dec oldmovefrm / call z,ratnewdir`: the leg lasts exactly rat_step RUNS
+        bne ur_boundcheck
         jsr rat_newdir
 ur_boundcheck
         lda 2,y                  ; current x
@@ -329,6 +332,7 @@ ut_msgthen
         jsr msg_begin
         jsr prtmessage
         jsr msg_wait_dismiss
+        jsr box_reset            ; T0258 (D1): windowrou1
         lda cur_room
         cmpa #36
         beq ut_launch
@@ -397,6 +401,7 @@ ut_showmsg
         ldx #msg_troll
         jsr prtmessage
         jsr msg_wait_dismiss
+        jsr box_reset            ; T0258 (D1): windowrou1
 ut_nomsg
 
         lda #1
@@ -509,7 +514,8 @@ uf_done
 ur_n                fcb 0
 fle_n               fcb 0
 rat_dir             fcb 0
-rat_step            fcb 16
+rat_step            fcb 60
+rat_dly             fcb 0     ; T0255: delay-2 phase: toggled each call, the call that leaves it 0 runs
 rat_target_active   fcb 0
 rat_target_x        fcb 0
 rat_fled            fcb 0

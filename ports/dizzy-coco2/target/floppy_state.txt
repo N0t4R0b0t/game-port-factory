@@ -8,18 +8,18 @@ S actor_acc 1                 # T0237 actor-clock accumulator (4 actor ticks per
 S pn_lfsr 2                   # breath/noise LFSR (cosmetic, 2 bytes, keeps the sequence exact)
 S upsidedown 2                # upsidedown (world flipped) + fb_flip (derived from it by draw_ui, kept consistent)
 S lives 4                     # lives, coins, cur_room, room_load_seq (hawk/dagger... compare it with their own copy to decide 'room just entered': restored, and load is made NOT to bump it)
-S flame_ctr 13                # flame/water animation counters+pointers (flame_ctr..fireout): fireout is the puzzle flag
+S flame_ctr 12                # flame/water animation counters+pointers (flame_ctr..fireout): fireout is the puzzle flag
 S dizzy_x 16                  # dizzy_x,y,dy,floor,dir, jump_on, jump_anim, seq, anim, anim_div, ff, h, probe_x/y, try_x, vstep
 S denzil_gave_rope 1          # Denzil gave the rope (flag inside the code block)
-S ai_n 380                    # actors.asm vars (pickup_timer, drop_slot, inv_cursor.. inv, inv_cap) + actor_ram (344 B): ONE run
-S croc_var_a 63               # croc vars, completedgame, ov_* temps, coin_ram (45 B), respawn_room/x/y (the checkpoint): ONE run
-S dg_y 26                     # gameplay.asm vars dg_y..spm_i: killed, death_msg, troll_bribed, rng_ctr, *_msg_pending, pib_*
+S ai_n 379                    # actors.asm vars (pickup_timer, drop_slot, inv_cursor.. inv, inv_cap) + actor_ram (344 B): ONE run
+S croc_var_a 64               # croc vars, completedgame, ov_* temps, coin_ram (45 B), respawn_room/x/y (the checkpoint): ONE run
+S dg_y 24                     # gameplay.asm vars dg_y..spm_i: killed, death_msg, troll_bribed, rng_ctr, *_msg_pending
 S cdt_n 4                     # drop-trigger counter + key-machine vars (cdk_*)
 S shop_count 3                # shopkeeper countdown, junk counter, stalk_grown
 S full_bucket 2               # bucket filled: pointer to the full-bucket actor record
 S us1_n 5                     # lift/switch tracker (us1_n, us1_lift, us1_sw)
 S uh_n 3                      # hawk: uh_n, uh_dc, uh_seq
-S ud40_n 17                   # dragon 40 / log 48 vars: ud40_n, dr_owner, dr_slots(4), egg slot, waterheight, tide_list(6), ul48_*
+S ud40_n 20                   # dragon 40 / log 48 vars: ud40_n, dr_owner, dr_slots(4), egg slot, waterheight, tide_list(6), ul48_*
 S dz_talks 1                  # Dozy talk counter
 S udd_rec 2                   # Daisy record pointer
 S hd_dir 4                    # heart demo direction patch + RNG seed (outlive a demo)
@@ -32,10 +32,10 @@ S coin_init_tape 45           # the LIVE tape coin table (15 x 3)
 S dgf_i 18                    # block D: dragon vars dgf_i .. dragon_headfrm, dragon_flame_x[6]
 S uc_n 3                      # block D: crocodile (uc_n, uc_slot word)
 S up_n 6                      # block D: portcullis
-S ur_n 15                     # block D: rat/troll/hazard vars (ur_n..uf_dy)
+S ur_n 16                     # block D: rat/troll/hazard vars (ur_n..uf_dy)
 S haz_msg 2                   # block D: which death line the hazard uses
 S ua_n 5                      # block D: armorog
-S ul_n 11                     # block D: lifts/dagger vars
+S ul_n 12                     # block D: lifts/dagger vars
 # ---- NOT SAVED (T) ------------------------------------------------------------------------------------
 T FD_NMIV 3  # disk driver NMI hook
 T ui_last_lives 3  # banner/UI draw state: draw_ui repaints from lives/coins/room
@@ -86,7 +86,10 @@ T msg_dozy_end 315  # ROOM_UNPACK_BUF: the room's unpacked placements, rebuilt b
 T rat_sv_hdr_a 1  # per-pass / per-draw temporaries, rewritten before every use
 T rat_sv_hdr_b 1  # per-pass / per-draw temporaries, rewritten before every use
 
+T cl_tp 12  # T0261 left-clip scratch (floppy_leftclip.asm: cl_tp..cl_j), rewritten by every load_room
+T CLIPBUF 278  # T0261 cropped sprites of the current room: rebuilt by load_room (= CLIP_BUF_LEN; if roompack's number grows, grow this)
 T fd_yc 2  # disk driver: count for the halting read loop
 T sv_base 3  # quick-save resident vars (overlay address, last result)
 T fb_k1 1  # fb_stablekeys' last-read temp (differs between a box closing and a load: found by the round-trip test)
 T $3521 1  # a byte in an unloaded gap that only the playthrough bot's stray_fix pokes (harness/playthrough.lua), ABSOLUTE: not written by the game
+T $3400 1  # same BASIC RAM-sweep stray as $3521 (NOTES T0130): the dyn run's live snapshot has $00 here (stray_fix in the bot repairs it to the file byte before checkpoint 1). ABSOLUTE: the address lands on cdt_key_tab+3 in the T0254 layout; if the layout moves, re-run floppy_state_check.py and re-address

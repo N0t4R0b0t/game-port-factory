@@ -160,6 +160,9 @@ ZXO.steps["20.3"] = { seq = {
 -- potion's pickup stands next to him: its DOWN presses already count 1-2.  The first talk is all that is needed for the potion; the port's 3 extra
 -- "kick" talks would push the counter to 5 and float him off.
 for _, k in ipairs({ "24.3", "24.4", "24.5" }) do ZXO.steps[k] = false end
+-- T0259 (D2): the CoCo takes the pickup in X-ALL's order (the LAST movingdata record first): Dozy (record 40) before the potion (15). The engine
+-- (pt_engine shadowed()) therefore stands where only the potion is in reach, so the CoCo plan keeps its own three "kick" talks (4 talks, no float).
+CO.steps["73.7"] = { seq = { { "pickup", "windowframe" }, { "coin" } } }   -- T0259: actors first, then the coin under the frame (comment at the segment; the key is the ZX PAIR number 73 of port segment 68)
 -- Hut lift (56): the bar is only at floor level for a moment; the port's route happens to arrive when it is there, the ZX's lift runs on a different
 -- phase relative to the walk, so wait for it.
 ZXO.steps["49.1"] = { seq = {
@@ -205,14 +208,16 @@ R.segments = {
     { "exit", "right", to = 36, from = { y = 80 } },
   }),
   S("The shelf: the rat, then out through the ceiling gap", {
-    -- The rat patrols x 48..192 (4 px/pass, kills on contact) and, once fed, runs right to x=224 and vanishes.
+    -- The rat patrols x 48..192 (4 px per 2 actor ticks, T0255; kills on contact) and, once fed, runs right to x=224 and vanishes.
     -- Arrival is at x=8, where it cannot reach (it never goes below 48).  Wait for it to be far right, step in,
     -- drop the loaf (the inventory is modal: the rat does not move), step back out of its way.
     { "wait_for", function() return rat_x() >= 104 end, sec = 60, what = "rat far to the right" },
-    { "drop", "loaf", at = { { 40, 44 }, 80 },   -- the loaf lands at (x&0xF8)+8 = 48: the rat only patrols x>=48, so 40 px left of it would be unreachable
+    -- T0255: the drop moved from x 40..44 (loaf at 48 = the very end of the patrol: with the original's pace and leg lengths the rat
+    -- almost never lands on it, 240 s were not enough) to 60..68, the ZX bot's own spot (loaf at 72, inside the rat's usual sweeps).
+    { "drop", "loaf", at = { { 60, 68 }, 80 },   -- the loaf lands at (x&0xF8)+8 = 72; it must stay >= 48 (the rat only patrols x>=48)
       expect = function() return rd("rat_target_active") == 1 or rd("rat_fled") == 1, "rat not sent to the loaf" end },
     { "walk_to", x = 8, y = 80 },
-    { "wait_for", function() return rd("rat_fled") == 1 and rat_room() == 255 end, sec = 60, what = "rat eats the loaf and leaves",
+    { "wait_for", function() return rd("rat_fled") == 1 and rat_room() == 255 end, sec = 90, what = "rat eats the loaf and leaves",
       onfail = function() return string.format("[rat room=%d x=%d fled=%d target=%d tx=%d loaf_room=%d]", rat_room(), rat_x(), rd("rat_fled"), rd("rat_target_active"), rd("rat_target_x"), loaf_room()) end },
     { "exit", "up", to = 52 },
   }, function() return rd("cur_room") == 52 and rd("rat_fled") == 1, "room=" .. rd("cur_room") end),
@@ -572,7 +577,7 @@ R.segments = {
     { "exit", "right", to = 89, arrive = { y = { 96, 112 } } },
     { "coin" },
   }, function() return rd("coins") == 17 and inv_has(21), "coins=" .. rd("coins") end),
-  S("To the Meeting Hall (87) over the top of the lift", {
+  S("Room 87 (Meeting Hall) via the lift roof", {
     { "exit", "left", to = 88 },
     { "wait_for", function() return elders_lift_y() <= 62 end, sec = 90, what = "the lift bar at the top" },
     { "exit", "left", to = 87 },
@@ -685,6 +690,8 @@ R.segments = {
     { "exit", "right", to = 73, from = { y = 96 } },
     -- (known fidelity gap, NOTES T0236: coin_covered ignores tape-table actors, so the first DOWN here takes the coin
     -- through the window frame; the second takes the frame)
+    -- T0259 (D2): X-ALL tests the actors BEFORE the coins (domoving, then pickupcoins), so the first DOWN takes the frame and the coin
+    -- needs its own press (CO override below; the ZX plan above already works like that).
     { "pickup", "windowframe" },
     { "drop", "windowframe" },
   }, function() return rd("coins") == 24, "coins=" .. rd("coins") end),

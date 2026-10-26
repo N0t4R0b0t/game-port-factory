@@ -24,17 +24,8 @@
 -- The two .bin halves are left in /tmp by tools/stage_pack.sh's raw pass.
 local mem = manager.machine.devices[":maincpu"].spaces["program"]
 local cpu = manager.machine.devices[":maincpu"]
-local function load_decb(path)
-  local fh=io.open(path,"rb"); local data=fh:read("*all"); fh:close(); local pos=1
-  local allram=false
-  while pos<=#data do local t=data:byte(pos)
-    if t==0 then local len=data:byte(pos+1)*256+data:byte(pos+2)
-      local addr=data:byte(pos+3)*256+data:byte(pos+4)
-      if addr>=0x8000 and not allram then mem:write_u8(0xffdf,0); allram=true end
-      for i=0,len-1 do mem:write_u8(addr+i,data:byte(pos+5+i)) end
-      pos=pos+5+len
-    elseif t==0xFF then return data:byte(pos+3)*256+data:byte(pos+4) else break end end
-end
+local HLIB = dofile("harness/lib.lua")
+local function load_decb(path) return HLIB.load_decb(path, mem) end   -- harness/lib.lua
 local f,loaded,checked=0,false,false
 emu.register_periodic(function()
   f=f+1

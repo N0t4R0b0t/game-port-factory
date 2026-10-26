@@ -21,17 +21,8 @@ local cpu=manager.machine.devices[":maincpu"]
 local row3=manager.machine.ioport.ports[":row3"]
 local fl={} ; for n,f in pairs(row3.fields) do fl[n]=f end
 local function key(n,d) fl[n]:set_value(d and 1 or 0) end
-local function load_decb(path)
-  local fh=io.open(path,"rb"); local data=fh:read("*all"); fh:close(); local pos=1
-  local allram=false
-  while pos<=#data do local t=data:byte(pos)
-    if t==0 then local len=data:byte(pos+1)*256+data:byte(pos+2)
-      local addr=data:byte(pos+3)*256+data:byte(pos+4)
-      if addr>=0x8000 and not allram then mem:write_u8(0xffdf,0); allram=true end
-      for i=0,len-1 do mem:write_u8(addr+i,data:byte(pos+5+i)) end
-      pos=pos+5+len
-    elseif t==0xFF then return data:byte(pos+3)*256+data:byte(pos+4) else break end end
-end
+local HLIB = dofile("harness/lib.lua")
+local function load_decb(path) return HLIB.load_decb(path, mem) end   -- harness/lib.lua
 local function stray_fix(path)
   local fh=io.open(path,"rb"); local d=fh:read("*all"); fh:close(); local pos=1
   while pos<=#d and d:byte(pos)==0 do
@@ -575,12 +566,15 @@ local function script()
       local len=d:byte(pos+1)*256+d:byte(pos+2); local addr=d:byte(pos+3)*256+d:byte(pos+4)
       if addr<=lo and addr+len>=hi then
         found=true
+        -- declared state living in the slot: full_bucket's pointer (T0226) and the joystick vars (T0240)
+        local state={}
+        for _,n in ipairs{"joy_f","joy_acc","joy_armed"} do if SYM[n] then state[SYM[n]]=true end end
         for a=lo+3,hi-1 do
-          if a~=SYM.full_bucket and a~=SYM.full_bucket+1 and mem:read_u8(a)~=d:byte(pos+5+(a-addr)) then bad=bad+1 end end
+          if a~=SYM.full_bucket and a~=SYM.full_bucket+1 and not state[a] and mem:read_u8(a)~=d:byte(pos+5+(a-addr)) then bad=bad+1 end end
       end
       pos=pos+5+len
     end
-    report(found and bad==0,string.format("TAPE_LOW_REGION3 ($%04X-$%04X) content unchanged after the whole run except its 3 state bytes + full_bucket's pointer (T0226) (%d bytes differ)",lo,hi,bad))
+    report(found and bad==0,string.format("TAPE_LOW_REGION3 ($%04X-$%04X) content unchanged after the whole run except its 3 state bytes + full_bucket's pointer (T0226) + the joystick vars (T0240) (%d bytes differ)",lo,hi,bad))
     -- and its free tail (never loaded: bytes are whatever RAM held) is not touched by the
     -- game: the real-boot proof is harness/tape_boot_regions.py's pattern test
   end

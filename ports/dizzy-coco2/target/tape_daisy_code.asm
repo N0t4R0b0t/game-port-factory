@@ -83,6 +83,9 @@ ud94_daisy
         lda 3,y
         adda #21
         sta 3,x
+        lda 7,x                   ; T0255: anidaisy -- the colour's bit 7 (= drawn mirrored) flips on every run
+        eora #$80
+        sta 7,x
 udd_ret
         rts
 udd_hit
@@ -105,7 +108,8 @@ udd_hit
         sta ,x                    ; daisy1here.room := 73
         ldx #msg_daisyruns
         jsr tape_win_one          ; daisyrunsmess; musicoff = the box's own SPACE
-        jmp force_redraw          ; windowrou1's resetuproom
+        jsr box_reset             ; T0258 (D1): windowrou1's resetuproom
+        jmp force_redraw
 udd_rec fdb 0
 
 ; A = routine id -> X = its record in actor_init_tape, or 0.

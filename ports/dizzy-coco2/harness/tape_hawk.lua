@@ -10,17 +10,8 @@ local cpu=manager.machine.devices[":maincpu"]
 local row3=manager.machine.ioport.ports[":row3"]
 local fl={} ; for n,f in pairs(row3.fields) do fl[n]=f end
 local function key(n,d) fl[n]:set_value(d and 1 or 0) end
-local function load_decb(path)
-  local fh=io.open(path,"rb"); local data=fh:read("*all"); fh:close(); local pos=1
-  local allram=false
-  while pos<=#data do local t=data:byte(pos)
-    if t==0 then local len=data:byte(pos+1)*256+data:byte(pos+2)
-      local addr=data:byte(pos+3)*256+data:byte(pos+4)
-      if addr>=0x8000 and not allram then mem:write_u8(0xffdf,0); allram=true end
-      for i=0,len-1 do mem:write_u8(addr+i,data:byte(pos+5+i)) end
-      pos=pos+5+len
-    elseif t==0xFF then return data:byte(pos+3)*256+data:byte(pos+4) else break end end
-end
+local HLIB = dofile("harness/lib.lua")
+local function load_decb(path) return HLIB.load_decb(path, mem) end   -- harness/lib.lua
 local function stray_fix(path)
   local fh=io.open(path,"rb"); local d=fh:read("*all"); fh:close(); local pos=1
   while pos<=#d and d:byte(pos)==0 do

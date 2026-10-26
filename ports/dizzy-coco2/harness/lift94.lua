@@ -39,17 +39,8 @@ local cpu=manager.machine.devices[":maincpu"]
 local row3=manager.machine.ioport.ports[":row3"]
 local fl={} ; for n,f in pairs(row3.fields) do fl[n]=f end
 local function key(n,d) fl[n]:set_value(d and 1 or 0) end
-local function load_decb(path)
-  local fh=io.open(path,"rb"); local data=fh:read("*all"); fh:close(); local pos=1
-  local allram=false
-  while pos<=#data do local t=data:byte(pos)
-    if t==0 then local len=data:byte(pos+1)*256+data:byte(pos+2)
-      local addr=data:byte(pos+3)*256+data:byte(pos+4)
-      if addr>=0x8000 and not allram then mem:write_u8(0xffdf,0); allram=true end
-      for i=0,len-1 do mem:write_u8(addr+i,data:byte(pos+5+i)) end
-      pos=pos+5+len
-    elseif t==0xFF then return data:byte(pos+3)*256+data:byte(pos+4) else break end end
-end
+local HLIB = dofile("harness/lib.lua")
+local function load_decb(path) return HLIB.load_decb(path, mem) end   -- harness/lib.lua
 local function stray_fix(path)
   local fh=io.open(path,"rb"); local d=fh:read("*all"); fh:close(); local pos=1
   while pos<=#d and d:byte(pos)==0 do
@@ -77,6 +68,7 @@ local f,loaded,stage,t=0,false,"boot",0
 local boot_live,settle_count=0,0
 local saw_v1_1=false
 local lift_y_min,lift_y_max=255,0
+local act_passes,last_rng=0,nil   -- T0262: mainloop passes (rng_ctr changes, one per pass) with the lift ACTIVE (var1 == 1) between its top (56) and the stop
 local function fail(msg) print("LIFT94 FAIL at "..stage..": "..msg); stage="done"; manager.machine:exit() end
 
 emu.register_periodic(function()
@@ -124,12 +116,27 @@ emu.register_periodic(function()
     local v1,ly = mem:read_u8(lb+5), mem:read_u8(lb+3)
     if ly<lift_y_min then lift_y_min=ly end
     if ly>lift_y_max then lift_y_max=ly end
+    local rc=r("rng_ctr")
+    if v1~=0 and ly<100 and last_rng and rc~=last_rng then act_passes=act_passes+1 end
+    last_rng=rc
     if v1~=0 then saw_v1_1=true end
     if f%20==0 then print(string.format("LIFT94 f=%d x=%d y=%d lift_var1=%d lift_y=%d",
       f, r("dizzy_x"), r("dizzy_y"), v1, ly)) end
     if r("killed")~=0 then return fail(string.format("killed while walking (ly=%d)", ly)) end
     if saw_v1_1 and ly>=100 and v1==0 then
       key("RIGHT",false)
+      -- T0262: SPEED, in the game's own time base (the port's frame rate in this room is not the original's, the
+      -- ACTOR TICK is). X-ALL liftrou moves the lift by var1 (=1) px per RUN while the switch is stood on, and the lift's
+      -- record has delay 2 (movingdata z62): it runs every 2nd actor tick = 1 px per 2 ticks. The port runs 4 actor
+      -- ticks per 3 mainloop passes (actors_pass, T0237), so 1 px per 1.5 passes. Before T0255 F9 (the delay) it was
+      -- 1 px per 0.75 pass. Passes are counted by rng_ctr (stepped once per pass, harness/rate.lua), only while the lift
+      -- is active (Dizzy walks off the switch box part-way).
+      local px = ly - 56
+      local per = act_passes / px
+      if per < 1.3 or per > 1.7 then
+        return fail(string.format("lift pace %.2f active passes per px over %d px, want 1.5 (X-ALL delay 2 at 4 ticks per 3 passes); 0.75 = the old every-tick pace", per, px))
+      end
+      print(string.format("LIFT94 pace: %.2f active passes per px over %d px (ideal 1.5 = delay 2)", per, px))
       print(string.format(
         "LIFT94 PASS: switch actuated the lift (var1 went 0->1->0), travel seen %d..%d (want top 56, stop >=100)",
         lift_y_min, lift_y_max))

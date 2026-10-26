@@ -42,7 +42,7 @@ PATTERNS=(
     'tools/aycapture/captures/fx11.*' 'tools/aycapture/captures/fx21.*' 'tools/aycapture/captures/fx25.*'
     # regen_art.sh (roompack)
     'target/room[0-9]*_data*.asm' target/font_data.asm 'target/frame_table_data*.asm'
-    'target/actor_data*.asm' 'target/coin_data*.asm' 'target/shared_*_data.asm'
+    'target/actor_data*.asm' 'target/coin_data*.asm' 'target/shared_*_data.asm' 'target/floppy_clip_*.asm'
     # textsplit fill (target/text_tpl* + game_text.json) and dte build (from target/text_src*)
     target/text_src target/text_src_tape
     # textsplit export-lua (harness fixture: the original's strings keyed X-ALL:<line>)
@@ -62,7 +62,7 @@ PATTERNS=(
     target/bootstrap_logs
 )
 # Safety net: whatever a glob above matches, these hand-authored files are never removed.
-PROTECT=(target/room36.asm target/room36_cart.asm target/title_mix3.asm target/win_mix3.asm target/text_tpl target/text_tpl_tape)
+PROTECT=(target/room36.asm target/title_mix3.asm target/win_mix3.asm target/text_tpl target/text_tpl_tape)
 
 declare -a HIT=()
 for pat in "${PATTERNS[@]}"; do

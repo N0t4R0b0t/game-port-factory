@@ -62,9 +62,10 @@ timeout ${PT_TIMEOUT:-3000} "${MAMECMD[@]}" "${THR[@]}" "${VID[@]}" \
   -state_directory "$PWD/$STATED" -seconds_to_run ${PT_SECONDS:-4000} "${RECARGS[@]}" \
   -autoboot_script harness/playthrough.lua 2>&1 | grep -v 'load_dat' | tee "$LOG"
 if [ -z "$RAW" ] && [ -n "$REC" ] && [ -f "$RECDIR/pt.avi" ]; then
+  # T0253: crop the active 256x192 area of the 372x240 AVI, x3 square pixels (same geometry as tools/side_by_side.sh)
   echo "== encoding $REC (raw AVI: $(du -h "$RECDIR/pt.avi" | cut -f1))"
   ffmpeg -loglevel error -y -i "$RECDIR/pt.avi" -c:v libx264 -preset slow -crf 18 -pix_fmt yuv420p \
-    -vf "scale=768:576:flags=neighbor" -c:a aac -b:a 128k "$REC" && rm -rf "$RECDIR"
+    -vf "crop=256:192:58:25,scale=768:576:flags=neighbor" -c:a aac -b:a 128k "$REC" && rm -rf "$RECDIR"
   ls -l "$REC"
 fi
 if grep -q '^PLAYTHROUGH PASS' "$LOG"; then exit 0; fi

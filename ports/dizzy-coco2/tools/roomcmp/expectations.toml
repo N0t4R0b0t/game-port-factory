@@ -1,0 +1,160 @@
+# roomcmp expectations: every EXPECTED deviation names its reason (gpfdiff's rule: a deviation is never silent).
+# A reason that starts with DECISION is a finding the coordinator has to rule on (docs/ROOM-FIDELITY.md, "For decision"):
+# it is listed here so the run is quiet, not because it is accepted.
+#
+# [[expect]]
+# room = 36            # the room under test
+# entity = "z44"       # the ZX movingdata index ("z44"), "*" for any entity of the room, or "flames" / "water" (channel "pos" or "ctr")
+# channel = "col"      # room | x | y | frame | col | ctr | pos | boxes | dizzy-anim
+# verdict = "diverge"  # what the standing-still comparer is expected to say: diverge | phase | sparse (ignored by `visits`)
+# mode = "trace"     # optional: "trace" = standing-still traces only, "visits" = passive logs only; default both
+# reason = "why this cannot / should not be matched"
+
+[[expect]]
+room = 36
+entity = "z44"
+channel = "x"
+verdict = "diverge"
+reason = "the original's rat starts at x=96 units (256 px, just off the right edge: resetmoving copies origx) and walks in; a port x is one byte, so the port's rat starts at x=40 px on its patrol. Same patrol 48..192 px, same pace (4 px per 2 ticks) and same leg lengths since T0255; only the start differs, and the random legs differ (two RNGs)."
+
+[[expect]]
+room = 36
+entity = "z44"
+channel = "col"
+verdict = "diverge"
+reason = "the original mirrors the rat with colour bit 7 (ratnewdir xors it); the port keeps the facing in v1 and draws the mirrored sprite variant: the same picture."
+
+[[expect]]
+room = 45
+entity = "water"
+channel = "pos"
+verdict = "diverge"
+mode = "trace"
+reason = "the original's leftmost water tile sits at x=-16 px (half off the left edge); a port x is one unsigned byte and blit does not clip on the left, so roompack emits it wrapped (240) and the left 16 px strip has no water. A water-list entry (32 px wide, one shared frame set), so even the converter clip of D4 does not reach it; needs a runtime left clip or a per-tile frame set (docs/ROOM-FIDELITY.md E3, NOTES T0261)."
+
+[[expect]]
+room = 46
+entity = "water"
+channel = "pos"
+verdict = "diverge"
+mode = "trace"
+reason = "same as room 45: the tile at x=-16 px is wrapped to 240 in the port."
+
+[[expect]]
+room = 54
+entity = "z14"
+channel = "y"
+verdict = "diverge"
+reason = "the breath starts by a 5/256 random roll per tick (justrandomfire) in both; the rule and its order are the same (T0255), the two RNGs hit on different ticks. While breathing the swing is frozen (y constant) and the head frame is 110."
+
+[[expect]]
+room = 54
+entity = "z14"
+channel = "frame"
+verdict = "diverge"
+reason = "same random breath start as the y channel (frame 110 = first half of a breath)."
+
+[[expect]]
+room = 40
+entity = "z25"
+channel = "y"
+verdict = "diverge"
+mode = "visits"
+reason = "visits: the lift pauses while Dizzy stands in its column but off-centre or jumping (liftrou stopthelift); the two bot runs interact differently, so odd-length runs differ. The free-running cycle itself is compared tick for tick by the standing-still trace (400 ticks equal)."
+
+[[expect]]
+room = 56
+entity = "z31"
+channel = "y"
+verdict = "diverge"
+mode = "visits"
+reason = "visits: lift/Dizzy interaction timing of the two bot runs (see room 40); the standing-still trace of the same lift is equal."
+
+[[expect]]
+room = 71
+entity = "z22"
+channel = "y"
+verdict = "diverge"
+mode = "visits"
+reason = "visits: lift/Dizzy interaction timing of the two bot runs (see room 40)."
+
+[[expect]]
+room = 88
+entity = "z28"
+channel = "y"
+verdict = "diverge"
+mode = "visits"
+reason = "visits: lift/Dizzy interaction timing of the two bot runs (see room 40)."
+
+[[expect]]
+room = 48
+entity = "z20"
+channel = "y"
+verdict = "diverge"
+mode = "visits"
+reason = "visits: the log's y is 162-waterheight+(1..3); the two bot runs drop the rocks into the river at different moments, so some runs are cut by a waterheight change. The 4-tick beat is equal (durations)."
+
+[[expect]]
+room = 53
+entity = "z16"
+channel = "col"
+verdict = "diverge"
+mode = "visits"
+reason = "visits: colour bit 7 is the facing flag set while Dizzy is in the big proximity box; the two bots stand there for 96 vs 88 ticks."
+
+[[expect]]
+room = 49
+entity = "z0"
+channel = "x"
+verdict = "diverge"
+mode = "visits"
+reason = "visits: since T0258 both machines re-run the hawk's reset at every box close (resethawk: y=52, dive off, one animation step, delay counter untouched). WHERE in the 2-tick delay phase the extra step lands depends on when the bot's box closes, so one odd run differs (zx 2 ticks, port 3); every other run is 4 ticks on both. The standing-still entry trace (the reset at room entry) is equal."
+
+[[expect]]
+room = 49
+entity = "z0"
+channel = "frame"
+verdict = "diverge"
+mode = "visits"
+reason = "visits: same cause as the x channel (the extra reset step lands at a bot-timing-dependent phase)."
+
+[[expect]]
+room = 50
+entity = "z13"
+channel = "y"
+verdict = "diverge"
+mode = "visits"
+reason = "visits: since T0258 both machines send Armorog back to sleep at a box close in the den (resetarmorog) and he wakes again: the ZX log shows wake (tick 3157) -> reset after 23 ticks -> re-wake 29 ticks later, the port wake -> reset after 22 -> re-wake 27 later. The countdown, the step pace and the run to the den are equal; the 1-2 tick differences are where the bot's box closes."
+
+[[expect]]
+room = 50
+entity = "z13"
+channel = "frame"
+verdict = "diverge"
+mode = "visits"
+reason = "visits: same cause as the y channel."
+
+# ---- dialogue identity per bot segment (room = the plan's segment index, entity/channel "msgs")
+[[expect]]
+room = 24
+entity = "msgs"
+channel = "msgs"
+mode = "visits"
+reason = "bot plan: the port bot talks to Dozy one more time than the ZX bot (the repeat 'kick' box); both machines print the same boxes for the same talk count (verify_tape_text)."
+
+[[expect]]
+room = 70
+entity = "msgs"
+channel = "msgs"
+mode = "visits"
+reason = "bot position: the ZX bot stands inside the knock box before the knocker is dropped (once-only knock conversation); the port bot does not. The port trigger works (Dizzy poked to (16,176) -> box at once)."
+
+[[expect]]
+room = 73
+entity = "msgs"
+channel = "msgs"
+mode = "visits"
+reason = "bot position: the ZX bot's bean drop overlaps the manure (its pickup box appears first); the port bot's does not."
+
+# T0261 (D4): not an actor entity, so roomcmp does not measure it: the left-clipped art of rooms 23 40 45 48 51 55 56 58 60 84 94 is drawn by the FLOPPY build
+# only (floppy_leftclip.asm); the tape build keeps the difference (docs/ROOM-FIDELITY.md E7). Recorded here so nobody files it as new.

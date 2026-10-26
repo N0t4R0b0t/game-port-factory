@@ -144,6 +144,9 @@ _expand() { [ "$1" = decor ] && echo "$DECOR_FRAMES" || echo "$1"; }
 STRUCT=""
 [ -n "${STRUCT_FRAMES:-}" ]    && STRUCT="--structure-frames $(_expand "$STRUCT_FRAMES")"
 [ -n "${DESPECKLE_FRAMES:-}" ] && STRUCT="$STRUCT --despeckle-frames $(_expand "$DESPECKLE_FRAMES")"
+# T0261 (D4): RP_CLIP_LEFT=1 clips placements at negative x instead of dropping them (adds ~1000 raw bytes of cropped
+# sprites: neither the tape nor the floppy build has room, NOTES.md T0261), so the default is OFF.
+[ -n "${RP_CLIP_LEFT:-}" ] && STRUCT="$STRUCT --clip-left"
 [ -n "$STRUCT" ] && echo "ART FILTER: $STRUCT"
 FRAMES=research/D3-prior-art/original_source/FRAMES.DAT
 ROOMS=extracted/rooms.json
@@ -162,7 +165,10 @@ if [ ! -x "$ROOMPACK" ]; then
     cargo build --release --manifest-path tools/roompack/Cargo.toml
 fi
 
-rm -f "$SHARED" "$SHARED_OVERFLOW" "$SHARED_ANIM" "$FRAME_TABLE"
+# T0261 (D4): FLOPPY-only run-time left clip. roompack (RP_CLIP_DATA) writes the whole sprites and the entry table
+# of every placement at negative x here; only the FLOPPY build includes them (room36.asm), so no other artifact changes.
+export RP_CLIP_DATA=target/floppy_clip
+rm -f "$SHARED" "$SHARED_OVERFLOW" "$SHARED_ANIM" "$FRAME_TABLE" "${RP_CLIP_DATA}_sprites.asm" "${RP_CLIP_DATA}_tab.asm"
 
 # --shared-sprites-budget/-overflow (T0075): once $SHARED's own raw text
 # reaches this many bytes, NEW shared frames go to $SHARED_OVERFLOW instead

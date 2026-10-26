@@ -190,7 +190,7 @@ def effective_attrs(things):
 
 # --- the derivation itself --------------------------------------------------
 
-def derive(tbl, defs, things, order, use_percell, all_ink=False):
+def derive(tbl, defs, things, order, use_percell):
     """order: sequence of indices into `things` (and its effective attrs)
     giving the order pass 1 (attr_cells) walks them in. Pass 2 (the actual
     mask) always walks placements in rooms.json's own order -- ink drawing
@@ -227,12 +227,7 @@ def derive(tbl, defs, things, order, use_percell, all_ink=False):
     cmask = bytearray(CM_LEN)
     solid_count = 0
     for t, inherited in zip(things, attrs):
-        # all_ink=True is T0209's "framebuffer scan" oracle: the FRAMEBUFFER
-        # holds every placement's ink, decorative ones included, so a probe
-        # that reads the screen (as X-ALL.TXT's `checkline` does) cannot skip
-        # them here. The per-cell attr test below is then the ONLY filter --
-        # which is exactly the original's checkline+checkattri pair.
-        if not all_ink and inherited & SOLID_DULL_BIT:
+        if inherited & SOLID_DULL_BIT:
             continue
         solid_count += 1
         dec = decode_cached(tbl, defs, t["frame"])
@@ -372,14 +367,6 @@ def main():
     ap.add_argument("--room", type=int, help="check a single room, print an ASCII diff map")
     ap.add_argument("--map", action="store_true", help="with --room, print the ASCII diff map ('full' derivation)")
     ap.add_argument("--json", help="write per-room detail to this path")
-    ap.add_argument("--dump-fbscan",
-                     help="T0208: like --dump-expected, but the FRAMEBUFFER-SCAN "
-                          "derivation (all_ink=True -- every placement's ink is on "
-                          "the screen, so only the per-cell attribute test filters "
-                          "it). This is the reference harness/cmaskverify.lua must "
-                          "diff an FB_CMASK=1 build against; diffing it against "
-                          "--dump-expected instead reports the 931 intended cells "
-                          "as failures.")
     ap.add_argument("--dump-expected",
                      help="write each BUILT_ROOMS room's 'full' mask (the ground truth -- "
                           "see the note above main()), concatenated 384 bytes/room in "
@@ -449,9 +436,6 @@ def main():
 
         if args.dump_expected:
             dump_chunks.append(apply_dc_patch(room, full))
-        if args.dump_fbscan:
-            dump_chunks.append(derive(tbl, defs, things, order_src,
-                                      use_percell=True, all_ink=True)[0])
 
         ref_set = sum(bin(b).count("1") for b in ref)
 
@@ -505,7 +489,7 @@ def main():
         Path(args.json).write_text(json.dumps(results, indent=2))
         print(f"\nwrote {args.json}")
 
-    out_path = args.dump_expected or args.dump_fbscan
+    out_path = args.dump_expected
     if out_path:
         Path(out_path).write_bytes(b"".join(dump_chunks))
         print(f"\nwrote {out_path} ({len(dump_chunks)} rooms x {CM_LEN} bytes, "

@@ -250,6 +250,11 @@ up_findnext
         lda #1
         sta 5,x                   ; thrown -- permanently, matches the
                                     ; source's own one-shot ("it breaks")
+        if TAPE_ROOMS
+        lda 7,x                   ; T0255: resetportswitch = resetmachines: var1 -> colour bit 7 (drawn mirrored)
+        ora #$80
+        sta 7,x
+        endif
         ldx up_gate_hi
         lda #-2
         sta 5,x                   ; portswitchrou: var1 = -2, rising...

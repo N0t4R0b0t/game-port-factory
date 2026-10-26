@@ -1,0 +1,4 @@
+# verify_base_text: deviations that are EXPECTED, one per line:  label | reason
+# (empty: all 42 base message streams equal X-ALL.TXT byte for byte, pen codes aside).
+# Pen codes (mpen+n / 16+n) are compared as "a pen" only, because the port stores the pen (msg_pen) and never reads it; with
+# --strict-pens two streams differ in a pen value only: msg_croctied (pens 5/6 vs 7/3) and msg_denzil (first box pens 5/6 vs 4/3).

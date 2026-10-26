@@ -9,6 +9,6 @@ strategy = "reimplement"
 stage = "iterate"
 
 [status]
-next_action = "PHASE 3 DONE (T0250-T0252), merged to master: gpf init existing-game oracle chain (watch -> field map+gate -> capture -> check/triage -> expectations), gpf init --public release chain, --original pre-closes recipe tasks for a 2nd port, task edit --note, task done --run-verify; gpfdiff init-oracle (zx48/coco2; c64 unsupported in keys mode), shared MAME spawn module, no-ready-gate warning; CLAUDE.md oracle+derived-data sections; guide chapter 'Port an existing game'; 5 new recipes. Fresh-clone guide test: 27/27 PASS. Public checkout ~/projects/game-port-factory-public has the sync committed locally, NOT pushed (user must OK push; public repo is live). STILL PENDING: delete N0t4R0b0t/game-port-factory-old-history (needs gh delete_repo scope); user declined Brickfall release + Oliver Twins email; verify_daisy228.sh baseline failures (tape_beanstalk, cmaskverify) uninvestigated; room-93 human route (T0231/T0232); coco2 black-box oracle not possible for Brickfall (input once per 5/6 field)."
+next_action = "WRAPPED UP and pushed (private origin). Start with ports/dizzy-coco2/README.md and the NOTES.md INDEX. Game complete and playable on tape and floppy; bots PASS tape/floppy/ZX; fidelity in docs/ROOM-FIDELITY.md. Open: T0238 kill-box height (user decision), T0239 death/drunk timers on the actor clock, T0257 gpfdiff closed-loop gap, floppy boot interleave speed-up (design call), joystick untested on the floppy build, nothing tried on real hardware, public export (scripts/export-public.sh) not run this session -- needs the user's OK to push the public repo. Videos are gitignored; regenerate per NOTES T0256."
 blocked_on = ""
-last_session = "2026-10-20"
+last_session = "2026-10-25"

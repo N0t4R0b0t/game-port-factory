@@ -2679,7 +2679,7 @@ attempts = 0
 id = "T0243"
 stage = "iterate"
 title = "tape_beanstalk.lua LOW3 content check fails on 1 byte at $3FF4 (a state byte added by T0240's joystick vars after the harness was written) -- teach the check to skip declared state vars"
-status = "todo"
+status = "done"
 depends_on = []
 note = ""
 tier = "haiku"
@@ -2783,4 +2783,114 @@ depends_on = []
 note = ""
 tier = "sonnet"
 verify = "see task note"
+attempts = 0
+
+[[tasks]]
+id = "T0253"
+stage = "iterate"
+title = "Polish phase 0: baseline on current master (bootstrap, tape/floppy/-run builds, both bots PASS), fix verify_daisy228 baseline failures, side-by-side video: proportional play areas (crop + equal scale)"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0254"
+stage = "iterate"
+title = "Polish phase 1: code cleanup loops until nothing of note"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0255"
+stage = "iterate"
+title = "Polish phase 2: room-by-room actor fidelity vs the ZX original (gpfdiff oracle): movement, animation, dialogue, actions"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0256"
+stage = "iterate"
+title = "Polish phase 3: final side-by-side recording of the full game"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0257"
+stage = "iterate"
+title = "gpfdiff gap (found by T0255 roomcmp): scenarios that start from a named emulator save state (first entry into a room, made by a closed-loop bot) and a comparison unit other than the frame (the original's main-loop run = actor tick); pairing records by initial data; phase-offset verdicts. ports/dizzy-coco2/tools/roomcmp is the port-local stand-in"
+status = "todo"
+depends_on = []
+note = ""
+tier = "opus"
+verify = "tools/verify_roomcmp255.sh"
+attempts = 0
+
+[[tasks]]
+id = "T0258"
+stage = "iterate"
+title = "D1: re-run every actor's reset routine after each message box, as the original"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0259"
+stage = "iterate"
+title = "D2: pickup priority as the original (last actor record first, coins last)"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0260"
+stage = "iterate"
+title = "D3: footstep thud (sndfx 0) on every 2nd walking frame, as the original"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0261"
+stage = "iterate"
+title = "D4: roompack clips placements partly off the left edge (room 45 hill, wrapped water tile)"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = ""
+attempts = 0
+
+[[tasks]]
+id = "T0262"
+stage = "iterate"
+title = "lift94 timing check in verify_daisy228: confirm its expectation still means what it says after the delay-2 change"
+status = "done"
+depends_on = []
+note = ""
+tier = "sonnet"
+verify = ""
 attempts = 0

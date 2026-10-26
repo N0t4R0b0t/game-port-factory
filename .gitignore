@@ -68,6 +68,8 @@ ports/*/target/pt_tmp/
 ports/*/target/pt_masks/
 ports/*/target/*.mp4
 ports/*/target/zxpt_states/
+# T0255 tools/roomcmp.sh: per-room actor traces recorded from the user's own ZX tape (derived data)
+ports/*/target/roomcmp/
 ports/*/target/*.plan.tsv
 
 # Public-release guard: converted game data and music/SFX captures are never ADDED by
@@ -101,6 +103,7 @@ ports/dizzy-coco2/tools/aycapture/captures/
 ports/dizzy-coco2/target/room[0-9]*_data*.asm
 ports/dizzy-coco2/target/font_data.asm
 ports/dizzy-coco2/target/frame_table_data*.asm
+ports/dizzy-coco2/target/floppy_clip_*.asm
 ports/dizzy-coco2/target/actor_data*.asm
 ports/dizzy-coco2/target/coin_data*.asm
 ports/dizzy-coco2/target/shared_*_data.asm

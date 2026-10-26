@@ -43,6 +43,8 @@ ai_loop
         lda #3
         sta inv_cap
         clr pickup_timer
+        lda #3                   ; T0255: restart the 4-per-3 actor clock (actors_pass) at the same phase every game
+        sta actor_acc
 
         ; T0057: coins. The original's `resetcoins` sets `coins` to 255
         ; so that its `addtocoins` (which increments BEFORE displaying)
@@ -262,6 +264,8 @@ da_havesprite
         lbeq da_clear
         cmpa #ROU_DAISY               ; T0228: room 94's Daisy rides the lift
         lbeq da_clear                 ; (y = lift y + 21 every pass) -- same path
+        cmpa #ROU_DAISY1              ; T0255: room 73's Daisy flips every run
+        lbeq da_clear
         ; T0239: the hawk (room 49) moves under its own power every pass
         ; too -- same always-redraw + save-under path as the rat (they
         ; are never in the same room, so the single save slot per
@@ -405,10 +409,22 @@ da_clear
         beq da_userat
         cmpa #ROU_DAISY           ; T0228: and Daisy (24x19)
         beq da_userat
+        cmpa #ROU_DAISY1          ; T0255: and the Daisy of room 73 (she flips too)
+        beq da_userat
         endif
         cmpa #ROU_PORTCULLIS
         bne da_clear_static
 da_userat
+        if TAPE_ROOMS
+        lda 1,y                   ; T0255: Daisy (94 / 73) flips every run: colour bit 7 = drawn mirrored (anidaisy)
+        cmpa #ROU_DAISY
+        beq da_ur_mir
+        cmpa #ROU_DAISY1
+        bne da_ur_go
+da_ur_mir
+        jsr tape_static_mirror
+da_ur_go
+        endif
         pshs y
         jsr rat_clear_and_blit
         puls y
@@ -433,7 +449,12 @@ da_clear_static
 da_needs_clear
         if TAPE_ROOMS
         cmpa #ROU_CROWBAR        ; T0223: A = routine. The shopkeeper's second
-        bne da_nc_go             ; half (frame 105, colour bit 7) is a static
+        beq da_nc_mir            ; half (frame 105, colour bit 7) is a static
+        cmpa #ROU_SWITCH1        ; T0255: the two levers (resetmachines: var1 ->
+        beq da_nc_mir            ; colour bit 7) are drawn mirrored too
+        cmpa #ROU_PORTSWITCH
+        bne da_nc_go
+da_nc_mir
         jsr tape_static_mirror   ; actor drawn mirrored (tape_bean_code.asm)
 da_nc_go
         endif
@@ -545,6 +566,13 @@ update_daisy1
         lda completedgame
         bne ud1_done              ; already won -- mainloop ends the
                                     ; game the instant it sees this set
+        lda cur_room              ; T0255: daisyrou1 has delay 2 (movingdata z67): it runs on every 2nd tick spent in
+        cmpa #73                  ; her room (the delay counter only advances there), and `anidaisy` flips her
+        bne ud1_done              ; colour bit 7 (= drawn mirrored) on each run that is not a conversation
+        lda ud1_par
+        eora #1
+        sta ud1_par
+        bne ud1_done              ; new value 1 = the first tick of the pair: skip
         ldy #actor_init_tape
         lda #ACTOR_COUNT_tape
         sta ud1_n
@@ -558,6 +586,9 @@ ud1_loop
         jsr actor_hit
         tsta
         bne ud1_hit
+        lda 7,y
+        eora #$80
+        sta 7,y
 ud1_next
         leay ACTOR_STRIDE,y
         dec ud1_n
@@ -646,22 +677,22 @@ pkt_ret rts
 try_pickup
         lda pickup_timer
         beq tp_ready
-        rts
+tp_ret0 rts                      ; T0259: a nearby rts, so the short branches below reach it
 tp_ready
         lda keyflags
         bita #2                  ; DOWN
-        lbeq tp_done
+        beq tp_ret0
         lda #PICKUP_COOLDOWN
         sta pickup_timer
 
-        jsr pickup_coins         ; T0057: coins first, so collecting one
-        tsta                     ; doesn't also open the inventory
-        lbne tp_done
-        if TAPE_ROOMS
-        jsr pickup_coins_tape    ; T0236: second pass, the tape-only
-        tsta                     ; region's own coin table
-        lbne tp_done
-        endif
+        ; T0259 (D2): X-ALL's order -- the ACTORS first (domoving), then the coins (pickupcoins), and among the
+        ; actors the one with the highest index in the original's `movingdata` (domoving walks from the LAST record
+        ; down, and the first pickupable that overlaps Dizzy consumes the key press). Both tables are scanned in
+        ; full and the best candidate kept: byte 6 of a pickupable record is its movingdata index (roompack).
+        ; Doug versus the crowbar he makes appear: the crowbar (a later record) wins, as on the ZX.
+        ; The best candidate lives on the stack for the whole scan: ,s = its index, 1,s = B, 2,s = its record.
+        clra
+        pshs y,b,a
 
         ; look for a pickupable actor in this room overlapping Dizzy
         if TAPE_ROOMS
@@ -682,7 +713,13 @@ tp_loop
         jsr actor_hit
         puls b
         tsta
-        bne tp_take
+        beq tp_next
+        lda 6,y                  ; T0259: movingdata index; keep the highest
+        cmpa ,s
+        bls tp_next
+        sta ,s
+        stb 1,s
+        sty 2,s
 tp_next
         incb
         leay ACTOR_STRIDE,y
@@ -706,6 +743,19 @@ tp_next
         bra tp_loop
         endif
 tp_fallback
+        puls a,b,y               ; T0259: the winner of the scan above, if any
+        tsta
+        beq tp_nopick
+        bra tp_take
+tp_nopick
+        jsr pickup_coins         ; T0057: coins after the actors (X-ALL pickupcoins follows domoving),
+        tsta                     ; so collecting one doesn't also open the inventory
+        bne tp_ret0
+        if TAPE_ROOMS
+        jsr pickup_coins_tape    ; T0236: second pass, the tape-only
+        tsta                     ; region's own coin table
+        bne tp_ret0
+        endif
         ; T0040: X-ALL.TXT's `tryputtingdown` checks `proxpicture`'s box
         ; BEFORE falling through to the inventory screen, and only while
         ; actually carrying something (`ret z` on an empty `pickup`) --
@@ -810,9 +860,8 @@ dz_show
 tp_reallytake
         incb                     ; store index+1 so 0 can mean "empty"
         stb tp_slot
-        jsr play_chirp            ; T0088 -- placeholder pickup sfx.
-                                    ; inv_insert reads tp_slot, already
-                                    ; stored, not B -- nothing to save.
+        ; T0255: no tune here -- X-ALL pickupablerou goes straight to inventoryrou (the box-open sound only);
+        ; tune 5 belongs to COINS (pickupcoins, below).  inv_insert reads tp_slot, already stored, not B.
         lda #255
         sta ,y                   ; remove from the world -- BEFORE inv_insert:
                                     ; a full inventory auto-drops the oldest
@@ -1182,15 +1231,18 @@ inv_slidedone
 
         jsr play_drop            ; T0109: sndfx 11, dropobject
         jsr drop_to_world
+        jsr box_reset            ; T0258 (D1): justexitinvent calls resetuproom BEFORE its trigger check
         jsr check_drop_trigger   ; T0105: X-ALL.TXT justexitinvent's own
                                   ; "CHECK DROPPING OBJECT BY TRIGGER"
+        bra inv_fr
 inv_close
+        jsr box_reset            ; T0258 (D1): EXIT -> justexitinvent -> resetuproom
+inv_fr
         jsr force_redraw       ; T0221 (was 8 bytes inline)
         rts
 
 ; --- state ----------------------------------------------------------
 ai_n        fdb 0
-as_tmp      fdb 0
 da_n        fcb 0
 da_p_col0   fcb 0
 da_p_col1   fcb 0
@@ -1407,6 +1459,7 @@ pc_take
         ora #$80                 ; collected, the original's `set 7,(ix+2)`
         sta ,x
         inc coins
+        jsr play_chirp           ; T0255: X-ALL pickupcoins: `ld a,5 / call starttune` BEFORE youfoundcoinmess
         jsr msg_begin
         ldx #msg_foundcoin
         jsr msg_box_done       ; T0221 (was 9 bytes inline)
@@ -1521,6 +1574,7 @@ pc_n        fcb 0
 cc_n        fcb 0
         if TAPE_ROOMS
 ud1_n           fcb 0
+ud1_par         fcb 0
 completedgame   fcb 0     ; T0236: X-ALL.TXT's own name/reset-to-0 shape
                             ; (new_game's own equivalent of resetlives'
                             ; `ld (completedgame),a` with a=0 -- see

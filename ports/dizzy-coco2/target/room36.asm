@@ -6,7 +6,6 @@
 ; arbitrary shift: pixel_x is always a multiple of 4 (confirmed transform,
 ; NOTES.md "Correction #2"), so pixel_x mod 8 is only ever 0 or 4.
 
-FBBASE  equ $4000       ; buffer A -- kept as the name used in comments/docs below
 BUFA    equ $4000
 BUFB    equ $6000       ; buffer B: $4000 + $2000, same F5 bit as buffer A plus F4
                          ; set (Inman & Inman appendix E, "screen offsets": offset
@@ -85,11 +84,6 @@ FRAME_FIELDS equ 4
 ; Costs 7 cycles a marker and is compiled out entirely when 0.
         ifndef PROFILE
 PROFILE      equ 0
-; T0236: 1 = the ORIGINAL's rule: the jump's key lockout (sequence>=3 / 8-step
-; animation) outlives the landing, so a jump that lands off the 8-update grid
-; keeps sliding in the latched direction until the animation wraps (X-ALL.TXT
-; `jumping` ~6333). 0 = the T0196 behaviour (landing clears the lockout).
-LANDING_SLIDE equ 1
         endif
 
 ; T0133: DEBUG_PROX_KEYS=1 (default) enables the dragon-sleep/well-lid
@@ -190,31 +184,10 @@ HCLIP        equ 1      ; T0211: clip blit horizontally. ON by default since
                           ; pixels down the left of rooms 22/50/51/54/57/59/67/68.
                           ; Set 0 only to measure against the old behaviour.
         endif
-        ifndef SINGLE_BUFFER
-SINGLE_BUFFER equ 0     ; T0207: 1 = one framebuffer. $4000 is the only page and
-                          ; is never flipped away from, freeing BUFB ($6000-$77ff,
-                          ; 6144 RESIDENT bytes) -- more than the 4810 raw bytes
-                          ; all 23 remaining rooms need (NOTES.md T0206). Cost is
-                          ; tearing, which the Spectrum original also has (it has
-                          ; no page flipping at all -- see msg_begin's comment).
-        endif
         ifndef INF_LIVES
 INF_LIVES    equ 0      ; playtest aid: 1 = a death never costs a life (the
                           ; death box/tune and respawn still happen). Set by
                           ; ./play.sh --inf-lives; never on in a shipped build.
-        endif
-        ifndef FB_CMASK
-FB_CMASK     equ 0      ; T0208: 1 = fill CUR_ROOM_CMASK by SCANNING the freshly
-                          ; painted room art (replacing dc_pass2_place's
-                          ; per-ink-nibble rasterisation) instead of rasterising
-                          ; placements. Keeps pass 1 AND dc_patch. See NOTES.md.
-        endif
-        ifndef NO_CMASK
-NO_CMASK     equ 0      ; T0209: 1 = derive solidity by probing the FRAMEBUFFER
-                          ; (X-ALL.TXT's checkline+checkattri) instead of reading
-                          ; the precomputed CUR_ROOM_CMASK. Frees the 1536-byte
-                          ; mask + pass 2. OFF by default -- see NOTES.md
-                          ; "T0209 design, grounded in the original".
         endif
         ifndef DEBUG_XY
 DEBUG_XY     equ 0      ; T0191: 1 = show live room/x/y instead of the room
@@ -629,7 +602,7 @@ DELAY_COUNT  equ 1      ; effectively disabled. This was an artificial
 ; `start:` used to occupy fall off the END of the resident block (LOW3 grows). Parked at
 ; $cc00 in the raw measurement pass so it cannot pollute the raw image. The -run build
 ; keeps `start:` at $0E00 (BASIC's EXEC address) and its own jsr show_title / nibswap order.
-TAPE_START_ORG equ $5760
+TAPE_START_ORG equ $5772        ; T0259: was $5760 -- block A (packed) grew 18 B (the movingdata index in v2 of the pickupables); start: still ends by $5800 (141 B)
         ifdef STAGE_GEN
         org $cc00
         else
@@ -988,9 +961,6 @@ mainloop
         ; scenes settling at 13.6 passes/sec against a 15 target.
         jsr tick_poll
         jsr build_solid_actors   ; T0103: once a pass, not once a probe
-        ifne NO_CMASK
-        jsr nc_probe_setup       ; T0209: aim the probes at the finished buffer
-        endif
         if PROFILE
         lda #1
         sta prof_slot
@@ -1324,36 +1294,14 @@ ml_ff_transition
 ml_landed
         clr dizzy_dy
         clr well_mode            ; T0125: any landing ends a well sequence
-        ; T0196: landing ENDS the jump's key lockout. X-ALL.TXT keeps the
-        ; lockout until the 8-step animation wraps (`jumping` -> cantstop
-        ; while animation != 0) REGARDLESS of floor -- but in the original
-        ; the arc and the animation are in phase, so it wraps exactly as
-        ; Dizzy touches down and the lockout never outlives the jump.
-        ; Measured, room 68, jump right from the floor at x=20 onto the
-        ; table with the key released:
-        ;   ORIGINAL  lands x=40, animation wrapped, STOPS
-        ;   PORT      lands x=48 (two steps late, anim=2) then slides six
-        ;             steps to x=72 with no key held
-        ; That slide is the playtest's "he does a few steps after landing".
-        ; Clearing the lockout on landing is a no-op for any jump that
-        ; lands in phase -- which is every jump the original makes -- and
-        ; removes the slide for ours that do not.
-        ; T0236 CORRECTION: the "ORIGINAL lands x=40 and STOPS" above was an
-        ; ARTIFACT of the ZX harness warp (it put Dizzy at orig y=176, one pixel
-        ; INSIDE the floor, so the arc ran one pixel low and landed in phase).
-        ; From a properly settled start (orig y=175) the original lands at x=48
-        ; with animation=1 and slides 7 more steps to x=76, step for step what
-        ; LANDING_SLIDE=1 does (NOTES.md T0236). So the lockout is NOT cleared.
-        if 1-LANDING_SLIDE
-        if TAPE_ROOMS
-        tst jump_on              ; T0230: jump_on = $80 marks the drunken fall-over (tape_drunk_tick):
-        bmi ml_keeplock          ; the original's lockout (animation 1..7) outlives its landing, so he
-        endif                    ; slides the whole cycle (X:2947 checkifdrunk, `jumping` X:6382)
-        clr jump_on
-        clr jump_anim
-        endif
-        ; T0236 (LANDING_SLIDE=1): nothing is cleared. jump_on/jump_anim are released only by
-        ; ml_jump_free (animation wrapped to 0 AND a floor), exactly the original's `jumping`.
+        ; T0236: landing does NOT end the jump's key lockout. X-ALL.TXT keeps it
+        ; until the 8-step animation wraps (`jumping` -> cantstop while
+        ; animation != 0) REGARDLESS of floor, so a jump that lands off the
+        ; 8-update grid keeps sliding in the latched direction (from a settled
+        ; start the original lands at x=48 with animation=1 and slides 7 more
+        ; steps to x=76; the port does the same, step for step). jump_on/jump_anim
+        ; are released only by ml_jump_free (animation wrapped to 0 AND a floor).
+        ; History (T0196's clear-on-landing, and why it was wrong): NOTES.md T0236.
 ml_keeplock
         lda #1
         sta dizzy_floor
@@ -1447,10 +1395,8 @@ ml_notdead
 
         lda dizzy_floor
         beq ml_airborne
-        if LANDING_SLIDE
         tst jump_on              ; T0236: still inside a jump's lockout: `sequence` stays 3..5 (the jump
         bne ml_airborne          ; frames keep cycling while he slides), only bettercheckkeys resets it
-        endif
         clra
         bra ml_havebase
 ml_airborne
@@ -1478,24 +1424,21 @@ ml_seqdone
         ; T0118: footsteps come from the ANIMATION, as in X-ALL.TXT
         ; updatedizzy -- only reached on the ground (checkfloor), only while
         ; walking (sequence != 0), and only on frames where `ld a,
-        ; (animation) / and 3 / srl a` sets carry. Frames 3 and 7 give
-        ; sndfx 1, the tap this port plays; frames 1 and 5 give sndfx 0, the
-        ; 68Hz thud it does not (see play_footstep). They used to fire on
+        ; (animation) / and 3 / srl a` sets carry, i.e. on every ODD frame. Frames 3
+        ; and 7 give sndfx 1, the tap; frames 1 and 5 give sndfx 0, the thud
+        ; (T0260: both now play, see play_footstep). They used to fire on
         ; every other PIXEL step instead, in the air too -- playtest: "more
         ; step sounds than steps" and "when he jumps there should be no
         ; walking sounds".
-        cmpb #3
-        beq ml_stepframe
-        cmpb #7
-        bne ml_nostep
-ml_stepframe
+        bitb #1
+        beq ml_nostep
         lda dizzy_floor
         beq ml_nostep
         lda dizzy_seq
         beq ml_nostep
         cmpa #3
         bhs ml_nostep             ; 3+ = airborne / dying sequences
-        jsr play_footstep
+        jsr play_footstep         ; B = dizzy_anim (odd)
 ml_nostep
 
         ldb flame_ctr            ; T0026: 16-step flame cycle, ticked on
@@ -1601,12 +1544,6 @@ actor_tab_end
 ; target.
 ; --------------------------------------------------------------------
 redraw
-        ifne SINGLE_BUFFER
-        ldd #BUFA                ; T0207: the only page there is
-        std draw_base
-        lda bufA_last_x
-        ldb bufA_last_y
-        else
         lda cur_buf
         beq rd_intob   ; A is on screen -> draw into B, track bufB's history
         ldd #BUFA
@@ -1619,7 +1556,6 @@ rd_intob
         std draw_base
         lda bufB_last_x
         ldb bufB_last_y
-        endif
 rd_havetrack
         sta old_dizzy_x
         stb old_dizzy_y
@@ -1763,7 +1699,7 @@ rd_topclamp
 rd_y0ok
         lda dmg_y0
         cmpa dmg_y1
-        lbhs rd_clrdone          ; nothing left inside the window
+        bhs rd_clrdone          ; nothing left inside the window
         else
         tst fb_flip
         beq rd_noclamp
@@ -1828,15 +1764,6 @@ rd_clrdone
         sta prof_slot
         endif
         jsr redraw_placements_dmg
-        ifne FB_CMASK
-        ; T0208: the ONLY moment the buffer holds room art and nothing else.
-        tst cmask_needs_scan
-        beq rd_noscan
-        jsr scan_fb_cmask
-        jsr dc_patch             ; rooms 51/84: cells no scan can find
-        clr cmask_needs_scan
-rd_noscan
-        endif
         if PROFILE
         lda #16
         sta prof_slot
@@ -2069,16 +1996,6 @@ rd_paced
 rd_carryok
         sta field_ctr
 
-        ifne SINGLE_BUFFER
-        ; T0207: nothing to flip -- $4000 stays on screen, so this frame's
-        ; drawing was visible AS IT HAPPENED. cur_buf stays 0 for everything
-        ; that reads it (msg_begin picks BUFA, rat_sv_slot picks hdr_a).
-        lda dizzy_x
-        sta bufA_last_x
-        lda dizzy_y
-        sta bufA_last_y
-        rts
-        else
         lda cur_buf
         beq rd_showb
         lda dizzy_x
@@ -2098,7 +2015,6 @@ rd_showb
         lda #1
         sta cur_buf
         rts
-        endif
 
 ; --------------------------------------------------------------------
 ; T0026: torch flames. A faithful port of `updateflames`/`printflame`
@@ -2120,7 +2036,7 @@ rd_showb
 ; --------------------------------------------------------------------
 draw_flames
         lda room_flame_count
-        lbeq df_done
+        beq df_done
         sta flame_n
         ldx room_flames_ptr
         stx flame_ptr
@@ -2182,7 +2098,7 @@ df_loop
         jsr clear_and_blit
 df_skipone
         dec flame_n
-        lbne df_loop
+        bne df_loop
 df_done
         rts
 
@@ -2656,7 +2572,7 @@ clear_and_blit
         beq cab_bot              ; box starting above it skips the clear
         lda cb_y                 ; (rows < 40 would mirror past row 191);
         cmpa win_top             ; blit clips its own top
-        lblo blit_only
+        blo blit_only
         ldb #FLIP_YEND
 cab_bot
         stb cb_ybot
@@ -2833,10 +2749,6 @@ rsu_wok
         rts
 
 rat_sv_slot                      ; U -> this buffer's 4-byte header
-        ifne SINGLE_BUFFER
-        ldu #rat_sv_hdr_a        ; T0207: one page, one save slot
-        rts
-        else
         lda cur_buf
         bne rss_a
         ldu #rat_sv_hdr_b
@@ -2844,7 +2756,6 @@ rat_sv_slot                      ; U -> this buffer's 4-byte header
 rss_a
         ldu #rat_sv_hdr_a
         rts
-        endif
 
 rat_save
         jsr rat_sv_setup
@@ -2930,22 +2841,15 @@ rat_sv_invalidate
         ; resets not everything on the rooms resets, like the fire on the
         ; first room".
         ;
-        ; flame_var_a/b ($2272/3) and fire_var_a/b ($2274/5) are FOUR
-        ; ADJACENT bytes (verified in room36.map), so two 16-bit stores
-        ; cover all of them. 255 is the "never drawn in this buffer"
-        ; value they already use.
-        ;
-        ; rat_lastx_a/b ($227e/f) and gate_last_a/b ($30a0/1) have the
-        ; identical flaw and are NOT fixed here -- there are only ~11
-        ; bytes of resident headroom left before the title screen stops
-        ; fitting its load-time holes, and these two are the ones the
-        ; playtest actually reported. See T0215.
+        ; flame_var_a/b and fire_var_a/b are FOUR ADJACENT bytes (check the .map),
+        ; so two 16-bit stores cover all of them. 255 is the "never drawn in
+        ; this buffer" value they already use.
         ldd #$ffff
         std flame_var_a
         std fire_var_a
         ; T0215: the other two, funded by T0219's dead-code removal.
-        ; rat_lastx_a/b ($227e/f) is the rat's last DRAWN x per buffer and
-        ; gate_last_a/b ($30a0/1) is draw_gate's -- both 255 = "never drawn
+        ; rat_lastx_a/b (adjacent) is the rat's last DRAWN x per buffer and
+        ; gate_last_a/b (adjacent) is draw_gate's -- both 255 = "never drawn
         ; in this buffer", both never invalidated, so after a full repaint
         ; each restores or skips against a position that is no longer on
         ; screen. Playtest: "odd flickers and eventually crashes after
@@ -3050,61 +2954,6 @@ rs_store
 ; range checking of its own (the callers all clamp first).
 ; --------------------------------------------------------------------
 cmask_test
-        ifne NO_CMASK
-; ---- T0209: solidity read off the SCREEN, as X-ALL.TXT's checkline does ----
-; Order is deliberately attribute-first: the ATTR_CELLS test is cheaper than
-; the address arithmetic for the ink, and it is the test that makes decorative
-; ink non-solid, so it rejects the common decorative case early.
-;
-; ATTR_CELLS is indexed in LOGICAL (unflipped) coords -- pass 1 builds it from
-; each placement's own y -- so it takes probe_y>>3 raw. The INK read goes
-; through fb_rowd, which applies T0125's vertical mirror when fb_flip is set,
-; so the upside-down world needs no code of its own here.
-        lda probe_y
-        lsra
-        lsra
-        lsra                     ; A = attr cell row (0-23)
-        ldb #ATTR_CELLS_W
-        mul
-        addd #ATTR_CELLS
-        tfr d,x
-        lda probe_x
-        lsra
-        lsra
-        lsra                     ; A = attr cell col (0-31) = px>>3
-        tfr a,b
-        abx
-        lda ,x                   ; dc_attr_write stores dc_xraw&2: the DULL
-        bne nc_notsolid            ; flag is BIT 1, not bit 6 (that is the
-                                   ; ORIGINAL's attribute packing, not ours)
-        ; The probed buffer still has Dizzy drawn in it. The original erases
-        ; him first (ruboutdizzy, X-ALL.TXT:6357) from a save-under buffer;
-        ; this port has no save-under, but it already RECORDS where he was
-        ; drawn in each buffer, so exclude that rect instead.
-        jsr nc_in_dizzy
-        bne nc_notsolid
-        ldb probe_y
-        jsr fb_rowd              ; D = probe buffer + row*32, flip-aware
-        tfr d,x
-        lda probe_x
-        lsra
-        lsra
-        lsra
-        tfr a,b
-        abx                      ; X -> the framebuffer byte (8px)
-        lda probe_x
-        anda #4                  ; which 4px half of that byte is the cell?
-        beq nc_hinib
-        lda #$0f
-        bra nc_msk
-nc_hinib
-        lda #$f0
-nc_msk
-        anda ,x
-        bne ct_solid             ; any ink in the 4px cell -> solid
-nc_notsolid
-        lbra actor_solid_test
-        else
         lda probe_y              ; T0187: probe_y IS the row (0-191)
         ldb #CM_STRIDE
         mul                      ; D = row * 8
@@ -3142,71 +2991,9 @@ nc_notsolid
         ; become solid everywhere at once rather than in one hand-picked
         ; check.
         lbra actor_solid_test     ; (long: T0124's lift entry in build_solid_actors put it out of range)
-        endif
 ct_solid
         rts
 
-        ifne NO_CMASK
-; --------------------------------------------------------------------
-; T0209 support. nc_probe_setup runs ONCE per mainloop pass (not per probe):
-; it points draw_base at the buffer that is currently ON SCREEN -- which at
-; physics time is the most recently COMPLETED one, the only buffer holding a
-; finished picture -- and latches that same buffer's recorded Dizzy position.
-; redraw() overwrites draw_base with the off-screen buffer immediately after,
-; which is exactly what it wants for drawing.
-;
-; Buffer validity: every "force a full redraw" site in this port stores the
-; 255 sentinel to BOTH bufA_last_x and bufB_last_x (rt_settle does it on every
-; room change), so a freshly entered room is fully repainted in both buffers
-; before it is ever probed. 255 also means "content unknown", so the Dizzy
-; exclusion is skipped for it rather than testing a rect around x=255.
-; --------------------------------------------------------------------
-nc_probe_setup
-        lda cur_buf              ; 0 = buffer A is the one on screen
-        bne ncs_b
-        ldd #FBBASE
-        std draw_base
-        lda bufA_last_x
-        ldb bufA_last_y
-        bra ncs_have
-ncs_b
-        ldd #BUFB
-        std draw_base
-        lda bufB_last_x
-        ldb bufB_last_y
-ncs_have
-        sta nc_dz_x
-        stb nc_dz_y
-        rts
-
-; nc_in_dizzy: Z CLEAR (bne taken) if probe_x/probe_y falls inside the rect
-; Dizzy occupies in the probed buffer. His stored y is his FEET and the frame
-; set's tallest is 21 rows (redraw's own damage-rect bound); eggwidth 6 in the
-; original's 4px unit is 24px. Deliberately generous by a pixel each way --
-; a probe that grazes his outline must not read as scenery.
-nc_in_dizzy
-        lda nc_dz_x
-        cmpa #255
-        beq nc_id_no             ; buffer content unknown -> nothing to exclude
-        lda probe_x
-        suba nc_dz_x
-        bmi nc_id_no             ; left of him (also catches the -1 margin)
-        cmpa #25
-        bhi nc_id_no
-        lda nc_dz_y
-        suba probe_y
-        bmi nc_id_no             ; probe is BELOW his feet
-        cmpa #22
-        bhi nc_id_no             ; above his head
-        andcc #$fb               ; inside: clear Z so the caller's bne fires
-        rts
-nc_id_no
-        orcc #$04                ; set Z
-        rts
-
-nc_dz_x     fcb 255
-nc_dz_y     fcb 0
-        endif
 
 ; build_solid_actors: collect this room's solid actors once per pass.
 ;
@@ -3286,7 +3073,7 @@ bsa_normal
         inc n_solid
         lda n_solid
         cmpa #SOLID_MAX
-        lbeq bsa_done
+        beq bsa_done
 bsa_norope
         lda 2,y
         sta ,x+
@@ -3298,7 +3085,7 @@ bsa_norope
         inc n_solid
         lda n_solid
         cmpa #SOLID_MAX
-        lbeq bsa_done
+        beq bsa_done
 bsa_notlift
         pshs x
         jsr actor_sprite_for     ; the sprite that will actually be DRAWN
@@ -3694,7 +3481,7 @@ pt_next
         puls y
         rts
 
-; play_chirp: item pickup -- the original's own trigger table (X-ALL.TXT,
+; play_chirp: COIN pickup (T0255: it was wired to item pickups) -- the original's own trigger table (X-ALL.TXT,
 ; NOTES.md T0089) fires TUNE 5 for this (`call starttune` right after
 ; `call addtocoins`), the same tune5_notes captured below -- the real
 ; sound, not a placeholder. Capped hard (tools/aycapture's max_ms) to
@@ -3721,7 +3508,7 @@ play_jump
 ; (`ld a,(animation) / and 3 / srl a / ld (sndfx),a`). Captured sndfx 0
 ; is a ~68Hz thud -- authentic, but even a single half-wave at that
 ; pitch costs ~9ms on this delay-loop DAC; sndfx 1 (~365Hz) is cheaper
-; (~7ms) and is what ships. Firing EVERY step still measurably slowed
+; (~7ms) and is what shipped until T0260 (below: the thud is back, user decision). Firing EVERY step still measurably slowed
 ; movement (the same scripted pickup test came up short by several
 ; pixels with it on, matching pixel-for-pixel with and without the
 ; jump/chirp hooks disabled, which is what isolated this as the actual
@@ -3732,8 +3519,14 @@ play_jump
 ; T0118: the every-other-step gate is gone -- the caller now fires this
 ; from the walk animation's sndfx-1 frames (3 and 7) only, which is
 ; already one call per 8 animation frames of stride and never in the air.
+; T0260 (D3): B = the odd animation frame: bit 1 set (3, 7) = sndfx 1, the tap; clear (1, 5) = sndfx 0, the thud
+; (X-ALL: `ld a,(animation) / and 3 / srl a / ld (sndfx),a` -> 0 for animation&3 = 1, 1 for 3).
 play_footstep
-        ldd #fx1_notes
+        ldx #fx1_notes
+        bitb #2
+        bne pf_go
+        ldx #fx0_notes
+pf_go   tfr x,d
         jmp play_tune
 
 ; T0109: the rest of the original's trigger table (NOTES.md T0089 has the
@@ -3945,8 +3738,20 @@ cw_side fcb BODY_R
 ; r36_/r35_/r52_ exists specifically so all three rooms' data can be
 ; `include`d into one assembly without symbol collisions).
 ; --------------------------------------------------------------------
-load_room
+; box_reset (T0258, D1): X-ALL roomsetup, which runs on every room entry AND at the close of every message box and
+; inventory (windowrou1 / justexitinvent -> resetuproom): breathingfire := 0 (5446, resetdragon 2562), the flames
+; and water are re-added at counter 0 and 3 (addtoflame / addtowater, T0255), and resetroommoving runs each room
+; actor's reset routine -- the actors that keep state reset themselves when room_load_seq changes (Armorog, hawk, log).
+box_reset
+        clr dragon_fire
+        clr flame_ctr             ; T0255: X-ALL addtoflame/addtowater start every room's flames at counter 0 and its
+        lda #3                    ; water at 3 (ld c,0 / ld c,3), so the animation phase on entry is fixed, not whatever
+        sta water_ctr             ; the global counters had reached in the last room
         inc room_load_seq         ; T0123: lets per-room actors run their reset once per load
+        rts
+
+load_room
+        jsr box_reset
         ldx #room_desc_table
 lr_scan
         ldu ,x++
@@ -4026,7 +3831,11 @@ lr_notpacked
         ; RAM buffers rd_sortplaces just built -- everything from here on
         ; (redraw_placements_dmg and friends) reads THESE, never the ROM
         ; source table again until the next load_room.
+        if FLOPPY
+        lda sp_count              ; T0261: + the run-time clipped placements (clip_room_add)
+        else
         lda room_place_count      ; sp_addr (rd_sortplaces's own helper):
+        endif
         jsr sp_addr                 ; X = ROOM_PLACE_SORTED + count*4
         stx room_placements_end
         ldd #ROOM_PLACE_SORTED
@@ -4244,7 +4053,6 @@ dc_bytei     equ dc_dcol
 dc_cmaskrow  equ dc_xend             ; row-address scratch (dc_xend is
                                      ; pass-1-only, free during pass 2)
 
-        ifeq NO_CMASK+FB_CMASK
 dc_pass2_place
         lda dc_w
         lsra
@@ -4419,142 +4227,12 @@ dc2_rowdone
 ; by load_room BEFORE room_placements_ptr/end are repointed at the
 ; sorted RAM copy.
 ; --------------------------------------------------------------------
-        endif   ; ifeq NO_CMASK+FB_CMASK -- dc_pass2_place's body (T0208/T0209)
 
-        ifne FB_CMASK
-; --------------------------------------------------------------------
-; scan_fb_cmask (T0208): fill CUR_ROOM_CMASK from the room art that is
-; ALREADY PAINTED in the buffer draw_base points at, instead of
-; rasterising every placement's ink nibble by nibble (dc_pass2_place,
-; ~29 of the room load's 42 frames for room 36's 2571 ink nibbles).
-;
-; This is what the original does -- `checkline` reads ink off the screen
-; and `checkattri` asks a shadow attribute table whether that ink is
-; solid -- so the filter here is pass 1's ATTR_CELLS, exactly as the
-; original's is `attritable` (NOTES.md, T0209 design entry).
-;
-; MUST be called from redraw, after redraw_placements_dmg has painted the
-; room and BEFORE draw_coins/draw_flames/actors/Dizzy put anything else
-; in the buffer. On a room entry rt_settle has forced the damage rect to
-; the whole screen, so at that moment the buffer holds room art and
-; nothing else. dc_patch still runs after this (rooms 51/84 -- their
-; dropped placements are never DRAWN, so no scan can recover them).
-;
-; One framebuffer byte is 8px = ONE attribute cell column (px>>3) and TWO
-; 4px mask cells, so the three walks advance in lockstep: U over
-; ATTR_CELLS (one byte per source byte), X over the framebuffer, Y over
-; the mask (one byte per FOUR source bytes). Unrolled x4 so each source
-; byte's two mask bits are hardcoded constants rather than a shift.
-;
-; Rows are walked in LOGICAL order through fb_rowd, which applies T0125's
-; vertical mirror when fb_flip is set -- so an upside-down room scans
-; into an upright mask with no code of its own here.
-; --------------------------------------------------------------------
-scan_fb_cmask
-        clr sc_row
-sc_rowlp
-        lda sc_row               ; row-constant addresses hoisted out of the
-        lsra                       ; inner loop (T0166's lesson: a MUL per
-        lsra                       ; cell cost real frames)
-        lsra
-        ldb #ATTR_CELLS_W
-        mul
-        addd #ATTR_CELLS
-        tfr d,u                  ; U -> this row's ATTR_CELLS row
-        lda sc_row
-        ldb #CM_STRIDE
-        mul
-        addd #CUR_ROOM_CMASK
-        tfr d,y                  ; Y -> this row's mask row
-        ldb sc_row
-        jsr fb_rowd              ; D = draw_base + row*32, flip-aware
-        tfr d,x                  ; X -> this row's framebuffer row
-        lda #8                   ; 8 mask bytes per row (32 source bytes / 4)
-        sta sc_cnt
-sc_bytelp
-        clrb                     ; B = the mask byte being built
-        lda ,u+                  ; attribute for these 8px
-        bne sc_s0               ; decorative cell -> neither 4px cell collides
-        lda ,x
-        beq sc_s0               ; no ink at all -- much the commonest case
-        anda #$f0
-        beq sc_h0
-        orb #$80
-sc_h0
-        lda ,x
-        anda #$0f
-        beq sc_s0
-        orb #$40
-sc_s0
-        leax 1,x
-        lda ,u+                  ; attribute for these 8px
-        bne sc_s1               ; decorative cell -> neither 4px cell collides
-        lda ,x
-        beq sc_s1               ; no ink at all -- much the commonest case
-        anda #$f0
-        beq sc_h1
-        orb #$20
-sc_h1
-        lda ,x
-        anda #$0f
-        beq sc_s1
-        orb #$10
-sc_s1
-        leax 1,x
-        lda ,u+                  ; attribute for these 8px
-        bne sc_s2               ; decorative cell -> neither 4px cell collides
-        lda ,x
-        beq sc_s2               ; no ink at all -- much the commonest case
-        anda #$f0
-        beq sc_h2
-        orb #$08
-sc_h2
-        lda ,x
-        anda #$0f
-        beq sc_s2
-        orb #$04
-sc_s2
-        leax 1,x
-        lda ,u+                  ; attribute for these 8px
-        bne sc_s3               ; decorative cell -> neither 4px cell collides
-        lda ,x
-        beq sc_s3               ; no ink at all -- much the commonest case
-        anda #$f0
-        beq sc_h3
-        orb #$02
-sc_h3
-        lda ,x
-        anda #$0f
-        beq sc_s3
-        orb #$01
-sc_s3
-        leax 1,x
-        stb ,y+
-        dec sc_cnt
-        bne sc_bytelp
-        jsr tick_poll            ; T0051: a full 192-row scan runs well past
-                                   ; one field, same as the prime clear does
-        inc sc_row
-        lda sc_row
-        cmpa #192
-        lbne sc_rowlp
-        rts
-
-sc_row      fcb 0
-sc_cnt      fcb 0
-cmask_needs_scan fcb 0
-        endif
 
 derive_room_cmask
-        ifne NO_CMASK
-        ldx #ATTR_CELLS       ; T0209: no mask to clear -- only pass 1's
-        ldd #0                  ; attribute grid is still consulted
-        ldy #ATTR_CELLS_LEN/2
-        else
         ldx #CUR_ROOM_CMASK   ; clear both scratch buffers -- they're
         ldd #0                     ; adjacent by construction (see the
         ldy #(CMASK_BYTES+ATTR_CELLS_LEN)/2   ; equ block above)
-        endif
 dc_clrlp
         std ,x++
         leay -1,y
@@ -4570,7 +4248,6 @@ dc_p1lp
         bra dc_p1lp
 dc_p1done
 
-        ifeq NO_CMASK+FB_CMASK
         ldx room_placements_ptr
 dc_p2lp
         cmpx room_placements_end
@@ -4585,25 +4262,6 @@ dc_p2skip
         bra dc_p2lp
 dc_p2done
         jsr dc_patch
-        endif
-        ifne FB_CMASK
-        ; T0208: the mask cannot be built yet -- the room art is not PAINTED
-        ; yet. Ask redraw to scan it the moment redraw_placements_dmg has
-        ; finished the prime (whole-screen) repaint, before anything else
-        ; goes into the buffer. Safe because a room change abandons the rest
-        ; of its own pass (X-ALL.TXT's dontupdatedizzy, T0192), so nothing
-        ; probes the mask between here and that scan.
-        lda #1
-        sta cmask_needs_scan
-        endif
-        ; T0209 KNOWN REGRESSION when NO_CMASK=1: dc_patch is skipped, so
-        ; rooms 51 and 84 lose the cells it ORs back in. Those come from
-        ; placements with a negative pixel_x that roompack DROPS from the
-        ; shipped table; the original clips and draws their visible sliver,
-        ; this port's blit cannot clip, so the framebuffer has NO ink there
-        ; and nothing derived from the screen can recover them. This is a
-        ; real limit of screen-derived collision, and T0208 (the load-time
-        ; framebuffer scan) inherits it -- T0208 must KEEP dc_patch.
         rts
 
 ; --------------------------------------------------------------------
@@ -4782,6 +4440,9 @@ sp_found
         ldx sp_srcx
         bra sp_lp
 sp_sorted
+        if FLOPPY
+        jsr clip_room_add         ; T0261
+        endif
         jsr sp_build_bands
         rts
 
@@ -4835,7 +4496,6 @@ dc_bpr        fcb 0
 dc_cy         fcb 0
 dc_cx         fcb 0
 dc_row        fcb 0
-dc_col        fcb 0
 dc_dcol       fcb 0
 dc_cr         fcb 0
 dc_cc         fcb 0
@@ -5342,8 +5002,8 @@ blit_topok
         ; that overruns (room 54's worst: x=204 with an 80px sprite, so it
         ; ends at 284), so all eight have had stray wrapped pixels down
         ; their left edge for as long as they have existed. Found via
-        ; T0208: a mask scanned from the framebuffer read the wrapped ink
-        ; as solid, in exactly those rooms.
+        ; a rejected framebuffer-scan mask experiment (NOTES.md T0208), which read the
+        ; wrapped ink as solid, in exactly those rooms.
         ;
         ; The SHIFTED path touches one byte MORE than bpr -- its spill
         ; `sta ,x` writes at X+bpr without advancing X -- so it must stop
@@ -5552,7 +5212,7 @@ bd_topok
         beq bd_nobot
         lda #FLIP_YEND
         suba bd_toprow
-        lbls bd_alldone          ; starts at/below row 184: nothing inside
+        bls bd_alldone          ; starts at/below row 184: nothing inside
         cmpa bd_height
         bhs bd_nobot
         sta bd_height            ; only the rows above 184
@@ -5613,7 +5273,7 @@ bd_noskip
         ldu bd_maskptr
         ldy bd_spriteptr
         lda bd_shift
-        lbne bd_shiftedlp
+        bne bd_shiftedlp
         bra bd_alignedlp
 bd_alldone
         rts
@@ -5761,7 +5421,6 @@ bd_shiftedlp
         lbne bd_shiftedlp
         rts
 
-placecount fcb 0
 placeptr   fdb 0
 
 blit_ptr    fdb 0
@@ -5813,24 +5472,15 @@ fb_strideb
         beq fbs_x
         subb #64
 fbs_x   rts
-blit_height fcb 0
 blit_bpr    fcb 0
         ifne HCLIP
 blit_eff    fcb 0      ; T0211: bytes actually written per row (<= bpr)
 blit_srcskip fcb 0     ; T0211: source bytes clipped off each row
         endif
-blit_src    fdb 0
 blit_col    fcb 0
 blit_shift  fcb 0
-blit_row    fdb 0
-blit_r      fcb 0
-blit_c      fcb 0
 
-        ifne SINGLE_BUFFER
-draw_base     fdb BUFA   ; T0207: the only page
-        else
 draw_base     fdb BUFB   ; first redraw() draws into B (cur_buf starts at 0/A)
-        endif
 cur_buf       fcb 0      ; 0 = buffer A currently on screen, 1 = buffer B
 prof_slot     fcb 0      ; T0064: phase id, tapped by harness/profile.lua
 field_ctr     fcb 0      ; T0051: 60Hz field boundaries seen since the last
@@ -5854,12 +5504,6 @@ dmg_col1      fcb 0
 dmg_y0        fcb 0
 dmg_y1        fcb 0
 clr_row       fcb 0
-clr_cnt       fcb 0
-p_col0        fcb 0
-p_col1        fcb 0
-p_y0          fcb 0
-p_y1          fcb 0
-ovl_tmp       fcb 0
 
 keyflags      fcb 0
 lives         fcb 2       ; spare lives (eggs shown); new_game sets it
@@ -5895,7 +5539,6 @@ water_n            fcb 0
 water_ptr          fdb 0
 flame_spr          fdb 0
 flame_var          fcb 0
-flame_idx          fcb 0
 fireout            fcb 0    ; T0032 follow-up: matches the original's own
                              ; `fireout` global exactly -- gates room 2's
                              ; fire-pit overlay, set by gameplay.asm
@@ -5916,7 +5559,6 @@ fire_var_a         fcb 255
 fire_var_b         fcb 255
 cb_x               fcb 0
 cb_y               fcb 0
-cb_cy              fcb 0
 clr_width          fcb 0    ; T0064: prime-clear width/stride, hoisted
 clr_stride         fcb 0    ; out of the row loop
 cb_width           fcb 0    ; T0064: clear width/stride, hoisted out
@@ -5924,17 +5566,6 @@ cb_stride          fcb 0    ; of clear_and_blit's row loop
 cb_rows            fcb 0
 rat_lastx_a        fcb 255   ; last x the rat was drawn at, per buffer --
 rat_lastx_b        fcb 255   ; 255 = never drawn in that buffer yet
-rcb_oldx           fcb 0
-rcb_col0           fcb 0
-rcb_col1           fcb 0
-rcb_row            fcb 0
-rcb_rows           fcb 0
-rcb_tmp            fcb 0
-rcb_y0             fcb 0
-rcb_save_col0      fcb 0
-rcb_save_col1      fcb 0
-rcb_save_y0        fcb 0
-rcb_save_y1        fcb 0
 
 dizzy_x       fcb 0
 dizzy_y       fcb 0       ; feet (bottom edge), not top -- see FLOOR_Y
@@ -5957,7 +5588,6 @@ bd_height     fcb 0
 bd_row        fdb 0
 bd_maskptr    fdb 0
 bd_spriteptr  fdb 0
-bd_r          fcb 0
 bd_rows       fcb 0    ; T0064: blitdizzy's row countdown
 bd_shift      fcb 0
 bd_m0         fcb 0
@@ -6794,6 +6424,7 @@ tape_room_staged_start
 ; the overlay loader take the start of this region.
         include "title_resident_len_floppy.asm"
         include "floppy_code.asm"
+        include "floppy_leftclip.asm"     ; T0261: run-time left clip of partly-off-screen placements
         else
         include "title_resident_lz.asm"
         endif
@@ -6880,6 +6511,9 @@ ROOM_UNPACK_BUF
         include "room77_data.asm"     ; T0233-fix -- THE ACTIVE VOLCANO
         ; T0240: joy_walk (the analog joystick's main-loop half; code in the tape-only tail)
         include "tape_joy_code.asm"
+        if FLOPPY
+CLIPBUF rmb CLIP_BUF_LEN          ; T0261: bss, cropped sprites of the current room (floppy_leftclip.asm)
+        endif
 tape_room_staged_end
         ifgt tape_room_staged_end-CODE_DEST
         error "the tape-only room region overlaps CODE_DEST -- shrink it or grow the free span"

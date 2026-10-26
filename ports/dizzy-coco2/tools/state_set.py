@@ -18,14 +18,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "target/floppy"
-COMMON = ["-DTITLE_MIX3=1", "-DDEBUG_XY=0", "-DNO_CMASK=0", "-DFB_CMASK=0", "-DSINGLE_BUFFER=0", "-DHCLIP=1",
+COMMON = ["-DTITLE_MIX3=1", "-DDEBUG_XY=0", "-DHCLIP=1",
           "-DINF_LIVES=0", "-DTAPE_ROOMS=1", "-DFLOPPY=1", "-DSTART_ROOM=36"]
 
 
 def lw(flags, name):
     lst, mp = OUT / f"{name}.lst", OUT / f"{name}.map"
-    subprocess.run(["lwasm", "--decb", *COMMON, *flags, "-o", str(OUT / f"{name}.bin"), f"--map={mp}", f"--list={lst}",
-                    str(ROOT / "target/room36.asm")], check=True, cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.run(["lwasm", "--decb", *COMMON, *flags, "-o", f"target/floppy/{name}.bin", f"--map=target/floppy/{name}.map",
+                    f"--list=target/floppy/{name}.lst", "target/room36.asm"], check=True, cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return lst, mp
 
 

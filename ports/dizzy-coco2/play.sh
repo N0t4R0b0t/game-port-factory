@@ -31,7 +31,7 @@
 # Controls: arrow keys move/jump, DOWN picks up / drops / opens inventory,
 # SPACE dismisses a message and selects in the inventory.
 #
-# Joystick (TAPE build only, T0240): the RIGHT joystick works alongside the
+# Joystick (tape and floppy builds, T0240; tested on tape): the RIGHT joystick works alongside the
 # keys. X axis walks (slower than the keys at partial tilt, full speed at full
 # tilt, dead zone at the centre), the fire button jumps, and also dismisses a
 # message / selects in the inventory. Under XRoar:

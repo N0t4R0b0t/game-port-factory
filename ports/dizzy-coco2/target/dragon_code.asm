@@ -89,6 +89,48 @@ udr_findnext
         bne udr_find
         rts
 udr_found
+        ; T0255: X-ALL dragonrou -> trytostartbreathing runs BEFORE the swing and the head are drawn, and when it
+        ; starts a breath it `pop hl / jp alreadybreathing`: that very tick keeps the swing, draws the head with the
+        ; breath frame (110) and runs the first flame step.  The roll used to follow the head, one tick late.
+        tst dragon_asleep
+        bne udr_headgo            ; a sleeping dragon never breathes fire
+        tst dragon_fire
+        bne udr_headgo
+        ; not currently breathing: the source's own random 5/256 per-
+        ; tick chance (`justrandomfire` -- this build has no golden-egg
+        ; state to special-case, so that's the only path that applies).
+        ; Reuses the free-running LFSR (rng_step, room36.asm) rather
+        ; than a second generator -- it is already sampled by unrelated
+        ; subsystems every pass, which is exactly what makes it a valid
+        ; source of "unpredictable" bits for this one too.
+        lda rng_ctr
+        cmpa #5
+        bhs udr_headgo
+        lda #1
+        sta dragon_fire
+        jsr play_breath          ; T0111: sndfx 10, X-ALL.TXT startbreath
+udr_headgo
+        jsr dragon_head
+
+        ; asleep and only just now reached -8: this is the LAST active
+        ; tick (matches the source drawing once more before the next
+        ; call's `ret z`) -- fall through and draw/collide-check the
+        ; flame state normally; draw_dragon will stop after this pass.
+
+        tst dragon_asleep
+        bne udr_nofire
+        tst dragon_fire
+        beq udr_nofire
+        jsr dragon_flames         ; positions + collision + the wrap/inc
+udr_nofire
+        rts
+
+; dragon_head: X = the dragon's actor slot (actor_ram for room 54, actor_init_tape for room 40).
+; Advances the swing (asleep: retract toward -8; awake: the triangle wave, frozen mid-breath),
+; picks the head frame, writes the head's CURRENT state into the slot and kills Dizzy on a head
+; hit. Shared by update_dragon and tape_code.asm's update_dragon40 (T0254: they were two copies).
+; Clobbers A, B, X, Y; sets udr_slot and udr_head_y.
+dragon_head
         stx udr_slot
 
         ; T0133: proxsleep used to fire here on mere proximity (any
@@ -170,33 +212,6 @@ udr_headframeok
         ldx #msg_dragon
         jsr kill_dizzy_msg
 udr_nothead
-
-        ; asleep and only just now reached -8: this is the LAST active
-        ; tick (matches the source drawing once more before the next
-        ; call's `ret z`) -- fall through and draw/collide-check the
-        ; flame state normally; draw_dragon will stop after this pass.
-
-        tst dragon_asleep
-        bne udr_nofire            ; a sleeping dragon never breathes fire
-        lda dragon_fire
-        bne udr_firing
-        ; not currently breathing: the source's own random 5/256 per-
-        ; tick chance (`justrandomfire` -- this build has no golden-egg
-        ; state to special-case, so that's the only path that applies).
-        ; Reuses the free-running LFSR (rng_step, room36.asm) rather
-        ; than a second generator -- it is already sampled by unrelated
-        ; subsystems every pass, which is exactly what makes it a valid
-        ; source of "unpredictable" bits for this one too.
-        lda rng_ctr
-        cmpa #5
-        bhs udr_nofire
-        lda #1
-        sta dragon_fire
-        jsr play_breath          ; T0111: sndfx 10, X-ALL.TXT startbreath
-        bra udr_nofire
-udr_firing
-        jsr dragon_flames         ; positions + collision + the wrap/inc
-udr_nofire
         rts
 
 ; dragon_flames: dragon_fire is nonzero. Computes this tick's visible

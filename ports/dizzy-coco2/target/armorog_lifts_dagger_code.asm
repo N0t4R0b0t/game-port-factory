@@ -339,6 +339,16 @@ ul_next
         endif
 
 ul_one
+        if TAPE_ROOMS
+        ; T0255: the room-94 lift (movingdata z62) has delay 2 like the switch and Daisy: it runs on every 2nd actor tick
+        ; (d94 is the shared parity, flipped once per tick by update_switch1 in tape_code.asm; run when it reads 1).
+        lda cur_room
+        cmpa #94
+        bne ul_gate_ok
+        tst d94
+        lbeq ul_ret
+ul_gate_ok
+        endif
         lda 5,x
         lbeq ul_ret
         lda 2,x
@@ -509,6 +519,7 @@ arm_strip_hdr   fcb 4,20,1
 ul_n            fcb 0
 ul_slot         fdb 0
 ul_obstruct     fcb 0
+d94             fcb 0     ; T0255: room 94 delay-2 parity (lift / switch1 / Daisy), see ul_one
 ul_y            fcb 0
 ul_top          fcb 0
 ul_bot          fcb 0

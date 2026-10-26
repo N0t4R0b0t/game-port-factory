@@ -245,6 +245,20 @@ return function(PT)
     if r.y >= sty or dt >= ab then return false end
     return true
   end
+  -- T0259 (D2): CoCo only. X-ALL tests the pickupables from the LAST movingdata record down and the first one in reach takes the key, so a
+  -- standing position where a pickupable with a HIGHER original index (byte 6 of its record, written by roompack) than `r` is also in reach would
+  -- talk to / take THAT one instead (Dozy 40 before the potion 15). The ZX model orders its own records; nothing to do there.
+  local function shadowed(stx, sty, r, dh)
+    if ZXM then return false end
+    local rank = rd8(r.addr + 6)
+    for _, o in ipairs(recs()) do
+      if o.rou == 2 and o.room == r.room and o.addr ~= r.addr and rd8(o.addr + 6) > rank then
+        local ow, oh = sprite_dims(o.frame)
+        if overlap_actor(stx, sty, o, ow, oh, dh) then return true end
+      end
+    end
+    return false
+  end
   local function overlap_box(stx, sty, bx, by, bw, bh, dh)
     local br = math.min(255, bx + bw)
     if math.min(255, stx + 24) <= bx or stx >= br then return false end
@@ -443,7 +457,7 @@ return function(PT)
     local w, h = sprite_dims(r.frame)
     local before = inv_desc()
     local function xin(x) if st.x == nil then return true end if type(st.x) == "table" then return x >= st.x[1] and x <= st.x[2] end return x == st.x end
-    local ok = at_candidates(function(x, y) return xin(x) and overlap_actor(x, y, r, w, h) end, function(c)
+    local ok = at_candidates(function(x, y) return xin(x) and overlap_actor(x, y, r, w, h) and not shadowed(x, y, r) end, function(c)
       for attempt = 1, 2 do
         -- T0237 (CoCo): try_pickup ignores a DOWN within PICKUP_COOLDOWN (12) passes of the previous one (the drop/pickup just before); a press
         -- inside it was swallowed and cost a 20-pass retry (Armorog's den race is only ~46 passes now), so let the cooldown run out first
@@ -468,7 +482,7 @@ return function(PT)
       if E.in_inventory() then close_inventory_if_open() end
       return false
     end, "pickup " .. st[2], nil, st.air and {
-      pred = function(x, y) return xin(x) and overlap_actor(x, y, r, w, h, 15) end,
+      pred = function(x, y) return xin(x) and overlap_actor(x, y, r, w, h, 15) and not shadowed(x, y, r, 15) end,
       ok = function()
         if E.in_inventory() then close_inventory_if_open() end
         return (spec.consumed or inv_has_frame(spec.frame, spec.slot)) and rec_by_slot(r.slot).room == 255
@@ -484,7 +498,7 @@ return function(PT)
     local r = find_rec(spec)
     if not r then fail(string.format("pickup_and_drop %s: no frame-%d record in room %d", st[2], spec.frame, room())) end
     local w, h = sprite_dims(r.frame)
-    local ok = at_candidates(function(x, y) return overlap_actor(x, y, r, w, h) end, function(c)
+    local ok = at_candidates(function(x, y) return overlap_actor(x, y, r, w, h) and not shadowed(x, y, r) end, function(c)
       local n = 0
       while rd("dizzy_h") < dh_estimate() and n < 20 do tick(0, "await tall frame"); n = n + 1 end
       setkeys(K_DOWN)
@@ -555,7 +569,7 @@ return function(PT)
     if not r then fail(string.format("talk %s: no frame-%d record in room %d", st[2], spec.frame, room())) end
     local w, h = sprite_dims(r.frame)
     local boxes = 0
-    local ok = at_candidates(function(x, y) return overlap_actor(x, y, r, w, h) end, function(c)
+    local ok = at_candidates(function(x, y) return overlap_actor(x, y, r, w, h) and not shadowed(x, y, r) end, function(c)
       -- frame-based press (the talk's first box blocks the main loop, so a pass-based tick would never return)
       local n = 0
       while rd("dizzy_h") < dh_estimate() and n < 20 do tick(0, "await tall frame"); n = n + 1 end
@@ -769,6 +783,7 @@ return function(PT)
       PT.boot()
     end
     say("PLAYTHROUGH start: segments=%d from=%d until=%d  %s", #segs, FROM, math.min(UNTIL, #segs), E.where())
+    if os.getenv("PT_RCLOG") then PT.rclog = dofile((os.getenv("PT_ROOT") or ".") .. "/harness/roomcmp_log.lua")(PT, os.getenv("PT_RCLOG")) end   -- T0255: passive actor log (tools/roomcmp.sh)
     local last_frames = E.total_frames()
     local done = 0
     -- T0242 (floppy build): PT_QS_N=n PT_QS_K=k -> after segment n press S (keys only), play on through n+k, press L, and
@@ -799,6 +814,7 @@ return function(PT)
       local reused = OV.plan == nil or type(OV.plan[i]) == "number"       -- a port segment: its per-step overrides apply (keyed by the port number)
       PT.seg = i; PT.segname = seg.name; PT.step = 0
       say("== SEGMENT %d: %s", i, seg.name)
+      if PT.rclog_seg then PT.rclog_seg(i, oi or "none") end
       say("SEGSTART %d t=%.3f frames=%d emulated=%s pair=%s", i, E.mtime(), E.total_frames(), E.emutime(E.total_frames()), tostring(oi or "none"))
       for j, st0 in ipairs(seg.steps) do
         PT.step = j
@@ -830,12 +846,14 @@ return function(PT)
       last_frames = now
       done = done + 1
       if i < #segs then save_checkpoint(i) end
+      if PT.rclog_flush then PT.rclog_flush() end
       if QS_N and qs_phase == 0 and i == QS_N then qs_press("S"); qs_phase = 1; qs_load_at = i + QS_K end
       if QS_N and qs_phase == 1 and i == qs_load_at then
         say("== QUICKLOAD: back to the state saved after segment %d (the bot has played %d segments since)", QS_N, QS_K)
         qs_press("L"); qs_phase = 2; i = QS_N
       end
     end
+    if PT.rclog_close then PT.rclog_close() end
     if UNTIL < #segs then
       say("PLAYTHROUGH PARTIAL segments_done=%d (stopped at --until %d of %d) deaths=%d frames=%d", done, UNTIL, #segs, PT.deaths, E.total_frames())
     elseif PT.deaths ~= 0 then

@@ -248,8 +248,8 @@ FRAME_JUG       equ 19
 FRAME_LOAF      equ 20
 FRAME_RAILING   equ 192    ; T0056: room 52's removable railing section
 FRAME_WHISKEY   equ 18     ; T0068: room 53's bottle (whiskeyhere)
-FRAME_POTION    equ 15     ; T0133: sleepingpotionhere, room 45 (not built)
-FRAME_CROWBAR   equ 4      ; T0133: crowbarhere, room 88 (not built)
+FRAME_POTION    equ 15     ; T0133: sleepingpotionhere, room 45 (tape build only)
+FRAME_CROWBAR   equ 4      ; T0133: crowbarhere, room 88 (tape build only)
 ; T0201: frames of the other carryables in BUILT rooms, from
 ; extracted/actors.json (each one's `message` field names the original's
 ; own string, so the text is the source's, not invented).
@@ -268,7 +268,8 @@ gameplay_init
         clr killed
         clr troll_bribed
         clr rat_dir
-        lda #16
+        clr rat_dly              ; T0255: delay phase; resetmoving's rathere+oldmovefrm=60 = the first leg
+        lda #60
         sta rat_step
         clr troll_launching
         clr dizzy_dir             ; T0136: latched direction / jump cycle
@@ -410,6 +411,7 @@ kd_already
 msg_box_done
         jsr prtmessage
         jsr msg_wait_dismiss
+        jsr box_reset            ; T0258 (D1): windowrou -> windowrou1 -> resetuproom, see room36.asm
         jsr force_redraw
         rts
 
@@ -660,7 +662,7 @@ aabb_miss
 ; source's real proxapplerou/proxjugrou fire on the DROPPED item's own
 ; placed position overlapping that box. dropobject in X-ALL.TXT places
 ; a dropped item near Dizzy and its caller immediately re-checks
-; proximity -- point_in_box below against the position drop_to_world
+; proximity -- a point-in-box test against the position drop_to_world
 ; JUST placed the item at is this port's equivalent.
 ;
 ; The jug/fire outcome was ALSO wrong beyond the trigger condition: it
@@ -801,33 +803,6 @@ uit_hit
         pshs y
         jsr aabb_hit
         puls y
-        rts
-
-; point_in_box: A=x, B=y -> Z clear if (A,B) lies within
-; [ah_bx,ah_bx+ah_bw) x [ah_by,ah_by+ah_bh). A plain point test, not
-; actor_hit's AABB -- callers here are checking one dropped item's
-; single placed position, not two sprites' overlapping boxes.
-point_in_box
-        sta pib_px
-        stb pib_py
-        lda pib_px
-        cmpa ah_bx
-        blo pib_miss
-        lda ah_bx
-        adda ah_bw
-        cmpa pib_px
-        bls pib_miss
-        lda pib_py
-        cmpa ah_by
-        blo pib_miss
-        lda ah_by
-        adda ah_bh
-        cmpa pib_py
-        bls pib_miss
-        lda #1
-        rts
-pib_miss
-        clra
         rts
 
 ; --------------------------------------------------------------------
@@ -994,7 +969,7 @@ mc_loop
         puls x
         lda ,x                   ; peek: another box, or end of the run?
         bne mc_loop
-        rts
+        jmp box_reset            ; T0258 (D1): `chatter` ends with jp windowrou1 (resetuproom), once, after the last box
 
 msg_wait_dismiss
         ; T0154: a real state byte for the harnesses. They used to detect
@@ -1403,8 +1378,6 @@ apple_msg_pending   fcb 0
 jug_quenched_msg_pending fcb 0
 ratloaf_msg_pending fcb 0
 uit_n               fcb 0
-pib_px              fcb 0
-pib_py              fcb 0
 spm_shown           fcb 0
 spm_i               fcb 0
 fb_k1               fcb 0
@@ -1767,7 +1740,7 @@ cdk_liftroom fcb 0
 msg_active fcb 0   ; T0154: nonzero while a message box blocks for a key
 
 ; T0133: proxsleep (X-ALL.TXT ~2741) -- fires only when the
-; potion item (FRAME_POTION, sleepingpotionhere, room 45 -- not built) is
+; potion item (FRAME_POTION, sleepingpotionhere, room 45 -- tape build only) is
 ; dropped in room 54's DRAGON_SLEEP_* box. Was wrongly wired as mere
 ; proximity in update_dragon; moved here to match justexitinvent ->
 ; checkproximity. proxsleeprou consumes the potion, latches dragon_asleep
@@ -1798,7 +1771,7 @@ cdt_potion
         rts
 
 ; T0133: proxcrowbar (X-ALL.TXT ~3443) -- fires only when the CROWBAR
-; (FRAME_CROWBAR, crowbarhere, room 88 -- not built) is dropped in room
+; (FRAME_CROWBAR, crowbarhere, room 88 -- tape build only) is dropped in room
 ; 55's WELLLID_PROX_* box. Was wrongly wired as mere proximity in
 ; update_welllid (now removed); moved here to match justexitinvent ->
 ; checkproximity. proxcrowbarrou consumes the crowbar, hides the lid

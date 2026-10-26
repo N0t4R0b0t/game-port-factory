@@ -54,6 +54,7 @@ cargo build --release --manifest-path tools/aycapture/Cargo.toml >/dev/null
 $BIN/aycapture $SRC/MUSIC128.SPC tune 0  1000 $C/tune0.csv
 $BIN/aycapture $SRC/MUSIC128.SPC tune 1  1000 $C/tune1.csv
 $BIN/aycapture $SRC/MUSIC128.SPC tune 5  1000 $C/tune5.csv
+$BIN/aycapture $SRC/MUSIC128.SPC fx   0   150 $C/fx0.csv   # T0260: the walking thud (X-ALL updatedizzy: sndfx 0 on animation frames 1/5)
 $BIN/aycapture $SRC/MUSIC128.SPC fx   1   150 $C/fx1.csv
 $BIN/aycapture $SRC/MUSIC128.SPC fx   21  150 $C/fx21.csv
 # T0109: the rest of the trigger table.
@@ -84,6 +85,9 @@ fi
 $BIN/reduce $C/tune1.csv      1000   tune1  $C/tune1.asm         24     600  100000    1
 $BIN/reduce $C/tune5.csv      1000   tune5  $C/tune5.asm         24     120       4   16
 $BIN/reduce $C/fx1.csv         150   fx1    $C/fx1.asm           24       8       2   16
+# T0260: sndfx 0, a 54Hz thud: ONE captured frame = one full cycle (2 half-waves, ~19ms uncapped, which cost one mainloop
+# pass in 13 while walking, see NOTES T0260); capped to ONE half-wave (~9ms) like the other action sfx.
+$BIN/reduce $C/fx0.csv         150   fx0    $C/fx0.asm           24      60       1   16
 $BIN/reduce $C/fx21.csv        150   fx21   $C/fx21.asm          24      60       3   16
 # death tune plays while the death box waits for SPACE -- a pause, so it
 # can be long; the three sfx all fire mid-action and stay short.
@@ -103,6 +107,7 @@ $BIN/reduce $C/fx10.csv        150   fx10   $C/fx10.asm          24      30     
   echo ";   tune0 (title)     <- $([ "$TITLE_SRC" = beep ] && echo 'MUSIC48.SPC, 48K beeper' || echo 'MUSIC128.SPC, 128K AY melody + envelope')"
   echo ";   tune1 (new life)  <- MUSIC128.SPC, 128K AY"
   echo ";   tune5 (pickup)    <- MUSIC128.SPC, 128K AY"
+  echo ";   fx0   (thud)      <- MUSIC128.SPC, 128K AY (T0260)"
   echo ";   fx1   (footstep)  <- MUSIC128.SPC, 128K AY"
   echo ";   fx21  (jump)      <- MUSIC128.SPC, 128K AY"
   echo ";   tune2 (death)     <- MUSIC128.SPC, 128K AY"
@@ -121,7 +126,7 @@ $BIN/reduce $C/fx10.csv        150   fx10   $C/fx10.asm          24      30     
   cat "$C/tune0_title.asm"
   echo "        endif"
   echo
-  for f in tune1 tune5 fx1 fx21 tune2 fx6 fx11 fx25 fx10; do cat "$C/$f.asm"; echo; done
+  for f in tune1 tune5 fx0 fx1 fx21 tune2 fx6 fx11 fx25 fx10; do cat "$C/$f.asm"; echo; done
 } > $OUT
 
 echo

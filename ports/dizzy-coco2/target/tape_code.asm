@@ -19,16 +19,21 @@
 ; there is no way back up. Otherwise, while Dizzy stands on the switch
 ; box (`collidewithdizzy16`, actor_hit's own equivalent here), var1 is
 ; set to 1 (descending); step off and it holds at 0 again next pass.
-; Not ported: the switch's own mirrored-colour redraw (resetmachines,
-; X-ALL.TXT ~2932) -- cosmetic only, ROU_SWITCH1 is not special-cased
-; in draw_actors so it always renders as the plain frame-122 static
-; sprite (same "not worth the bytes" class as other cosmetic-only
-; skips this port has taken). See NOTES.md T0238.
+; T0255: the switch's mirrored-colour redraw (resetmachines, X-ALL.TXT ~2932)
+; IS ported now: the record's colour bit 7 follows "Dizzy stands on it" and
+; draw_actors draws a bit-7 lever mirrored (tape_static_mirror).
 update_switch1
         lda cur_room
         cmpa #94
         bne us1_ret
         jsr ud94_daggers         ; T0227 (tape_item_code.asm)
+        ; T0255: the switch, Daisy and the lift all have delay 2 (movingdata z62/z63/z64): the delay counters of the three
+        ; advance together, once per actor tick in this room, and each routine runs when its counter reaches 2.  d94 = the
+        ; parity (block D, armorog_lifts_dagger_code.asm); update_lifts ran EARLIER this tick and saw it before this flip.
+        lda d94
+        eora #1
+        sta d94
+        bne us1_ret              ; new value 1 = the previous was 0 = this tick is the first of the pair: skip
         ldd #0
         std us1_lift
         std us1_sw
@@ -63,6 +68,13 @@ us1_next
         cmpy #0
         beq us1_done
         jsr actor_hit
+        ldy us1_sw               ; T0255: resetmachines -- the lever is drawn mirrored (colour bit 7) while it is pressed
+        ldb 7,y
+        andb #$7f
+        tsta
+        beq us1_lvr
+        orb #$80
+us1_lvr stb 7,y
         tsta
         beq us1_done
         ldy us1_lift
@@ -114,15 +126,16 @@ uh_have
         beq uh_noreset
         sta uh_seq
         lda #52
-        sta 3,y                  ; resethawk: movey=52, var1=0
+        sta 3,y                  ; resethawk: movey=52, var1=0 ...
         clr 5,y
-        clr uh_dc
+        bra uh_step              ; ... then joinresthawk: one animation step NOW; the delay counter is not touched (T0258, D1)
 uh_noreset
         inc uh_dc
         lda uh_dc
         cmpa #2
         lblo uh_ret
         clr uh_dc
+uh_step
         lda 5,y
         anda #1
         bne uh_dive
@@ -203,7 +216,7 @@ uh_seq  fcb 0
 ;    puteggbackmess. The port's dragon_asleep/dragon_swing are single
 ;    globals (one dragon when they were written), so dragon_swap keeps one
 ;    (asleep,swing) pair per dragon and swaps them on room change; the
-;    breath (dragon_fire/dragon_delay) is shared, as the original's
+;    breath (dragon_fire) is shared, as the original's
 ;    `breathingfire` is.
 ;  - find the egg: two records have frame 10 (room 93's egg too), and the
 ;    live egg's room byte becomes 255 when carried, so it is found once by
@@ -228,24 +241,30 @@ dsw_have
         cmpb dr_owner
         beq dsw_ret
         pshs b
-        ldx #dr_slots              ; save the outgoing dragon's pair
+        ldx #dr_slots              ; save the outgoing dragon's state (T0255: 3 bytes -- the swing's delaycounter is per dragon too)
         lda dr_owner
-        asla
-        leax a,x
+        ldb #3
+        mul
+        leax b,x
         lda dragon_asleep
         sta ,x
         lda dragon_swing
         sta 1,x
+        lda dragon_delay
+        sta 2,x
         puls b
         stb dr_owner
         ldx #dr_slots              ; load the incoming one
         tfr b,a
-        asla
-        leax a,x
+        ldb #3
+        mul
+        leax b,x
         lda ,x
         sta dragon_asleep
         lda 1,x
         sta dragon_swing
+        lda 2,x
+        sta dragon_delay
 dsw_ret
         rts
 
@@ -256,6 +275,7 @@ dsw_ret
 tape_state_reset
         jsr bean_reset           ; T0223: shopkeeper timer/junk counter, stalk (tape_bean_code.asm)
         clr waterheight
+        clr uh_dc                ; T0258: hawk's delaycounter (reseteach at game start)
         clr dz_talks             ; T0218: Dozy (below)
         clr tt_dylan             ; T0229: Dylan/Doug's talkbefore (below)
         clr tt_doug
@@ -270,6 +290,7 @@ dragon_reset
         ldd #0
         std dr_slots
         std dr_slots+2
+        std dr_slots+4
         clr dr_egg_slot_ok
         rts
 
@@ -299,59 +320,28 @@ ud40_nx
         bne ud40_find
         rts
 ud40_found
-        lda dragon_asleep
-        beq ud40_swingawake
-        lda dragon_swing
-        deca
-        cmpa #-8
-        bge ud40_haveswing
-        lda #-8
-        bra ud40_haveswing
-ud40_swingawake
-        lda dragon_fire
-        bne ud40_cur
-        lda dragon_delay
-        inca
-        anda #31
-        sta dragon_delay
-        cmpa #16
-        blo ud40_haveswing
-        nega
-        adda #32
-ud40_haveswing
-        sta dragon_swing
-        bra ud40_swingdone
-ud40_cur
-        lda dragon_swing
-ud40_swingdone
-        lda #DRAGON_ORIGY
-        suba dragon_swing
-        sta udr_head_y
-        lda #109
-        ldb dragon_fire
-        beq ud40_framedone
-        decb
-        cmpb #16
-        bhs ud40_framedone
-        lda #110
-ud40_framedone
-        sta dragon_headfrm
-        sta 4,y
-        lda #DRAGON_HEAD_X
-        sta 2,y
-        lda udr_head_y
-        sta 3,y
-        jsr actor_hit
-        tsta
-        beq ud40_nothead
-        ldx #msg_dragon
-        jsr kill_dizzy_msg
-ud40_nothead
+        tfr y,x
+        ; T0255: trytostartbreathing first (room 40: the nest egg is gone), then the swing/head, then the flames --
+        ; the same order as update_dragon (dragon_code.asm).
+        tst dragon_asleep
+        bne ud40_head
+        tst dragon_fire
+        bne ud40_head
+        pshs x
+        bsr ud40_trystart
+        puls x
+ud40_head
+        jsr dragon_head          ; T0254: the swing/head/hit part is update_dragon's (dragon_code.asm)
         tst dragon_asleep
         bne ud40_ret
-        lda dragon_fire
-        bne ud40_firing
-        ; not breathing: start only if the nest egg has been taken
+        tst dragon_fire
+        beq ud40_ret
+        jsr dragon_flames
+ud40_ret
+        rts
+
+; ud40_trystart: not breathing: start only if the nest egg has been taken
+ud40_trystart
         tst dr_egg_slot_ok
         bne ud40_egg_known
         ldx #actor_init_tape_template
@@ -385,10 +375,6 @@ ud40_egg_known
         sta dragon_fire
         jsr play_breath
         rts
-ud40_firing
-        jsr dragon_flames
-ud40_ret
-        rts
 
 ; cdt_egg: check_drop_trigger's frame-10 branch (X = the dropped item).
 ; Only room 40's nest box counts (room 93 has an egg too).
@@ -421,7 +407,7 @@ cdt_egg
 
 ud40_n          fcb 0
 dr_owner        fcb 0
-dr_slots        fcb 0,0,0,0
+dr_slots        fcb 0,0,0,0,0,0
 dr_egg_slot     fcb 0
 dr_egg_slot_ok  fcb 0
 
@@ -448,6 +434,7 @@ dr_egg_slot_ok  fcb 0
 waterheight     fcb 0
 tide_list       fcb 80,168,112,168,144,168
 ul48_n          fcb 0
+ul48_seq        fcb 0
 ul48_dc         fcb 0
 
 update_log48
@@ -477,10 +464,17 @@ ul48_find
 ul48_ret
         jmp update_dozy          ; T0218: chained here, saves a resident call site
 ul48_have
+        lda room_load_seq        ; T0255: X-ALL resetlog IS the log's step: every entry into the room runs one (the
+        cmpa ul48_seq            ; delay counter is not touched), so the cycle is one step ahead of the delay-4 beat
+        beq ul48_notnew
+        sta ul48_seq
+        bra ul48_dostep
+ul48_notnew
         inc ul48_dc
         lda ul48_dc
         anda #3
         bne ul48_nostep
+ul48_dostep
         lda 5,y
         inca
         anda #3

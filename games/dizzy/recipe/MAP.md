@@ -43,12 +43,12 @@ Rows are printed top-down, so up the page is up in the game.
 | row | +0 | +1 | +2 | +3 | +4 | +5 | +6 | +7 | +8 | +9 | +10 | +11 | +12 | +13 | +14 | +15 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | **112** |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| **96** |  |  |  |  | 100<br>THE ATTIC |  |  |  |  |  |  |  |  |  |  |  |
-| **80** |  |  |  | 83<br>THE WEST TOWER | 84<br>THE CASTLE STAIRCASE | 85<br>THE EAST TOWER | 86<br>THE LONGJUMP CLOUD | 87<br>THE MEETING HALL | 88<br>LIFT TO THE ELDERS | 89<br>DIZZY'S PARENTS HUT |  | 91<br>YET MORE CLOUDS | 92<br>MORE 'ORRIBLE CLOUDS | 93<br>THE CLOUD CASTLE | 94<br>DAISY'S PRISON |  |
-| **64** |  |  |  | 67<br>THE WEST WING | **68<br>THE BANQUET HALL** | **69<br>THE EAST WING** |  | 71<br>KEEP OUT! DOZY'S HUT | 72<br>DENZIL'S PAD | 73<br>DAISY'S EMPTY HUT | 74<br>THE GIANT BEANSTALK | 75<br>COMPLEX CLOUD ROUTE | 76<br>NEAR THE VOLCANO TOP | 77<br>THE ACTIVE VOLCANO |  |  |
-| **48** | 48<br>THE BROKEN BRIDGE | 49<br>THE GUARD HOUSE | 50<br>ARMOROG'S DEN | **51<br>MOAT AND PORTCULLIS** | **52<br>THE ENTRANCE HALL** | **53<br>THE SNAP HAPPY GATOR** | **54<br>THE WIDE-EYED DRAGON** | 55<br>THE BOTTOMLESS WELL | 56<br>THE LIFT CONTROL HUT | 57<br>BASE OF TREE HOUSE | 58<br>THE SMELLY ALLOTMENT | 59<br>THE LARGE OAK TREE | 60<br>BASE OF THE VOLCANO |  |  | 63<br>THE CRAFTY CLOUD |
-| **32** |  |  |  | **35<br>SMUGGLER'S HIDEOUT** | **36<br>THE CASTLE'S DUNGEON** |  |  | 39<br>GOING DOWN THE WELL! | 40<br>THE DRAGON'S LAIR | 41<br>THE DESERTED MINES |  |  |  | 45<br>LOOKING OUT TO SEA | 46<br>THE DOCKS AND PIER | 47<br>FOURWAY WAREHOUSE |
-| **16** |  |  |  |  |  |  | 22<br>THE MARKET SQUARE | 23<br>A STRANGE NEW WORLD! | 24<br>INSIDE THE CHURCH |  |  |  |  |  |  | 31<br>THE AMAZING ILLUSION |
+| **96** |  |  |  |  | **100<br>THE ATTIC** |  |  |  |  |  |  |  |  |  |  |  |
+| **80** |  |  |  | **83<br>THE WEST TOWER** | **84<br>THE CASTLE STAIRCASE** | **85<br>THE EAST TOWER** | **86<br>THE LONGJUMP CLOUD** | **87<br>THE MEETING HALL** | **88<br>LIFT TO THE ELDERS** | **89<br>DIZZY'S PARENTS HUT** |  | **91<br>YET MORE CLOUDS** | **92<br>MORE 'ORRIBLE CLOUDS** | **93<br>THE CLOUD CASTLE** | **94<br>DAISY'S PRISON** |  |
+| **64** |  |  |  | **67<br>THE WEST WING** | **68<br>THE BANQUET HALL** | **69<br>THE EAST WING** |  | **71<br>KEEP OUT! DOZY'S HUT** | **72<br>DENZIL'S PAD** | **73<br>DAISY'S EMPTY HUT** | **74<br>THE GIANT BEANSTALK** | **75<br>COMPLEX CLOUD ROUTE** | **76<br>NEAR THE VOLCANO TOP** | **77<br>THE ACTIVE VOLCANO** |  |  |
+| **48** | **48<br>THE BROKEN BRIDGE** | **49<br>THE GUARD HOUSE** | **50<br>ARMOROG'S DEN** | **51<br>MOAT AND PORTCULLIS** | **52<br>THE ENTRANCE HALL** | **53<br>THE SNAP HAPPY GATOR** | **54<br>THE WIDE-EYED DRAGON** | **55<br>THE BOTTOMLESS WELL** | **56<br>THE LIFT CONTROL HUT** | **57<br>BASE OF TREE HOUSE** | **58<br>THE SMELLY ALLOTMENT** | **59<br>THE LARGE OAK TREE** | **60<br>BASE OF THE VOLCANO** |  |  | **63<br>THE CRAFTY CLOUD** |
+| **32** |  |  |  | **35<br>SMUGGLER'S HIDEOUT** | **36<br>THE CASTLE'S DUNGEON** |  |  | **39<br>GOING DOWN THE WELL!** | **40<br>THE DRAGON'S LAIR** | **41<br>THE DESERTED MINES** |  |  |  | **45<br>LOOKING OUT TO SEA** | **46<br>THE DOCKS AND PIER** | **47<br>FOURWAY WAREHOUSE** |
+| **16** |  |  |  |  |  |  | **22<br>THE MARKET SQUARE** | **23<br>A STRANGE NEW WORLD!** | **24<br>INSIDE THE CHURCH** |  |  |  |  |  |  | **31<br>THE AMAZING ILLUSION** |
 | **0** | _0: not a place_ | _1: not a place_ | _2: not a place_ | _3: not a place_ |  |  |  |  |  |  |  |  |  |  |  |  |
 
 ## The built slice and its frontier
@@ -57,22 +57,73 @@ Solid boxes are built; dashed are the rooms one step outside it.
 
 ```mermaid
 flowchart TB
+  R22["22<br>THE MARKET SQUARE"]
+  R23["23<br>A STRANGE NEW WORLD!"]
+  R24["24<br>INSIDE THE CHURCH"]
+  R31["31<br>THE AMAZING ILLUSION"]
   R35["35<br>SMUGGLER'S HIDEOUT"]
   R36["36<br>THE CASTLE'S DUNGEON"]
+  R39["39<br>GOING DOWN THE WELL!"]
+  R40["40<br>THE DRAGON'S LAIR"]
+  R41["41<br>THE DESERTED MINES"]
+  R45["45<br>LOOKING OUT TO SEA"]
+  R46["46<br>THE DOCKS AND PIER"]
+  R47["47<br>FOURWAY WAREHOUSE"]
+  R48["48<br>THE BROKEN BRIDGE"]
+  R49["49<br>THE GUARD HOUSE"]
   R50["50<br>ARMOROG'S DEN"]
   R51["51<br>MOAT AND PORTCULLIS"]
   R52["52<br>THE ENTRANCE HALL"]
   R53["53<br>THE SNAP HAPPY GATOR"]
   R54["54<br>THE WIDE-EYED DRAGON"]
   R55["55<br>THE BOTTOMLESS WELL"]
+  R56["56<br>THE LIFT CONTROL HUT"]
+  R57["57<br>BASE OF TREE HOUSE"]
+  R58["58<br>THE SMELLY ALLOTMENT"]
+  R59["59<br>THE LARGE OAK TREE"]
+  R60["60<br>BASE OF THE VOLCANO"]
+  R63["63<br>THE CRAFTY CLOUD"]
   R67["67<br>THE WEST WING"]
   R68["68<br>THE BANQUET HALL"]
   R69["69<br>THE EAST WING"]
+  R70["70<br>"]
+  R71["71<br>KEEP OUT! DOZY'S HUT"]
+  R72["72<br>DENZIL'S PAD"]
+  R73["73<br>DAISY'S EMPTY HUT"]
+  R74["74<br>THE GIANT BEANSTALK"]
+  R75["75<br>COMPLEX CLOUD ROUTE"]
+  R76["76<br>NEAR THE VOLCANO TOP"]
+  R77["77<br>THE ACTIVE VOLCANO"]
+  R83["83<br>THE WEST TOWER"]
   R84["84<br>THE CASTLE STAIRCASE"]
   R85["85<br>THE EAST TOWER"]
+  R86["86<br>THE LONGJUMP CLOUD"]
+  R87["87<br>THE MEETING HALL"]
+  R88["88<br>LIFT TO THE ELDERS"]
+  R89["89<br>DIZZY'S PARENTS HUT"]
+  R91["91<br>YET MORE CLOUDS"]
+  R92["92<br>MORE 'ORRIBLE CLOUDS"]
+  R93["93<br>THE CLOUD CASTLE"]
+  R94["94<br>DAISY'S PRISON"]
+  R100["100<br>THE ATTIC"]
+  R22 -- E/W --- R23
+  R23 -- E/W --- R24
+  R23 -- N/S --- R39
+  R24 -- N/S --- R40
+  R31 -- N/S --- R47
   R35 -- E/W --- R36
   R35 -- N/S --- R51
   R36 -- N/S --- R52
+  R39 -- E/W --- R40
+  R39 -- N/S --- R55
+  R40 -- E/W --- R41
+  R40 -- N/S --- R56
+  R41 -- N/S --- R57
+  R45 -- E/W --- R46
+  R46 -- E/W --- R47
+  R47 -- N/S --- R63
+  R48 -- E/W --- R49
+  R49 -- E/W --- R50
   R50 -- E/W --- R51
   R51 -- E/W --- R52
   R51 -- N/S --- R67
@@ -81,16 +132,48 @@ flowchart TB
   R53 -- E/W --- R54
   R53 -- N/S --- R69
   R54 -- E/W --- R55
+  R54 -- N/S --- R70
+  R55 -- E/W --- R56
+  R55 -- N/S --- R71
+  R56 -- E/W --- R57
+  R56 -- N/S --- R72
+  R57 -- E/W --- R58
+  R57 -- N/S --- R73
+  R58 -- E/W --- R59
+  R58 -- N/S --- R74
+  R59 -- E/W --- R60
+  R59 -- N/S --- R75
+  R60 -- N/S --- R76
   R67 -- E/W --- R68
+  R67 -- N/S --- R83
   R68 -- E/W --- R69
   R68 -- N/S --- R84
+  R69 -- E/W --- R70
   R69 -- N/S --- R85
+  R70 -- E/W --- R71
+  R70 -- N/S --- R86
+  R71 -- E/W --- R72
+  R71 -- N/S --- R87
+  R72 -- E/W --- R73
+  R72 -- N/S --- R88
+  R73 -- E/W --- R74
+  R73 -- N/S --- R89
+  R74 -- E/W --- R75
+  R75 -- E/W --- R76
+  R75 -- N/S --- R91
+  R76 -- E/W --- R77
+  R76 -- N/S --- R92
+  R77 -- N/S --- R93
+  R83 -- E/W --- R84
   R84 -- E/W --- R85
-  style R50 stroke-dasharray: 4 3
-  style R55 stroke-dasharray: 4 3
-  style R67 stroke-dasharray: 4 3
-  style R84 stroke-dasharray: 4 3
-  style R85 stroke-dasharray: 4 3
+  R84 -- N/S --- R100
+  R85 -- E/W --- R86
+  R86 -- E/W --- R87
+  R87 -- E/W --- R88
+  R88 -- E/W --- R89
+  R91 -- E/W --- R92
+  R92 -- E/W --- R93
+  R93 -- E/W --- R94
 ```
 
 ## Room index
@@ -101,51 +184,51 @@ flowchart TB
 | 1 | room 58 redrawn with the beanstalk grown (checkbeanstalk, X-ALL.TXT ~5478) |  | 12 |  |  |  |
 | 2 | room 36 redrawn with the fire out (checkfireout, ~5491) -- this port builds it as the fire overlay | yes | 4 |  |  |  |
 | 3 | the heart demo shown on reaching Daisy (theheartdemo, ~3518) |  | 2 |  |  |  |
-| 22 | THE MARKET SQUARE |  | 78 | 1 | pickupable (shopkeeperhere), crowbar (shopkeeperhere1), pickupable (beanhere) | proxshopkeeper |
-| 23 | A STRANGE NEW WORLD! |  | 75 |  |  |  |
-| 24 | INSIDE THE CHURCH |  | 70 | 1 | pickupable |  |
-| 31 | THE AMAZING ILLUSION |  | 105 | 1 |  |  |
+| 22 | THE MARKET SQUARE | yes | 78 | 1 | pickupable (shopkeeperhere), crowbar (shopkeeperhere1), pickupable (beanhere) | proxshopkeeper |
+| 23 | A STRANGE NEW WORLD! | yes | 75 |  |  |  |
+| 24 | INSIDE THE CHURCH | yes | 70 | 1 | pickupable |  |
+| 31 | THE AMAZING ILLUSION | yes | 105 | 1 |  |  |
 | 35 | SMUGGLER'S HIDEOUT | yes | 56 |  | pickupable |  |
 | 36 | THE CASTLE'S DUNGEON | yes | 63 | 1 | pickupable, pickupable, pickupable (loafhere), rat (rathere), troll (trollhere) | proxjug, proxloaf, proxtroll, proxapple |
-| 39 | GOING DOWN THE WELL! |  | 42 |  |  |  |
-| 40 | THE DRAGON'S LAIR |  | 67 | 1 | lift, dragon (dragonhere1), pickupable (goldenegghere1), pickupable | proxegg |
-| 41 | THE DESERTED MINES |  | 70 | 1 | crowbar (rockhere), miner | proxpickaxe, proxminer |
-| 45 | LOOKING OUT TO SEA |  | 25 |  | pickupable (sleepingpotionhere), pickupable (dozyhere), dozyfloat (dozyfloathere) |  |
-| 46 | THE DOCKS AND PIER |  | 82 | 1 |  |  |
-| 47 | FOURWAY WAREHOUSE |  | 99 |  |  |  |
-| 48 | THE BROKEN BRIDGE |  | 39 |  | log, pickupable | proxrock |
-| 49 | THE GUARD HOUSE |  | 42 | 1 | hawk |  |
-| 50 | ARMOROG'S DEN |  | 54 |  | pickupable, armorog (armoroghere) |  |
+| 39 | GOING DOWN THE WELL! | yes | 42 |  |  |  |
+| 40 | THE DRAGON'S LAIR | yes | 67 | 1 | lift, dragon (dragonhere1), pickupable (goldenegghere1), pickupable | proxegg |
+| 41 | THE DESERTED MINES | yes | 70 | 1 | crowbar (rockhere), miner | proxpickaxe, proxminer |
+| 45 | LOOKING OUT TO SEA | yes | 25 |  | pickupable (sleepingpotionhere), pickupable (dozyhere), dozyfloat (dozyfloathere) |  |
+| 46 | THE DOCKS AND PIER | yes | 82 | 1 |  |  |
+| 47 | FOURWAY WAREHOUSE | yes | 99 |  |  |  |
+| 48 | THE BROKEN BRIDGE | yes | 39 |  | log, pickupable | proxrock |
+| 49 | THE GUARD HOUSE | yes | 42 | 1 | hawk |  |
+| 50 | ARMOROG'S DEN | yes | 54 |  | pickupable, armorog (armoroghere) |  |
 | 51 | MOAT AND PORTCULLIS | yes | 63 | 1 | portcullis (porthere), portswitch |  |
 | 52 | THE ENTRANCE HALL | yes | 91 | 1 | pickupable | proxpicture |
 | 53 | THE SNAP HAPPY GATOR | yes | 33 |  | crocodile, pickupable, pickupable (whiskeyhere) | proxcroc |
 | 54 | THE WIDE-EYED DRAGON | yes | 57 |  | dragon (dragonhere) | proxsleep |
-| 55 | THE BOTTOMLESS WELL |  | 57 | 2 | pickupable, pickupable, pickupable, crowbar (welllidhere) | proxcrowbar |
-| 56 | THE LIFT CONTROL HUT |  | 65 | 1 | machines, machines, machines, lift, machines, pickupable | proxkey1, proxkey2, proxkey3, proxkey4 |
-| 57 | BASE OF TREE HOUSE |  | 79 | 1 |  |  |
-| 58 | THE SMELLY ALLOTMENT |  | 45 |  | pickupable (manurehere), pickupable | proxfullbucket, proxbean |
-| 59 | THE LARGE OAK TREE |  | 54 | 1 | pickupable, pickupable (dylanhere) |  |
-| 60 | BASE OF THE VOLCANO |  | 55 |  | pickupable, pickupable | proxmtbucket |
-| 63 | THE CRAFTY CLOUD |  | 7 | 1 |  |  |
-| 67 | THE WEST WING |  | 55 | 1 |  |  |
+| 55 | THE BOTTOMLESS WELL | yes | 57 | 2 | pickupable, pickupable, pickupable, crowbar (welllidhere) | proxcrowbar |
+| 56 | THE LIFT CONTROL HUT | yes | 65 | 1 | machines, machines, machines, lift, machines, pickupable | proxkey1, proxkey2, proxkey3, proxkey4 |
+| 57 | BASE OF TREE HOUSE | yes | 79 | 1 |  |  |
+| 58 | THE SMELLY ALLOTMENT | yes | 45 |  | pickupable (manurehere), pickupable | proxfullbucket, proxbean |
+| 59 | THE LARGE OAK TREE | yes | 54 | 1 | pickupable, pickupable (dylanhere) |  |
+| 60 | BASE OF THE VOLCANO | yes | 55 |  | pickupable, pickupable | proxmtbucket |
+| 63 | THE CRAFTY CLOUD | yes | 7 | 1 |  |  |
+| 67 | THE WEST WING | yes | 55 | 1 |  |  |
 | 68 | THE BANQUET HALL | yes | 76 | 1 | pickupable (ropehere), pickupable (denzilhere) |  |
 | 69 | THE EAST WING | yes | 54 | 1 | dagger |  |
-| 71 | KEEP OUT! DOZY'S HUT |  | 62 |  | lift |  |
-| 72 | DENZIL'S PAD |  | 95 | 1 | pickupable, pickupable |  |
-| 73 | DAISY'S EMPTY HUT |  | 74 | 1 | daisy1 (daisy1here), pickupable |  |
-| 74 | THE GIANT BEANSTALK |  | 33 |  |  |  |
-| 75 | COMPLEX CLOUD ROUTE |  | 37 | 1 |  |  |
-| 76 | NEAR THE VOLCANO TOP |  | 24 | 1 |  |  |
-| 77 | THE ACTIVE VOLCANO |  | 34 | 1 |  |  |
-| 83 | THE WEST TOWER |  | 37 |  | pickupable (buckethere) |  |
-| 84 | THE CASTLE STAIRCASE |  | 51 | 1 | door (doorhere) | proxdoor, proxknox |
-| 85 | THE EAST TOWER |  | 36 |  | pickupable |  |
-| 86 | THE LONGJUMP CLOUD |  | 7 | 1 |  |  |
-| 87 | THE MEETING HALL |  | 68 | 1 | pickupable |  |
-| 88 | LIFT TO THE ELDERS |  | 80 |  | lift, pickupable (doughere), pickupable (crowbarhere) |  |
-| 89 | DIZZY'S PARENTS HUT |  | 62 | 1 | pickupable |  |
-| 91 | YET MORE CLOUDS |  | 34 |  |  |  |
-| 92 | MORE 'ORRIBLE CLOUDS |  | 34 | 1 |  |  |
-| 93 | THE CLOUD CASTLE |  | 44 |  | pickupable (goldenegghere) |  |
-| 94 | DAISY'S PRISON |  | 66 | 1 | dagger, dagger, crowbar (carpethere), crowbar (carpethere1), lift (daisylifthere), daisy (daisyhere), switch1 | proxrug |
-| 100 | THE ATTIC |  | 78 |  | pickupable (bonehere) |  |
+| 71 | KEEP OUT! DOZY'S HUT | yes | 62 |  | lift |  |
+| 72 | DENZIL'S PAD | yes | 95 | 1 | pickupable, pickupable |  |
+| 73 | DAISY'S EMPTY HUT | yes | 74 | 1 | daisy1 (daisy1here), pickupable |  |
+| 74 | THE GIANT BEANSTALK | yes | 33 |  |  |  |
+| 75 | COMPLEX CLOUD ROUTE | yes | 37 | 1 |  |  |
+| 76 | NEAR THE VOLCANO TOP | yes | 24 | 1 |  |  |
+| 77 | THE ACTIVE VOLCANO | yes | 34 | 1 |  |  |
+| 83 | THE WEST TOWER | yes | 37 |  | pickupable (buckethere) |  |
+| 84 | THE CASTLE STAIRCASE | yes | 51 | 1 | door (doorhere) | proxdoor, proxknox |
+| 85 | THE EAST TOWER | yes | 36 |  | pickupable |  |
+| 86 | THE LONGJUMP CLOUD | yes | 7 | 1 |  |  |
+| 87 | THE MEETING HALL | yes | 68 | 1 | pickupable |  |
+| 88 | LIFT TO THE ELDERS | yes | 80 |  | lift, pickupable (doughere), pickupable (crowbarhere) |  |
+| 89 | DIZZY'S PARENTS HUT | yes | 62 | 1 | pickupable |  |
+| 91 | YET MORE CLOUDS | yes | 34 |  |  |  |
+| 92 | MORE 'ORRIBLE CLOUDS | yes | 34 | 1 |  |  |
+| 93 | THE CLOUD CASTLE | yes | 44 |  | pickupable (goldenegghere) |  |
+| 94 | DAISY'S PRISON | yes | 66 | 1 | dagger, dagger, crowbar (carpethere), crowbar (carpethere1), lift (daisylifthere), daisy (daisyhere), switch1 | proxrug |
+| 100 | THE ATTIC | yes | 78 |  | pickupable (bonehere) |  |

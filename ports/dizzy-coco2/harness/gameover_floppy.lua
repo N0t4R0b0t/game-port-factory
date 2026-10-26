@@ -33,17 +33,8 @@ local function key(n,d) fl[n]:set_value(d and 1 or 0) end
 -- T0230's all-RAM-aware load_decb (jumptrace.lua) -- room36_tape.bin
 -- carries a real block at $8000+ (the tape-only region), which a plain
 -- write loop would silently drop under ROM mode.
-local function load_decb(path)
-  local fh=io.open(path,"rb"); local data=fh:read("*all"); fh:close(); local pos=1
-  local allram=false
-  while pos<=#data do local t=data:byte(pos)
-    if t==0 then local len=data:byte(pos+1)*256+data:byte(pos+2)
-      local addr=data:byte(pos+3)*256+data:byte(pos+4)
-      if addr>=0x8000 and not allram then mem:write_u8(0xffdf,0); allram=true end
-      for i=0,len-1 do mem:write_u8(addr+i,data:byte(pos+5+i)) end
-      pos=pos+5+len
-    elseif t==0xFF then return data:byte(pos+3)*256+data:byte(pos+4) else break end end
-end
+local HLIB = dofile("harness/lib.lua")
+local function load_decb(path) return HLIB.load_decb(path, mem) end   -- harness/lib.lua
 local SYM={} ; for line in io.lines(os.getenv("DIZZY_MAP")) do
   local n,a=line:match("^Symbol: (%S+) %(.-%) = (%x+)$"); if n then SYM[n]=tonumber(a,16) end end
 for _,s in ipairs({"msg_wait_dismiss","fb_stablekeys","new_game","lives","coins","inv",

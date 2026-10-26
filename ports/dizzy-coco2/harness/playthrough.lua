@@ -147,11 +147,20 @@ local prev_room = nil
 -- the sync point: the CoCo's write of dizzy_h (once per mainloop pass); the ZX's write of `of` (the last store of plotnew, once per Dizzy update: the
 -- ISR runs updatedizzy every 4th interrupt, and enterroom's plotnew writes it again after a room change).  The state is consistent there and
 -- Dizzy is rubbed out of the screen (prtdizzy comes next), so the collision model can be read from the screen.
+local ENTRY_SAVE = os.getenv("PT_ENTRY_SAVE") == "1"
+local entry_done = {}
 local PASS_ADDR = ZX and Zm.A.of or SYM.dizzy_h
 PT.tap = mem:install_write_tap(PASS_ADDR, PASS_ADDR, "pt_pass", function(offset, data, mask)
   passn = passn + 1
   snap = take_snap()
   if prev_room ~= nil and snap.room ~= prev_room then arrival_pass = passn end
+  -- T0255 (tools/roomcmp.sh): PT_ENTRY_SAVE=1 saves a MAME state at the FIRST entry into every room (entry_<room>), the starting
+  -- point of harness/roomcmp_rec.lua.  Read-only for the game; MAME writes the file at the end of the current frame.
+  if ENTRY_SAVE and not entry_done[snap.room] and snap.killed == 0 then
+    entry_done[snap.room] = true
+    manager.machine:save("entry_" .. snap.room)
+    print(string.format("ENTRY room=%d pass=%d frame=%d", snap.room, passn, f))
+  end
   prev_room = snap.room
   -- decide synchronously, at the flip: the keys set now are the ones the NEXT pass's scankeys sees, with no
   -- frame-phase race (a decision made at the next video frame can land after that pass's key scan)
@@ -712,6 +721,7 @@ local loaded = false
 local started_f = nil
 local load_state = nil
 if (MODE == "route" or MODE == "probe" or MODE == "modeltest") and FROM > 1 then load_state = "pt_seg" .. (FROM - 1) end
+if os.getenv("PT_STATE") then load_state = os.getenv("PT_STATE") end   -- T0255: any named state (entry_<room>, tools/roomcmp.sh)
 resume_script = function()
   if not PT.in_tap_resume then PT.at_sync = false end
   if not co then co = coroutine.create(script) end
@@ -753,6 +763,7 @@ emu.register_periodic(function()
     local nk, cass = manager.machine.natkeyboard, manager.machine.cassettes[":cassette"]
     if load_state then
       if f == 30 and not loaded then manager.machine:load(load_state); loaded = true; return end
+      if f == 31 and os.getenv("PT_EARLY") then dofile(os.getenv("PT_EARLY"))(PT) end   -- T0255: hook installed the frame after the load (taps see every tick)
       if f == 32 then zx_begin() end
       if not loaded or f < 34 then return end
       resume_script()
@@ -777,6 +788,7 @@ emu.register_periodic(function()
     cpu.state["PC"].value = load_decb(BIN); loaded = true
   end
   if f == 31 and loaded and not load_state then stray_fix(BIN) end
+  if f == 31 and loaded and load_state and os.getenv("PT_EARLY") then dofile(os.getenv("PT_EARLY"))(PT) end
   if not loaded or f < 32 then return end
   resume_script()
 end)

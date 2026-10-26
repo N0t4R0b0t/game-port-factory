@@ -9,8 +9,8 @@
 #   Output was identical across repeated builds and across a clean-then-bootstrap rebuild, so
 #   the build is deterministic (no timestamps or hash-map order in any artifact).
 # Build order that produces them: tools/bootstrap.sh (the default step list).
-da61515b99974a4e1193d2045205f5dcafeec3a41e2e76996d1636baf020463c  target/room36.bin
-04858c8a5b870c8b233824da5d83078709abd78dd29a5dc304eb20056a338811  target/room36_tape.bin
-2c6fa5fbd06207f162382bad80d00009b35f0bd5dd07adee3c8fe6dff315aaf3  target/room36_floppy.bin
-885868eff521afec347d2677e03e4d1c4decdbeeac7d2169f03912770da342b8  target/room36.cas
-cd17b749800708ffdf2ee978358171e7877487b4e8c7b741ccdc17f58934ecb2  target/dizzy.dsk
+d593683195df672198950d6a21edcfe1d6f2ec92c9abfd150c50c55d875f566f  target/room36.bin
+97d4d8707e2df2f563ff13fa3be858732ae00dc5b7e1b8ff18b4ec0237ce172d  target/room36_tape.bin
+70d9c44c7d13b2c3410761d7a08d7fe4d5e47d950f4607df6a831c574ecbc6c8  target/room36_floppy.bin
+26e153a209fadb0dc4cccce60f28ba6e8a75fc76613b31e73935bdaf4629f7ae  target/room36.cas
+e42fe2bdeb7aab3f46f30a5f70ac2c0d5ce7dc268f300f5b7bba2f1585d51215  target/dizzy.dsk

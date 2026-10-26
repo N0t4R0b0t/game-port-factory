@@ -307,6 +307,13 @@ struct Args {
     #[arg(long)]
     actor_reuse_sprites: Option<PathBuf>,
 
+    /// T0261 (D4): clip placements at NEGATIVE pixel_x instead of dropping them: the stored sprite is the visible
+    /// part, placed at x=0 (see sprite_key). OFF by default: it adds ~1000 raw bytes (~650 packed) of cropped
+    /// bitmaps that neither the tape nor the floppy build has room for (NOTES.md T0261). `RP_CLIP_LEFT=1` in
+    /// tools/regen_art.sh turns it on for a build that does.
+    #[arg(long, default_value_t = false)]
+    clip_left: bool,
+
     /// T0234: also emit a PRISTINE, never-mutated copy of this table
     /// under `actor_init{suffix}_template`, byte-identical to
     /// `actor_init{suffix}` at assembly time. For a table that lives
@@ -1177,8 +1184,37 @@ fn main() {
     // per-placement mirrored bit -- the placement writer below needs it
     // to set the flag bit in pixel_x -- it's just no longer part of what
     // picks or names a *sprite*.
-    let mut variants: Vec<(u8, u8, usize, bool)> =
-        variant_key.iter().map(|&(frame, thr, phase, _mirrored)| (frame, thr, phase, false)).collect();
+    // T0261 (D4): a placement at NEGATIVE pixel_x is clipped here, in the converter: the stored sprite is the
+    // visible part only, placed at x=0 (the blitter has no left clip, and pixel_x is one unsigned byte). The
+    // 4th field of a sprite key is the crop code: 0 = whole sprite (a mirrored placement mirrors at run time),
+    // else k | 0x100 if the placement is mirrored, k = the pixels cut off the DISPLAYED left edge. A mirrored
+    // clipped sprite is stored already mirrored (a run-time flip of a width that is not a multiple of 8 would
+    // move the padding to the left side), so such a placement carries no mirror bit.
+    let frame_pixel_width = |frame: u8| -> i32 {
+        let off = offsets[frame as usize];
+        assert!(off < 0xFF00, "frame {frame} is a sentinel (no sprite)");
+        ((defs[off as usize] & 0x7f) as i32) * 4
+    };
+    let crop_code: Vec<u16> = room
+        .things
+        .iter()
+        .zip(&variant_key)
+        .map(|(t, &(_, _, _, mirrored))| {
+            if args.clip_left && t.frame != FLAME_FRAME && t.frame != WATER_TRIGGER_FRAME
+                && t.pixel_x < 0 && t.pixel_x > -frame_pixel_width(t.frame)
+            {
+                (-t.pixel_x) as u16 | if mirrored { 0x100 } else { 0 }
+            } else {
+                0
+            }
+        })
+        .collect();
+    let sprite_key: Vec<(u8, u8, usize, u16)> = variant_key
+        .iter()
+        .zip(&crop_code)
+        .map(|(&(frame, thr, phase, _mirrored), &code)| (frame, thr, phase, code))
+        .collect();
+    let mut variants: Vec<(u8, u8, usize, u16)> = sprite_key.clone();
     variants.sort_unstable();
     variants.dedup();
 
@@ -1188,11 +1224,16 @@ fn main() {
     // still be called with either a `variants` entry (always false) or a
     // `variant_key` entry (may be true, from `label_for` below) and name
     // them identically.
-    let vname = |&(frame, thr, phase, _mirrored): &(u8, u8, usize, bool)| -> String {
+    let vname = |&(frame, thr, phase, code): &(u8, u8, usize, u16)| -> String {
+        let crop = match code {
+            0 => String::new(),
+            c if c & 0x100 != 0 => format!("_cm{}", c & 0xff),
+            c => format!("_c{c}"),
+        };
         if thr >= 16 && phase == 0 {
-            format!("spr_{frame}")
+            format!("spr_{frame}{crop}")
         } else {
-            format!("spr_{frame}_t{thr}_p{phase}")
+            format!("spr_{frame}_t{thr}_p{phase}{crop}")
         }
     };
 
@@ -1246,8 +1287,8 @@ fn main() {
     // FRAME, whether the primary file still has budget or this frame
     // should go to the overflow file instead.
     let mut primary_len = shared_existing.len();
-    let shareable = |v: &(u8, u8, usize, bool)| -> bool {
-        let &(_frame, thr, phase, _mirrored) = v;
+    let shareable = |v: &(u8, u8, usize, u16)| -> bool {
+        let &(_frame, thr, phase, _code) = v;
         args.shared_sprites.is_some()
             && thr >= 16
             && phase == 0
@@ -1256,7 +1297,7 @@ fn main() {
     };
     // Per-variant final label, INCLUDING any room prefix -- the single
     // source of truth every reference below must use.
-    let label_for = |v: &(u8, u8, usize, bool)| -> String {
+    let label_for = |v: &(u8, u8, usize, u16)| -> String {
         if shareable(v) {
             vname(v) // global: no room prefix
         } else {
@@ -1290,7 +1331,7 @@ fn main() {
     let mut shaded_away = 0usize;
     let mut total_ink = 0usize;
     for v in &variants {
-        let (frame_id, thr, phase, _mirrored) = *v;
+        let (frame_id, thr, phase, crop) = *v;
         if shareable(v) && shared_known.contains(&vname(v)) {
             continue; // already emitted by an earlier room this run
         }
@@ -1333,7 +1374,25 @@ fn main() {
         // bitmap is always the unmirrored one; the placement writer below
         // sets the flag bit in pixel_x instead of this code producing a
         // second, mirrored copy of the bitmap.
-
+        //
+        // T0261 (D4): the one exception is a left-clipped placement (crop code != 0): keep the VISIBLE part only.
+        let (pixel_width, bytes_per_row, packed) = if crop == 0 {
+            (pixel_width, bytes_per_row, packed)
+        } else {
+            let k = (crop & 0xff) as usize;
+            let mut g = unpack(&packed, w, h, bytes_per_row);
+            if crop & 0x100 != 0 {
+                g = mirror_grid(&g); // the displayed image; the placement carries no mirror bit
+            }
+            let g: Grid = g.into_iter().map(|row| row[k..].to_vec()).collect();
+            let nw = w - k;
+            let nbpr = nw.div_ceil(8);
+            eprintln!(
+                "room {}: frame {} clipped at the left edge: {} px cut, {}x{} -> {}x{}{}",
+                room.index, frame_id, k, w, h, nw, h, if crop & 0x100 != 0 { " (mirrored, baked)" } else { "" }
+            );
+            (nw as u32, nbpr, repack(&g, nw, h, nbpr))
+        };
         let use_overflow = shareable(v)
             && args.shared_sprites_overflow.is_some()
             && args
@@ -1393,6 +1452,94 @@ fn main() {
              ; --shared-sprites-budget's own doc comment (NOTES.md T0033/T0035\n\
              ; memory audit: two separate small unused RAM blocks, not one).\n\n",
         );
+    }
+
+    // --- T0261 (D4, FLOPPY): run-time left clip data -----------------------------------------------------
+    // A placement at NEGATIVE pixel_x is dropped from room_placements above (tape and -run builds keep that
+    // difference). For the FLOPPY build only, `RP_CLIP_DATA=<prefix>` (tools/regen_art.sh exports it) also writes
+    //   <prefix>_sprites.asm : the WHOLE, unmirrored sprite of each such placement, once per frame
+    //                          (labels clipspr_<frame>_w/_h/_bpr/clipspr_<frame>), and
+    //   <prefix>_tab.asm     : one 5-byte entry per placement: room, fdb sprite header, cut (pixels, a multiple
+    //                          of 4 and < width), y. Terminated by a room byte 0, then `CLIP_BUF_LEN equ n` = the
+    //                          largest per-room total of cropped sprites (3-byte header + rows*bpr each).
+    // Both are included only under FLOPPY (room36.asm): the other builds never see them, so their output is
+    // byte-identical. load_room (floppy) crops the sprites into a scratch buffer and inserts the placements.
+    if let Ok(prefix) = std::env::var("RP_CLIP_DATA") {
+        let spr_path = format!("{prefix}_sprites.asm");
+        let tab_path = format!("{prefix}_tab.asm");
+        let mut spr_txt = fs::read_to_string(&spr_path).unwrap_or_default();
+        let old_tab = fs::read_to_string(&tab_path).unwrap_or_default();
+        // keep the entries and the per-room needs of the earlier rooms of this run; the trailer is rewritten
+        let mut entries = String::new();
+        let mut needs: Vec<usize> = Vec::new();
+        for l in old_tab.lines() {
+            if l.starts_with("; need ") {
+                needs.push(l.split_whitespace().nth(2).unwrap().parse().unwrap());
+                entries.push_str(l);
+                entries.push('\n');
+            } else if l.starts_with("\tfcb ") || l.starts_with("\tfdb ") || l.starts_with("; room ") {
+                // the terminator line is `\tfcb 0 ; end` -- not an entry
+                if l.contains("; end") {
+                    continue;
+                }
+                entries.push_str(l);
+                entries.push('\n');
+            }
+        }
+        let mut room_need = 0usize;
+        let mut room_lines = String::new();
+        // a room is generated by several roompack calls (actor / coin / scratch variants): its entries once only
+        let room_done = old_tab.lines().any(|l| l.starts_with("; need ") && l.ends_with(&format!(" room {}", room.index)));
+        for (t, &(_, _, _, mirrored)) in room.things.iter().zip(&variant_key) {
+            if room_done {
+                break;
+            }
+            if t.frame == FLAME_FRAME || t.frame == WATER_TRIGGER_FRAME {
+                continue;
+            }
+            let pw = frame_pixel_width(t.frame);
+            if !(t.pixel_x < 0 && t.pixel_x > -pw) {
+                continue;
+            }
+            assert!(!mirrored, "room {} frame {}: a mirrored left-clipped placement is not supported", room.index, t.frame);
+            assert!(!args.shade && !args.outline, "RP_CLIP_DATA: only the verbatim (no --shade/--outline) art path is supported");
+            assert!(t.pixel_x % 4 == 0 && (0..192).contains(&t.y));
+            let cut = (-t.pixel_x) as usize;
+            let raw_off = offsets[t.frame as usize];
+            let despeckle = args.despeckle_frames.contains(&t.frame);
+            let (w, h, mut packed) = decode_and_repack(defs, raw_off as usize, despeckle);
+            let bpr = (w as usize).div_ceil(8);
+            if args.structure_frames.contains(&t.frame) {
+                let cur = unpack(&packed, w as usize, h as usize, bpr);
+                packed = repack(&structure_mask(&cur, args.structure_run), w as usize, h as usize, bpr);
+            }
+            let label = format!("clipspr_{}", t.frame);
+            if !spr_txt.contains(&format!("{label}_w\t")) {
+                writeln!(spr_txt, "{label}_w\tfcb {w}").unwrap();
+                writeln!(spr_txt, "{label}_h\tfcb {h}").unwrap();
+                writeln!(spr_txt, "{label}_bpr\tfcb {bpr}").unwrap();
+                let hex: Vec<String> = packed.iter().map(|b| format!("${:02x}", b)).collect();
+                writeln!(spr_txt, "{label}\t\tfcb {}\n", hex.join(",")).unwrap();
+            }
+            writeln!(room_lines, "\tfcb {}\n\tfdb {label}_w\n\tfcb {cut},{}", room.index, t.y).unwrap();
+            room_need += 3 + h as usize * (w as usize - cut).div_ceil(8);
+            eprintln!("room {}: frame {} left-clip entry: {} px cut of {}x{}", room.index, t.frame, cut, w, h);
+        }
+        if room_need > 0 {
+            needs.push(room_need);
+            entries.push_str(&format!("; need {room_need} room {}\n", room.index));
+            entries.push_str(&room_lines);
+            fs::write(&spr_path, spr_txt).expect("write clip sprites");
+            let mut tab = String::from(
+                "; Auto-generated by tools/roompack (RP_CLIP_DATA, T0261): FLOPPY run-time left-clip entries.\n\
+                 ; DO NOT EDIT BY HAND -- regenerated whole on every tools/regen_art.sh run.\n\
+                 clip_tab\n",
+            );
+            tab.push_str(&entries);
+            tab.push_str("\tfcb 0 ; end\n");
+            writeln!(tab, "CLIP_BUF_LEN equ {}", needs.iter().max().unwrap()).unwrap();
+            fs::write(&tab_path, tab).expect("write clip table");
+        }
     }
 
     // --- T0167: global per-build frame index table -----------------------
@@ -1459,9 +1606,13 @@ fn main() {
         .iter()
         .zip(&variant_key)
         .zip(&effective_attr)
-        .filter(|((t, _), _)| t.frame != FLAME_FRAME && t.frame != WATER_TRIGGER_FRAME)
-        .filter(|((t, _), _)| {
-            let ok = (0..256).contains(&t.pixel_x);
+        .zip(&sprite_key)
+        .filter(|(((t, _), _), _)| t.frame != FLAME_FRAME && t.frame != WATER_TRIGGER_FRAME)
+        .filter(|(((t, _), _), _)| {
+            // T0261: a partly visible placement at negative x is kept (clipped, see sprite_key); only one that
+            // lies ENTIRELY off the left edge (or past the byte range) is dropped.
+            let ok = (0..256).contains(&t.pixel_x)
+                || (args.clip_left && t.pixel_x < 0 && t.pixel_x > -frame_pixel_width(t.frame));
             if !ok {
                 eprintln!(
                     "warning: room {} frame {} pixel_x {} is off the left edge (off-screen at spawn) -- skipped, not clamped",
@@ -1471,6 +1622,7 @@ fn main() {
             }
             ok
         })
+        .map(|(((t, key), attr), sk)| ((t, key), attr, sk))
         .collect();
     let flames: Vec<_> = room.things.iter().filter(|t| t.frame == FLAME_FRAME).collect();
     let water: Vec<_> =
@@ -1519,8 +1671,11 @@ fn main() {
     writeln!(out, "{rp}room_place_count\tfcb {}", static_places.len()).unwrap();
     let mark_place_start = out.len();
     writeln!(out, "{rp}room_placements").unwrap();
-    for &((t, key), attr) in &static_places {
-        assert!((0..256).contains(&t.pixel_x), "pixel_x {} out of byte range", t.pixel_x);
+    for &((t, key), attr, skey) in &static_places {
+        // T0261: a clipped placement (negative pixel_x) is stored at x=0 with its visible part as the sprite.
+        let clipped = t.pixel_x < 0;
+        let px_base = if clipped { 0 } else { t.pixel_x };
+        assert!((0..256).contains(&px_base), "pixel_x {} out of byte range", t.pixel_x);
         // Point at the _w header label, not the bitmap-data label -- blit
         // reads a 3-byte (width,height,bpr) header before the bitmap
         // bytes, and _w/_h/_bpr/data are laid out in exactly that order.
@@ -1535,8 +1690,8 @@ fn main() {
         let (_, _, _, mirrored) = *key;
         assert!(t.pixel_x % 4 == 0, "pixel_x {} isn't a multiple of 4 -- can't OR in mirror+decorative bits", t.pixel_x);
         let dull = attr & SOLID_DULL_BIT != 0;
-        let mut px = t.pixel_x;
-        if mirrored {
+        let mut px = px_base;
+        if mirrored && !clipped {
             px |= 1;
         }
         if dull {
@@ -1548,7 +1703,7 @@ fn main() {
         // (derive_room_cmask, rd_sortplaces); the per-frame draw path
         // (rd_placelp) still reads a resolved 4-byte record out of RAM, so
         // this costs nothing extra per frame -- see room36.asm.
-        let idx = frame_idx_for(&label_for(key), &mut frame_index);
+        let idx = frame_idx_for(&label_for(&skey), &mut frame_index);
         if args.pack_room_data {
             // No range assert on y (unlike pixel_x, filtered above): the
             // raw `fcb` path never had one either -- lwasm wraps a
@@ -2080,9 +2235,14 @@ fn main() {
                 start_room = 255;
             }
             init_lines.push(format!(
-                "\tfcb {},{},{},{},{},0,0,{}\t; {}{}",
+                "\tfcb {},{},{},{},{},0,{},{}\t; {}{}",
                 start_room.clamp(0, 255), if rid == 255 { 255 } else { rid },
                 ax.clamp(0, 255), ay.clamp(0, 255), act.frame.clamp(0, 255),
+                // T0259 (D2): byte 6 (v2) of a PICKUPABLE record holds its index in the original's `movingdata`
+                // (1..71; slot 0 is the hawk). X-ALL `domoving` walks the records from the LAST down and the first
+                // pickupable that overlaps Dizzy takes the key press, so try_pickup keeps the highest index
+                // across BOTH tables (the base and the tape table are each in movingdata order, but interleave).
+                if act.routine == "pickupable" { act.slot.clamp(0, 255) } else { 0 },
                 act.colour.clamp(0, 255), act.routine,
                 if note.is_empty() { String::new() } else { format!(" ({note})") }
             ));

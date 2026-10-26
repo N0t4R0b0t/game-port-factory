@@ -1,0 +1,7 @@
+[package]
+name = "roomcmp"
+version = "0.1.0"
+edition = "2024"
+
+# std only on purpose: no downloads, nothing to audit.
+[dependencies]

@@ -19,17 +19,8 @@ local cpu=manager.machine.devices[":maincpu"]
 local row3=manager.machine.ioport.ports[":row3"]
 local fl={} ; for n,f in pairs(row3.fields) do fl[n]=f end
 local function key(n,d) fl[n]:set_value(d and 1 or 0) end
-local function load_decb(path)
-  local fh=io.open(path,"rb"); local data=fh:read("*all"); fh:close(); local pos=1
-  local allram=false
-  while pos<=#data do local t=data:byte(pos)
-    if t==0 then local len=data:byte(pos+1)*256+data:byte(pos+2)
-      local addr=data:byte(pos+3)*256+data:byte(pos+4)
-      if addr>=0x8000 and not allram then mem:write_u8(0xffdf,0); allram=true end
-      for i=0,len-1 do mem:write_u8(addr+i,data:byte(pos+5+i)) end
-      pos=pos+5+len
-    elseif t==0xFF then return data:byte(pos+3)*256+data:byte(pos+4) else break end end
-end
+local HLIB = dofile("harness/lib.lua")
+local function load_decb(path) return HLIB.load_decb(path, mem) end   -- harness/lib.lua
 local function stray_fix(path)
   local fh=io.open(path,"rb"); local d=fh:read("*all"); fh:close(); local pos=1
   while pos<=#d and d:byte(pos)==0 do
@@ -101,7 +92,9 @@ local LIST={
   {name="crowbarhere (room 88)", slot=slot_of(255,4), room=88, wx=64, wy=96, setroom=88},
   -- T0218 made the potion start in room 255 (Dozy's first talk materialises it); T0223:
   -- look it up there and put it into room 45 for this test (setroom).
-  {name="sleepingpotionhere (room 45)", slot=slot_of(255,15), room=45, wx=184, wy=128, setroom=45},
+  -- T0259 (D2): wx=196, not 184: at 184 Dizzy also overlaps Dozy (x 168..192, a LATER movingdata record than the potion), and
+  -- X-ALL domoving tests the last record first, so the press talks to Dozy (as on the ZX); at x >= 192 only the potion (192..208) is in reach.
+  {name="sleepingpotionhere (room 45)", slot=slot_of(255,15), room=45, wx=196, wy=128, setroom=45},
 }
 if os.getenv("ONLY") then
   local keep={}

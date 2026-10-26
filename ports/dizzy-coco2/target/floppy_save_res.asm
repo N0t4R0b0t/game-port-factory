@@ -43,14 +43,14 @@ sp_go   tst killed
         bne sv_do_load
 ; ---- save ----
         jsr sv_open
-        bne sv_fail
+        lbne sv_fail
         ldx sv_base
         jsr ,x                     ; sv_save
         tsta
         bne sv_fail
         sta sv_code                ; 0
         ldx #msg_sv_saved
-        bra sv_box_rel
+        lbra sv_box_rel
 ; ---- load ----
 sv_do_load
         jsr sv_open
@@ -63,16 +63,24 @@ sv_do_load
         sta sv_code                ; 10 = read ok, about to apply
         jsr msg_begin              ; the box over the CURRENT picture; the staged image survives in the hidden buffer
         ldx #msg_sv_loaded
-        jsr msg_box_done
+        jsr sv_box_plain           ; T0258: NOT msg_box_done -- save/load is not the original's windowrou, so it must not run box_reset
         ldx sv_base
         jsr 6,x                    ; sv_apply
         lda #20
         sta sv_code                ; 20 = applied, rebuilding (test hook)
-        lda room_load_seq          ; load_room bumps room_load_seq, and hawk/dagger/... reset themselves when it differs
-        pshs a                     ; from their own copy ("room just entered"): a load is NOT an entry, keep the saved value
+        lda room_load_seq          ; load_room (box_reset) bumps room_load_seq, and hawk/dagger/... reset themselves when it differs
+        ldb flame_ctr              ; from their own copy ("room just entered"), and restarts the flame / water counters and the
+        pshs d                     ; dragon's breath: a load is NOT an entry (T0258: box_reset made those four part of load_room's
+        lda water_ctr              ; entry reset, T0255 had the counters), so keep the saved values of all four
+        ldb dragon_fire
+        pshs d
         jsr load_room              ; cur_room is the saved one now: rebuild the room exactly as entering it does
-        puls a
+        puls d
+        sta water_ctr
+        stb dragon_fire
+        puls d
         sta room_load_seq
+        stb flame_ctr
         jsr force_redraw           ; both buffers repainted whole
         clr rat_sv_hdr_a           ; save-unders belong to the old screen
         clr rat_sv_hdr_b
@@ -84,6 +92,11 @@ sv_do_load
         lds #$0100                 ; a fresh main-loop pass, as new_game enters it
         jmp mainloop
 sp_ret  rts
+
+sv_box_plain
+        jsr prtmessage
+        jsr msg_wait_dismiss
+        jmp force_redraw
 
 ; A = 1 no save, 2 other build, 3 disk/damaged/unreadable (or sv_open's error: nonzero)
 sv_fail
@@ -97,7 +110,7 @@ sv_fail
         ldx #msg_sv_diskerr
 sv_box_rel
         jsr msg_begin
-        jsr msg_box_done
+        jsr sv_box_plain           ; T0258: NOT msg_box_done -- save/load is not the original's windowrou, so it must not run box_reset
         jsr sv_relkeys
         rts
 

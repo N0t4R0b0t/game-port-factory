@@ -12,7 +12,10 @@
 # T0237: since T0235 (the lair dragon needs the golden egg of room 93) the CoCo bot plays the SAME 106-segment plan as the ZX bot (R.override.coco.plan =
 # R.override.zx.plan in harness/playthrough_route.lua), so segment k of one log is segment k of the other and every segment is paired by index (the `pair=` field
 # of the logs is the PORT segment number the plan entry reuses, or none: it is no longer needed to find the CoCo clip).  Per segment: both clips are cut at the segment boundaries, the shorter side is held on its last frame (tpad clone), and the pair
-# lasts max(duration CoCo, duration ZX).  Halves: CoCo scaled to 592 px high, ZX x2 (704x592), nearest neighbour; a label bar on top, the segment caption below.
+# lasts max(duration CoCo, duration ZX).  Halves (T0253, equal proportions): each machine's ACTIVE 256x192 display area is cropped exactly out of its AVI (CoCo 372x240: x=58 y=25; ZX 352x296: x=48 y=48;
+# both measured as the union bounding box of non-border pixels over frames of both recordings, see NOTES T0253) and scaled x3 with nearest neighbour to 768x576
+# (square pixels for both: the honest equal-proportion choice, both are 256x192 with near-identical TV pixel aspect).  Equal content pixels = equal on-screen size.
+# A label bar on top, the segment caption below.  Output 1536x660.
 # Audio: the CoCo's track on both channels (silence-padded to the segment length).  The ZX track is NOT mixed in: the original runs here as a 48K `spectrum`, but the
 # game plays ALL its sound through the 128K AY (ifmem128 = 1, `ramon`/AY registers), so the ZX AVI's audio is digital silence (measured: -91 dB over the whole run;
 # the tape-loading noise, which is beeper, does record).  Playing it on `spectrum128` would give music but changes the machine the whole bot was verified on.
@@ -21,6 +24,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 COCO_AVI=target/pt_tmp/coco_raw.avi; COCO_LOG=target/pt_tmp/coco.log
 ZX_AVI=target/pt_tmp/zx_raw.avi;     ZX_LOG=target/pt_tmp/zx.log
+COCO_LABEL=${COCO_LABEL:-Tandy CoCo 2 (port)}   # T0256: COCO_LABEL='Tandy CoCo 2 (port, floppy build)' for the floppy recording
 OUT=target/dizzy-side-by-side.mp4; JOBS=3; KEEP=0; ONLY=""
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -56,8 +60,11 @@ echo "CoCo segments: $NC   ZX segments: $NZ"
 # ---- one clip per ZX segment
 CW=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 "$COCO_AVI")
 CH=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 "$COCO_AVI")
-CWS=790      # the CoCo AVI (372x240) has non-square pixels: the picture is 4:3, so 592 px high = 789.3 wide -> 790 (even)
-echo "CoCo AVI ${CW}x${CH} -> ${CWS}x592 (4:3) ; ZX 352x296 -> 704x592 (x2) ; total width $((CWS + 704))"
+# T0253: crop each AVI to its active 256x192 area, scale both x3 (nearest) -> 768x576 per half
+HW=768; HH=576; CROP_C="crop=256:192:58:25"; CROP_Z="crop=256:192:48:48"
+[ "$CW" = 372 ] && [ "$CH" = 240 ] || { echo "CoCo AVI is ${CW}x${CH}, expected 372x240 (crop rectangle measured on that)" >&2; exit 2; }
+ZW=$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "$ZX_AVI"); [ "$ZW" = "352,296" ] || { echo "ZX AVI is $ZW, expected 352,296" >&2; exit 2; }
+echo "CoCo ${CW}x${CH} ${CROP_C} -> ${HW}x${HH} ; ZX 352x296 ${CROP_Z} -> ${HW}x${HH} (x3, nearest) ; total width $((2*HW))"
 : > "$CLIPS/cmds.txt"; rm -f "$CLIPS"/plan.tsv
 prev_ce=""
 while IFS=$'\t' read -r k zs ze pair zname; do
@@ -78,8 +85,8 @@ while IFS=$'\t' read -r k zs ze pair zname; do
   cpad=$(awk -v d="$D" -v a="$cd" 'BEGIN{printf "%.3f", d-a}'); zpad=$(awk -v d="$D" -v a="$zd" 'BEGIN{printf "%.3f", d-a}')
   printf '%s' "${cap:0:140}" > "$CLIPS/cap_$k.txt"
   cvol=1; [ $cfreeze = 1 ] && cvol=0
-  printf 'ffmpeg -nostdin -loglevel error -y -ss %s -t %s -i %q -ss %s -t %s -i %q -filter_complex "[0:v]fps=60,scale=%d:592:flags=neighbor,setsar=1,tpad=stop_mode=clone:stop_duration=%s[cv];[1:v]fps=60,scale=704:592:flags=neighbor,setsar=1,tpad=stop_mode=clone:stop_duration=%s[zv];[cv][zv]hstack=inputs=2,pad=iw:ih+84:0:44:black,drawtext=fontfile=%s:text=\x27Tandy CoCo 2 (port)\x27:fontsize=26:fontcolor=white:x=(%d-text_w)/2:y=9,drawtext=fontfile=%s:text=\x27ZX Spectrum (original, 1989)\x27:fontsize=26:fontcolor=white:x=%d+(704-text_w)/2:y=9,drawtext=fontfile=%s:textfile=%s:fontsize=19:fontcolor=0xdddddd:x=12:y=h-32[v];[0:a]aformat=channel_layouts=mono,volume=%s,apad=whole_dur=%s,atrim=duration=%s,pan=stereo|c0=c0|c1=c0[a]" -map "[v]" -map "[a]" -t %s -r 60 -c:v libx264 -preset fast -crf 18 -pix_fmt yuv420p -c:a pcm_s16le %s\n' \
-    "$cs" "$cd" "$COCO_AVI" "$zs" "$zd" "$ZX_AVI" "$CWS" "$cpad" "$zpad" "$FONT" "$CWS" "$FONT" "$CWS" "$FONT" "$CLIPS/cap_$k.txt" "$cvol" "$D" "$D" "$D" "$(printf '%s/clip_%03d.mkv' "$CLIPS" "$k")" > "$CLIPS/cmd_$(printf '%03d' "$k").sh"; echo "$CLIPS/cmd_$(printf '%03d' "$k").sh" >> "$CLIPS/cmds.txt"
+  printf 'ffmpeg -nostdin -loglevel error -y -ss %s -t %s -i %q -ss %s -t %s -i %q -filter_complex "[0:v]fps=60,%s,scale=768:576:flags=neighbor,setsar=1,tpad=stop_mode=clone:stop_duration=%s[cv];[1:v]fps=60,%s,scale=768:576:flags=neighbor,setsar=1,tpad=stop_mode=clone:stop_duration=%s[zv];[cv][zv]hstack=inputs=2,pad=iw:ih+84:0:44:black,drawtext=fontfile=%s:text=\x27%s\x27:fontsize=26:fontcolor=white:x=(%d-text_w)/2:y=9,drawtext=fontfile=%s:text=\x27ZX Spectrum (original, 1989)\x27:fontsize=26:fontcolor=white:x=%d+(768-text_w)/2:y=9,drawtext=fontfile=%s:textfile=%s:fontsize=19:fontcolor=0xdddddd:x=12:y=h-32[v];[0:a]aformat=channel_layouts=mono,volume=%s,apad=whole_dur=%s,atrim=duration=%s,pan=stereo|c0=c0|c1=c0[a]" -map "[v]" -map "[a]" -t %s -r 60 -c:v libx264 -preset fast -crf 18 -pix_fmt yuv420p -c:a pcm_s16le %s\n' \
+    "$cs" "$cd" "$COCO_AVI" "$zs" "$zd" "$ZX_AVI" "$CROP_C" "$cpad" "$CROP_Z" "$zpad" "$FONT" "$COCO_LABEL" "$HW" "$FONT" "$HW" "$FONT" "$CLIPS/cap_$k.txt" "$cvol" "$D" "$D" "$D" "$(printf '%s/clip_%03d.mkv' "$CLIPS" "$k")" > "$CLIPS/cmd_$(printf '%03d' "$k").sh"; echo "$CLIPS/cmd_$(printf '%03d' "$k").sh" >> "$CLIPS/cmds.txt"
   printf '%s\t%s\t%s\t%s\t%s\n' "$k" "$pair" "$zd" "$cd" "$D" >> "$CLIPS/plan.tsv"
 done < "$CLIPS/zx.tsv"
 echo "clips: $(wc -l < "$CLIPS/cmds.txt")   expected duration (sum of max): $(awk -F'\t' '{s+=$5} END{printf "%.1f s", s}' "$CLIPS/plan.tsv")"
